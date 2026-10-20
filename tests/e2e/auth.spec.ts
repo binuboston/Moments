@@ -5,10 +5,9 @@ test.describe("authentication", () => {
   test("signed-out visitors open the app as guests; admin and the API still need a session", async ({ page, playwright, baseURL }) => {
     await page.goto("/dashboard/invitations");
     await expect(page).toHaveURL(/\/dashboard\/invitations$/, { timeout: 30_000 });
-    await expect(page.getByTestId("guest-banner")).toBeVisible();
 
     // The logo always goes to the landing page.
-    await page.getByRole("link", { name: "Mirth home" }).first().click();
+    await page.getByRole("link", { name: "Invite home" }).first().click();
     await expect(page).toHaveURL(/\/$/);
 
     // Without any session the API refuses and admin asks for a real login.
@@ -49,6 +48,8 @@ test.describe("account menu", () => {
     await page.waitForURL((url) => url.pathname === "/", { timeout: 15_000 });
     // The account session is really gone: the app opens as a fresh guest.
     await page.goto("/dashboard");
-    await expect(page.getByTestId("guest-banner")).toBeVisible({ timeout: 30_000 });
+    await expect(page).toHaveURL(/\/dashboard$/, { timeout: 30_000 });
+    await page.getByRole("button", { name: "Account menu" }).click();
+    await expect(page.getByRole("menu").getByText("Guest", { exact: true })).toBeVisible();
   });
 });

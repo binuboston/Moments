@@ -7,7 +7,7 @@ test("a visitor designs without an account and signs up only to publish", async 
   // Starting from a template CTA: no login wall, a guest session is created on the way.
   await page.goto("/dashboard/invitations/new");
   await expect(page).toHaveURL(/\/dashboard\/invitations\/new/, { timeout: 30_000 });
-  await expect(page.getByTestId("guest-banner")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /create an invitation/i })).toBeVisible();
 
   await page.getByTestId("category-birthday").click();
   await page.getByTestId("template-confetti-pop").click();
@@ -37,7 +37,6 @@ test("a visitor designs without an account and signs up only to publish", async 
   // The same draft, now owned by the account; the publish sheet reopens.
   await expect(page.getByTestId("publish")).toBeEnabled({ timeout: 30_000 });
   await expect(page).toHaveURL(new RegExp(`/dashboard/invitations/${id}/edit`));
-  await expect(page.getByTestId("guest-banner")).toHaveCount(0);
   await page.getByTestId("publish").click();
   await expect(page.getByTestId("public-url")).toBeVisible({ timeout: 20_000 });
 });
