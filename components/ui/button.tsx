@@ -14,6 +14,8 @@ const buttonVariants = cva(
         outline: "border border-input bg-surface text-foreground hover:border-foreground/40 hover:bg-subtle",
         ghost: "text-foreground hover:bg-muted",
         subtle: "bg-muted text-foreground hover:bg-border/70",
+        /** Soft fill for actions on white surfaces (the default secondary action inside cards). */
+        soft: "bg-fill text-foreground hover:bg-fill-hover",
         accent: "bg-accent text-accent-foreground hover:brightness-95",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         link: "rounded-md text-primary underline-offset-4 hover:underline active:scale-100",

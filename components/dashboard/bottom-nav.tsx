@@ -28,9 +28,9 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
+      className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 mx-auto max-w-md lg:hidden"
     >
-      <ul className="mx-auto grid h-16 max-w-md grid-cols-4">
+      <ul className="surface-float grid h-16 grid-cols-4 rounded-3xl">
         {items.map((item) => {
           const active = isActive(item.href, item.exact);
           if (item.primary) {
@@ -38,11 +38,11 @@ export function BottomNav() {
               <li key={item.href} className="flex items-center justify-center">
                 <Link
                   href={item.href}
-                  className="flex flex-col items-center gap-1 text-[0.7rem] font-medium text-primary outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+                  className="group flex flex-col items-center gap-1 rounded-xl text-[0.7rem] font-medium text-primary outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   data-testid="bottom-nav-create"
                 >
-                  <span className="-mt-5 flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lift ring-4 ring-background">
-                    <item.icon className="size-5" aria-hidden />
+                  <span className="-mt-5 flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-[0_10px_24px_-8px_var(--primary)] ring-4 ring-surface transition-transform duration-(--duration-base) ease-(--ease-out-quart) group-active:scale-90">
+                    <item.icon className="size-5 transition-transform duration-(--duration-slow) ease-(--ease-out-quart) group-hover:rotate-90" aria-hidden />
                   </span>
                   {item.label}
                 </Link>
@@ -59,8 +59,16 @@ export function BottomNav() {
                   active ? "text-primary" : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <span className={cn("flex h-7 w-12 items-center justify-center rounded-full transition-colors", active && "bg-primary/10")}>
-                  <item.icon className="size-5" aria-hidden />
+                <span className="relative flex h-7 w-12 items-center justify-center">
+                  {/* The highlight pops in under the active tab. */}
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "absolute inset-0 rounded-full bg-primary/10 transition-[scale,opacity] duration-(--duration-slow) ease-(--ease-out-quart)",
+                      active ? "scale-100 opacity-100" : "scale-50 opacity-0",
+                    )}
+                  />
+                  <item.icon className={cn("relative size-5 transition-transform duration-(--duration-slow) ease-(--ease-out-quart)", active && "-translate-y-px scale-110")} aria-hidden />
                 </span>
                 {item.label}
               </Link>
@@ -76,5 +84,5 @@ export function BottomNav() {
 export function BottomNavSpacer() {
   const pathname = usePathname();
   if (isFocusedFlow(pathname)) return null;
-  return <div aria-hidden className="h-[calc(5rem+env(safe-area-inset-bottom))] lg:hidden" />;
+  return <div aria-hidden className="h-[calc(6rem+env(safe-area-inset-bottom))] lg:hidden" />;
 }

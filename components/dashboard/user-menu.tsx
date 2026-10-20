@@ -1,8 +1,9 @@
 "use client";
 
-import { LogOutIcon, SettingsIcon, ShieldIcon, UserIcon } from "lucide-react";
+import { LogOutIcon, SettingsIcon, ShieldIcon, SparklesIcon, UserIcon } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { ShellUser } from "@/components/dashboard/dashboard-shell";
 import { initials } from "@/lib/utils/format";
@@ -18,11 +19,23 @@ export function UserMenu({ user }: { user: ShellUser }) {
           <AvatarFallback>{initials(user.name || user.email)}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel>
-          <p className="truncate text-sm font-medium text-foreground">{user.name || "Your account"}</p>
-          <p className="truncate text-xs font-normal">{user.email}</p>
+          <span className="flex items-center justify-between gap-2">
+            <span className="truncate text-sm font-medium text-foreground">{user.name || "Your account"}</span>
+            <Badge variant={user.plan === "pro" ? "accent" : "outline"} className="shrink-0 capitalize">
+              {user.plan}
+            </Badge>
+          </span>
+          <span className="block truncate text-xs font-normal">{user.email}</span>
         </DropdownMenuLabel>
+        {user.plan === "free" ? (
+          <DropdownMenuItem asChild>
+            <Link href="/pricing" className="font-medium text-primary">
+              <SparklesIcon /> Upgrade to Pro
+            </Link>
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/dashboard/settings">

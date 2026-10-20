@@ -41,7 +41,7 @@ export function InvitationActions({ item }: { item: InvitationListItem }) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon-sm" aria-label={`More actions for ${item.title || "invitation"}`}>
+          <Button variant="soft" size="icon-sm" aria-label={`More actions for ${item.title || "invitation"}`}>
             <MoreHorizontalIcon className="size-4" />
           </Button>
         </DropdownMenuTrigger>

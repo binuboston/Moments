@@ -3,7 +3,8 @@
 import { HeartIcon, SparklesIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { gsap, prefersReducedMotion, useGSAP } from "@/lib/motion/gsap";
-import { blossomSvg, type ParticleKind } from "@/features/templates/motion/burst";
+import { blossomMarkup, CornerBloom as BrandCornerBloom } from "@/components/brand/blossom";
+import type { ParticleKind } from "@/features/templates/motion/burst";
 
 export interface CoverData {
   /** One line per name; couples get two lines joined by an ampersand. */
@@ -149,7 +150,7 @@ export function OpeningCover({ names, date, invocation, icon, particles, onRevea
           aria-hidden
           className="pointer-events-none absolute opacity-0"
           style={{ left: `${a.x}%`, top: `${a.y}%`, width: `${a.s}rem`, height: `${a.s}rem`, color: i % 2 ? "color-mix(in oklab, var(--inv-accent) 40%, white)" : "color-mix(in oklab, var(--inv-accent) 50%, #f48fb1)" }}
-          dangerouslySetInnerHTML={{ __html: blossomSvg("rgb(255 255 255 / 0.6)") }}
+          dangerouslySetInnerHTML={{ __html: blossomMarkup("rgb(255 255 255 / 0.6)") }}
         />
       ))}
 
@@ -186,7 +187,7 @@ export function OpeningCover({ names, date, invocation, icon, particles, onRevea
         </h2>
         <div data-cover-line aria-hidden className="mx-auto mt-4 flex items-center justify-center gap-2 text-(--inv-accent)">
           <span className="h-px w-12 bg-current opacity-40" />
-          <span className="size-3" dangerouslySetInnerHTML={{ __html: blossomSvg("var(--inv-bg)") }} />
+          <span className="size-3" dangerouslySetInnerHTML={{ __html: blossomMarkup("var(--inv-bg)") }} />
           <span className="h-px w-12 bg-current opacity-40" />
         </div>
         <p data-cover-line className="mt-3 text-lg">
@@ -219,50 +220,11 @@ export function OpeningCover({ names, date, invocation, icon, particles, onRevea
   );
 }
 
-/** A spray of blossoms and leaves anchored in the top-left corner (flip it for other corners). */
+/** The brand corner spray, coloured from the invitation's theme. */
 function CornerBloom({ kind }: { kind: ParticleKind }) {
-  const flower = kind === "petals" ? "color-mix(in oklab, var(--inv-accent) 40%, #d81b60)" : "var(--inv-accent)";
-  const soft = kind === "petals" ? "color-mix(in oklab, var(--inv-accent) 30%, #f48fb1)" : "color-mix(in oklab, var(--inv-accent) 55%, white)";
-  const leaf = "color-mix(in oklab, var(--inv-accent) 35%, #4e6b3c)";
-  const blooms = [
-    { x: 14, y: 14, r: 10, c: flower },
-    { x: 32, y: 9, r: 7, c: soft },
-    { x: 9, y: 33, r: 7.5, c: soft },
-    { x: 30, y: 28, r: 6, c: flower },
-    { x: 50, y: 7, r: 5.5, c: flower },
-    { x: 7, y: 52, r: 5.5, c: flower },
-    { x: 46, y: 20, r: 4.2, c: soft },
-    { x: 20, y: 46, r: 4.2, c: soft },
-    { x: 66, y: 12, r: 3.6, c: soft },
-    { x: 12, y: 68, r: 3.6, c: soft },
-    { x: 40, y: 38, r: 3.4, c: flower },
-    { x: 78, y: 5, r: 2.8, c: flower },
-    { x: 5, y: 80, r: 2.8, c: flower },
-    { x: 22, y: 22, r: 3, c: soft },
-  ];  return (
-    <svg data-bloom viewBox="0 0 96 96" className="block size-32 sm:size-36" aria-hidden>
-      <g fill="none" stroke={leaf} strokeWidth="1.4" strokeLinecap="round">
-        <path d="M6 6 C 30 12, 52 6, 88 4" />
-        <path d="M6 6 C 12 30, 6 52, 4 88" />
-        <path d="M14 14 C 30 24, 40 34, 46 46" />
-      </g>
-      <g fill={leaf}>
-        <ellipse cx="66" cy="8" rx="6" ry="2.4" transform="rotate(-12 66 8)" />
-        <ellipse cx="8" cy="68" rx="2.4" ry="6" transform="rotate(12 8 68)" />
-        <ellipse cx="44" cy="4" rx="5" ry="2" transform="rotate(14 44 4)" />
-        <ellipse cx="4" cy="44" rx="2" ry="5" transform="rotate(-14 4 44)" />
-        <ellipse cx="58" cy="14" rx="4.5" ry="1.8" transform="rotate(24 58 14)" />
-        <ellipse cx="14" cy="58" rx="1.8" ry="4.5" transform="rotate(-24 14 58)" />
-        <ellipse cx="36" cy="44" rx="4" ry="1.7" transform="rotate(48 36 44)" />
-      </g>
-      {blooms.map((b, i) => (
-        <g key={i} transform={`translate(${b.x} ${b.y}) scale(${b.r / 6})`} fill={b.c}>
-          {[0, 60, 120, 180, 240, 300].map((a) => (
-            <ellipse key={a} cx="0" cy="-3.4" rx="1.7" ry="3.2" transform={`rotate(${a})`} />
-          ))}
-          <circle r="1.3" fill="rgb(255 255 255 / 0.85)" />
-        </g>
-      ))}
-    </svg>
-  );
+  const colors =
+    kind === "petals"
+      ? { flower: "color-mix(in oklab, var(--inv-accent) 40%, #d81b60)", soft: "color-mix(in oklab, var(--inv-accent) 30%, #f48fb1)", leaf: "color-mix(in oklab, var(--inv-accent) 35%, #4e6b3c)" }
+      : { flower: "var(--inv-accent)", soft: "color-mix(in oklab, var(--inv-accent) 55%, white)", leaf: "color-mix(in oklab, var(--inv-accent) 35%, #4e6b3c)" };
+  return <BrandCornerBloom data-bloom colors={colors} className="size-32 sm:size-36" />;
 }

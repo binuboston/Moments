@@ -1,9 +1,6 @@
-import { PlusIcon } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/dashboard/page-header";
-import { Button } from "@/components/ui/button";
 import { InvitationList } from "@/features/invitations/components/invitation-list";
 import { listOwnedInvitations } from "@/features/invitations/queries";
 import { invitationListQuerySchema } from "@/lib/validation/invitation";
@@ -28,14 +25,6 @@ export default async function InvitationsPage({ searchParams }: PageProps<"/dash
       <PageHeader
         title="Invitations"
         description="Everything you've created, in one place."
-        hideActionsOnMobile
-        actions={
-          <Button asChild>
-            <Link href="/dashboard/invitations/new">
-              <PlusIcon aria-hidden /> New invitation
-            </Link>
-          </Button>
-        }
       />
       <InvitationList initialParams={params} initialData={initial} />
     </div>

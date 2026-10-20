@@ -1,11 +1,12 @@
 import * as React from "react";
 import { cn } from "@/lib/utils/cn";
 
+/** Borderless white surface that floats on the app canvas (elevation, not borders, separates it). */
 function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card"
-      className={cn("rounded-2xl border border-border bg-surface text-surface-foreground shadow-soft", className)}
+      className={cn("surface-card text-surface-foreground", className)}
       {...props}
     />
   );

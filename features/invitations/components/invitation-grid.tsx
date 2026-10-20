@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils/cn";
 export function InvitationGrid({ items, busy = false, className }: { items: InvitationListItem[]; busy?: boolean; className?: string }) {
   const ref = useFlipList<HTMLUListElement>(items.map((i) => i.id));
   return (
-    <ul ref={ref} className={cn("grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 transition-opacity", busy && "opacity-70", className)} aria-busy={busy}>
+    <ul ref={ref} className={cn("grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 transition-opacity", busy && "opacity-70", className)} aria-busy={busy}>
       {items.map((item) => (
         <li key={item.id} data-flip-id={item.id}>
           <InvitationCard item={item} />

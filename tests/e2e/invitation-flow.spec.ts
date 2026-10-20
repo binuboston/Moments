@@ -38,11 +38,24 @@ test("owner personalises the design and enables RSVP", async ({ page }) => {
   await logIn(page, ownerEmail);
   await page.goto(`/dashboard/invitations/${invitationId}/edit`);
 
-  await page.getByTestId("step-design").click();
+  // Sections are collapsible cards; open "Look & feel".
+  await page.getByTestId("editor-section-design").click();
   await page.getByTestId("palette-ocean").click();
   await waitForDraft(page, invitationId, (d) => (d.theme as { paletteId: string }).paletteId, "ocean");
 
-  await page.getByTestId("step-settings").click();
+  // Edit / Preview tabs replace the side-by-side preview.
+  await page.getByTestId("view-preview").click();
+  await expect(page.getByTestId("preview")).toBeVisible();
+  await page.getByTestId("view-edit").click();
+  await expect(page.getByTestId("editor-section-details")).toBeVisible();
+
+  // The design switcher lists the designs for this occasion.
+  await page.getByTestId("template-switcher").click();
+  await expect(page.getByTestId("switch-template-confetti-pop")).toBeVisible();
+  await page.keyboard.press("Escape");
+
+  // Settings open as a sheet from the toolbar gear.
+  await page.getByTestId("open-settings").click();
   await page.getByTestId("rsvp-toggle").click();
   await waitForDraft(page, invitationId, (d) => (d.settings as { rsvp: { enabled: boolean } }).rsvp.enabled, true);
 });
@@ -131,7 +144,7 @@ test("duplicate slugs are rejected and unpublishing takes the page offline", asy
   await page.goto(`/dashboard/invitations/${invitationId}/edit`);
   await page.getByTestId("go-to-publish").click();
   await page.getByTestId("unpublish").click();
-  // The status badge renders in the toolbar on wide screens and in the step bar on phones; assert the visible one.
+  await page.keyboard.press("Escape");
   await expect(page.getByText("Unpublished", { exact: true }).filter({ visible: true }).first()).toBeVisible({ timeout: 15_000 });
 
   const guest = await browser.newContext();

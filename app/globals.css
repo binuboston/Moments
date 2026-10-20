@@ -37,12 +37,37 @@
   --warning-foreground: #fff8e6;
   --info: #2b5c8a;
   --radius: 0.875rem;
+
+  /* App canvas: a cool paper grey that borderless white surfaces float on. */
+  --canvas: #eef1f5;
+  --canvas-edge: #e3e8ee;
+  /* Soft fills for controls on white surfaces (pill buttons, icon buttons, chips). */
+  --fill: #eff2f5;
+  --fill-hover: #e5e9ee;
+  /* Elevation: surfaces are separated by shadow, never by borders. */
+  --elevation-card: 0 1px 2px rgb(16 24 40 / 0.04), 0 6px 20px -8px rgb(16 24 40 / 0.08);
+  --elevation-card-hover: 0 2px 6px rgb(16 24 40 / 0.05), 0 24px 44px -18px rgb(16 24 40 / 0.18);
+  --elevation-float: 0 1px 2px rgb(16 24 40 / 0.05), 0 12px 32px -12px rgb(16 24 40 / 0.14);
+  --card-radius: 1.5rem;
+  --tile-radius: 0.875rem;
+  /* Tones: pastel tile + deeper ink, one per category/stat. Same lightness so no hue dominates. */
+  --tone-rose: #fde7ec;    --tone-rose-ink: #b4234b;
+  --tone-violet: #ece9fe;  --tone-violet-ink: #5b3fd1;
+  --tone-amber: #fdf1d3;   --tone-amber-ink: #9a6512;
+  --tone-peach: #fde9dc;   --tone-peach-ink: #b4521f;
+  --tone-teal: #dcf4f1;    --tone-teal-ink: #0f766e;
+  --tone-green: #e1f5e5;   --tone-green-ink: #1f7a4d;
+  --tone-lime: #ecf6d6;    --tone-lime-ink: #4d7c0f;
+  --tone-blue: #e3edfd;    --tone-blue-ink: #2556b8;
+  --tone-slate: #e9ecf1;   --tone-slate-ink: #3f4a5a;
 }
 
 @theme inline {
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   /* Display shares the product grotesk; size, weight and tracking create hierarchy. */
   --font-display: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Brand serif, shared with the invitation templates: used for emphasis (names, celebratory lines), never for UI text. */
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -70,6 +95,32 @@
   --color-stage-foreground: var(--stage-foreground);
   --color-stage-muted: var(--stage-muted);
   --color-stage-border: var(--stage-border);
+  --color-canvas: var(--canvas);
+  --color-fill: var(--fill);
+  --color-fill-hover: var(--fill-hover);
+  --color-tone-rose: var(--tone-rose);
+  --color-tone-rose-ink: var(--tone-rose-ink);
+  --color-tone-violet: var(--tone-violet);
+  --color-tone-violet-ink: var(--tone-violet-ink);
+  --color-tone-amber: var(--tone-amber);
+  --color-tone-amber-ink: var(--tone-amber-ink);
+  --color-tone-peach: var(--tone-peach);
+  --color-tone-peach-ink: var(--tone-peach-ink);
+  --color-tone-teal: var(--tone-teal);
+  --color-tone-teal-ink: var(--tone-teal-ink);
+  --color-tone-green: var(--tone-green);
+  --color-tone-green-ink: var(--tone-green-ink);
+  --color-tone-lime: var(--tone-lime);
+  --color-tone-lime-ink: var(--tone-lime-ink);
+  --color-tone-blue: var(--tone-blue);
+  --color-tone-blue-ink: var(--tone-blue-ink);
+  --color-tone-slate: var(--tone-slate);
+  --color-tone-slate-ink: var(--tone-slate-ink);
+  --radius-card: var(--card-radius);
+  --radius-tile: var(--tile-radius);
+  --shadow-card: var(--elevation-card);
+  --shadow-card-hover: var(--elevation-card-hover);
+  --shadow-float: var(--elevation-float);
 
   /* Brand scale for marketing accents */
   --color-brand-50: #fbf1f3;
@@ -261,6 +312,30 @@
 }
 
 /* Shared interaction states: hover lift for cards and tiles. */
+/* App surfaces (see docs/DESIGN_SYSTEM.md). */
+@utility app-canvas {
+  background-color: var(--canvas);
+  background-image:
+    radial-gradient(90% 60% at 0% 0%, rgb(255 255 255 / 0.7) 0%, transparent 60%),
+    linear-gradient(180deg, var(--canvas) 0%, var(--canvas-edge) 100%);
+  background-attachment: fixed;
+}
+@utility surface-card {
+  background-color: var(--surface);
+  border-radius: var(--card-radius);
+  box-shadow: var(--elevation-card);
+}
+@utility surface-float {
+  background-color: color-mix(in oklab, var(--surface) 92%, transparent);
+  box-shadow: var(--elevation-float);
+  backdrop-filter: blur(16px);
+}
+@utility surface-hover {
+  transition: transform var(--duration-slow) var(--ease-out-quart), box-shadow var(--duration-slow) var(--ease-out-quart);
+  &:hover { transform: translateY(-3px); box-shadow: var(--elevation-card-hover); }
+  &:active { transform: translateY(-1px); transition-duration: var(--duration-fast); }
+}
+
 @utility interactive-lift {
   transition: transform var(--duration-base) var(--ease-out-quart), box-shadow var(--duration-base) var(--ease-out-quart), border-color var(--duration-base) ease;
   &:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
@@ -327,6 +402,13 @@
 .motion-ok [data-inv-cover] [data-cover-in]:not([data-reveal-bound]) {
   opacity: 0;
   animation: motion-failsafe 0s linear 2.5s forwards;
+}
+@keyframes blossom-drift {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(18deg); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .animate-blossom-drift { animation: blossom-drift 5s ease-in-out infinite; }
 }
 @keyframes inv-tick {
   from { opacity: 0; transform: translateY(-0.45em); }

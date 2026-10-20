@@ -17,9 +17,9 @@ import { canUseTemplate } from "@/lib/entitlements";
 import { formatEventDate } from "@/lib/utils/dates";
 import { publishableSchema } from "@/lib/validation/invitation";
 import { withDerivedHeadline } from "@/lib/validation/content";
-import { useEditorStore, type EditorStep } from "@/stores/editor-store";
+import { useEditorStore, type EditorTarget } from "@/stores/editor-store";
 
-const FIELD_LABELS: Record<string, { label: string; step: EditorStep }> = {
+const FIELD_LABELS: Record<string, { label: string; step: EditorTarget }> = {
   "content.headline": { label: "Headline", step: "details" },
   "content.partnerOne": { label: "Partner one", step: "details" },
   "content.partnerTwo": { label: "Partner two", step: "details" },
@@ -35,7 +35,17 @@ const FIELD_LABELS: Record<string, { label: string; step: EditorStep }> = {
   "settings.rsvp.deadline": { label: "RSVP deadline", step: "settings" },
 };
 
-function labelFor(path: string): { label: string; step: EditorStep } {
+/** Plain-language reason for a validation issue (Zod's defaults are written for developers). */
+function friendlyMessage(issue: { code?: string; message: string; minimum?: unknown }): string {
+  if (issue.code === "too_small" && issue.minimum === 1) return "add this to publish";
+  if (issue.code === "too_small") return "too short";
+  if (issue.code === "too_big") return "too long";
+  if (issue.code === "invalid_format" || issue.code === "invalid_string") return "check the format";
+  if (issue.code === "invalid_type") return "add this to publish";
+  return issue.message;
+}
+
+function labelFor(path: string): { label: string; step: EditorTarget } {
   if (FIELD_LABELS[path]) return FIELD_LABELS[path];
   if (path.startsWith("content.contacts")) return { label: "Contacts", step: "details" };
   if (path.startsWith("functions")) return { label: "Schedule", step: "schedule" };
@@ -46,7 +56,7 @@ function labelFor(path: string): { label: string; step: EditorStep } {
 export function PublishPanel() {
   const qc = useQueryClient();
   const draft = useEditorStore((s) => s.draft)!;
-  const setStep = useEditorStore((s) => s.setStep);
+  const setStep = useEditorStore((s) => s.goTo);
   const syncStatus = useEditorStore((s) => s.syncStatus);
   const [shareOpen, setShareOpen] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
@@ -140,16 +150,16 @@ export function PublishPanel() {
             <AlertTitle>A few things need attention</AlertTitle>
             <AlertDescription>
               <ul className="mt-1 list-disc space-y-1 pl-4">
-                {premiumBlocked ? <li>This premium template needs the Pro plan. Choose a free template in Design, or upgrade.</li> : null}
+                {premiumBlocked ? <li>This premium template needs the Pro plan. Switch to a free design from the toolbar, or upgrade.</li> : null}
                 {issues.map((i) => {
                   const path = i.path.join(".");
                   const { label, step } = labelFor(path);
                   return (
                     <li key={path}>
-                      <button type="button" className="underline underline-offset-2" onClick={() => setStep(step)}>
+                      <button type="button" className="font-medium underline underline-offset-2" onClick={() => setStep(step)}>
                         {label}
                       </button>
-                      : {i.message}
+                      : {friendlyMessage(i as { code?: string; message: string; minimum?: unknown })}
                     </li>
                   );
                 })}

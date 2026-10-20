@@ -17,8 +17,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (profile?.role !== "admin") notFound();
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur-md">
+    <div className="app-canvas flex min-h-dvh flex-col">
+      <header className="surface-float sticky top-0 z-30">
         {/* Phones: brand row, then a scrolling nav row. Desktop: one row. */}
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-4 px-4 sm:px-6 md:h-16 md:flex-nowrap">
           <div className="flex h-14 items-center gap-3 md:h-auto">

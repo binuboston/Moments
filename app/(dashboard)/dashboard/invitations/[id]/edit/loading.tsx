@@ -1,26 +1,19 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
+/** Mirrors the editor: floating toolbar, title, then collapsed section cards. */
 export default function EditorLoading() {
   return (
-    <div className="-mx-4 -my-8 grid min-h-[calc(100vh-4rem)] sm:-mx-6 lg:-mx-10 lg:grid-cols-[14rem_minmax(0,1fr)_minmax(22rem,30rem)]" aria-busy aria-label="Loading editor">
-      <div className="border-b border-border p-3 lg:border-r lg:border-b-0">
-        <div className="flex gap-2 lg:flex-col">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-11 w-28 lg:w-full" />
-          ))}
+    <div className="grid gap-4" aria-busy aria-label="Loading editor">
+      <Skeleton className="h-14 w-full rounded-2xl" />
+      <div className="mx-auto grid w-full max-w-3xl gap-4">
+        <div className="grid gap-2 px-1">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-5 w-40" />
         </div>
-      </div>
-      <div className="px-6 py-8">
-        <div className="mx-auto grid max-w-2xl gap-5">
-          <Skeleton className="h-6 w-24" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-10 w-2/3" />
-        </div>
-      </div>
-      <div className="hidden border-l border-border p-6 lg:block">
-        <Skeleton className="mx-auto aspect-[9/19] w-full max-w-[21rem] rounded-[2.75rem]" />
+        <Skeleton className="h-96 rounded-card" />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-20 rounded-card" />
+        ))}
       </div>
     </div>
   );

@@ -1,8 +1,9 @@
+import { CelebrationProvider } from "@/components/brand/celebrate";
 import { Logo } from "@/components/layout/logo";
 import { BottomNav, BottomNavSpacer } from "@/components/dashboard/bottom-nav";
-import { DashboardNav } from "@/components/dashboard/dashboard-nav";
+import { HeaderNav } from "@/components/dashboard/header-nav";
+import { TopBarAction } from "@/components/dashboard/top-bar-context";
 import { UserMenu } from "@/components/dashboard/user-menu";
-import { Badge } from "@/components/ui/badge";
 
 export interface ShellUser {
   email: string;
@@ -12,41 +13,31 @@ export interface ShellUser {
 }
 
 /**
- * Mobile-first app shell. Phones get a compact top bar plus a bottom tab bar;
- * from lg up a persistent sidebar replaces the tab bar.
+ * Minimal app shell: one floating header (logo, navigation, primary action,
+ * account) over the canvas. Phones get a compact header plus a bottom tab bar.
  */
 export function DashboardShell({ user, children }: { user: ShellUser; children: React.ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col lg:flex-row">
-      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-border bg-surface lg:flex">
-        <div className="flex h-16 items-center px-6">
-          <Logo href="/dashboard" />
-        </div>
-        <DashboardNav role={user.role} className="flex-1 px-3" />
-        <div className="border-t border-border p-4">
-          <div className="flex items-center justify-between rounded-xl bg-subtle px-3 py-2.5">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{user.name || user.email}</p>
-              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+    <CelebrationProvider>
+      <div className="app-canvas flex min-h-dvh flex-col">
+        {/* A backing painted with the same fixed canvas hides content scrolling past the floating bar, invisibly. */}
+        <header className="sticky top-0 z-30 px-3 pt-3 sm:px-4">
+          <div aria-hidden className="app-canvas absolute inset-0 -z-10 [mask-image:linear-gradient(to_bottom,black_70%,transparent)]" />
+          <div className="surface-float mx-auto grid h-14 max-w-6xl grid-cols-[1fr_auto] items-center gap-4 rounded-2xl px-3 sm:h-16 sm:px-5 md:grid-cols-[1fr_auto_1fr]">
+            <Logo href="/dashboard" />
+            <HeaderNav className="hidden md:block" />
+            <div className="flex items-center justify-end gap-3">
+              <TopBarAction />
+              <UserMenu user={user} />
             </div>
-            <Badge variant={user.plan === "pro" ? "accent" : "outline"} className="capitalize">
-              {user.plan}
-            </Badge>
           </div>
-        </div>
-      </aside>
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b border-border bg-background/90 px-4 backdrop-blur-md sm:h-16 sm:px-6 lg:justify-end">
-          <Logo href="/dashboard" className="lg:hidden" />
-          <UserMenu user={user} />
         </header>
-        <main id="main" className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
+        <main id="main" className="flex-1 px-4 py-6 sm:px-6 sm:py-8">
           <div className="mx-auto w-full max-w-6xl min-w-0">{children}</div>
           <BottomNavSpacer />
         </main>
+        <BottomNav />
       </div>
-      <BottomNav />
-    </div>
+    </CelebrationProvider>
   );
 }

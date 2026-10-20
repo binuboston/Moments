@@ -1,39 +1,36 @@
 "use client";
 
-import { Dialog as DialogPrimitive } from "radix-ui";
-import { ArrowLeftIcon, ArrowRightIcon, CalendarIcon, CheckIcon, CloudOffIcon, EyeIcon, ImageIcon, Loader2Icon, PaletteIcon, PencilLineIcon, SendIcon, SettingsIcon, XIcon } from "lucide-react";
+import { ArrowLeftIcon, CalendarClockIcon, CheckIcon, CloudOffIcon, ImageIcon, Loader2Icon, PaletteIcon, SendIcon, Settings2Icon } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { SwapTransition } from "@/components/motion/swap-transition";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StatusBadge } from "@/features/invitations/components/status-badge";
-import { DetailsPanel } from "@/features/invitations/editor/panels/details-panel";
+import { EditorSection } from "@/features/invitations/editor/editor-section";
 import { DesignPanel, type TemplateOption } from "@/features/invitations/editor/panels/design-panel";
+import { DetailsPanel } from "@/features/invitations/editor/panels/details-panel";
 import { PhotosPanel } from "@/features/invitations/editor/panels/photos-panel";
 import { PublishPanel } from "@/features/invitations/editor/panels/publish-panel";
 import { SchedulePanel } from "@/features/invitations/editor/panels/schedule-panel";
 import { SettingsPanel } from "@/features/invitations/editor/panels/settings-panel";
 import { PreviewPane } from "@/features/invitations/editor/preview-pane";
+import { TemplateSwitcher } from "@/features/invitations/editor/template-switcher";
 import { useAutosave } from "@/features/invitations/editor/use-autosave";
+import { ViewToggle } from "@/features/invitations/editor/view-toggle";
 import type { InvitationDraft } from "@/features/invitations/types";
+import { getTemplateOrFallback } from "@/features/templates/registry";
+import { categoryStyle } from "@/lib/design/tones";
 import { cn } from "@/lib/utils/cn";
-import { isDirty, useEditorStore, type EditorStep } from "@/stores/editor-store";
+import { formatShortDate } from "@/lib/utils/dates";
+import { isDirty, useEditorStore } from "@/stores/editor-store";
 
-const STEPS: { key: EditorStep; label: string; icon: typeof PencilLineIcon; description: string }[] = [
-  { key: "details", label: "Details", icon: PencilLineIcon, description: "Names, date, venue" },
-  { key: "schedule", label: "Schedule", icon: CalendarIcon, description: "Multiple functions" },
-  { key: "photos", label: "Photos", icon: ImageIcon, description: "Cover and gallery" },
-  { key: "design", label: "Design", icon: PaletteIcon, description: "Template, colours, type" },
-  { key: "settings", label: "RSVP & settings", icon: SettingsIcon, description: "Responses, address" },
-  { key: "publish", label: "Publish", icon: SendIcon, description: "Go live and share" },
-];
-
-function SaveIndicator({ testId = "save-indicator" }: { testId?: string }) {
+function SaveIndicator() {
   const saveState = useEditorStore((s) => s.saveState);
   const dirty = useEditorStore((s) => isDirty(s.draft, s.serverDraft));
   const label = saveState === "saving" ? "Saving…" : saveState === "error" ? "Not saved" : dirty ? "Unsaved changes" : saveState === "saved" ? "Saved" : "All changes saved";
   return (
-    <span className={cn("inline-flex items-center gap-1.5 text-xs", saveState === "error" ? "text-destructive" : "text-muted-foreground")} role="status" aria-live="polite" data-testid={testId}>
+    <span className={cn("inline-flex items-center gap-1.5 text-xs", saveState === "error" ? "text-destructive" : "text-muted-foreground")} role="status" aria-live="polite" data-testid="save-indicator">
       {saveState === "saving" ? <Loader2Icon className="size-3.5 animate-spin" aria-hidden /> : saveState === "error" ? <CloudOffIcon className="size-3.5" aria-hidden /> : !dirty ? <CheckIcon className="size-3.5 text-success" aria-hidden /> : null}
       <span key={label} className="animate-fade-in">
         {label}
@@ -42,14 +39,25 @@ function SaveIndicator({ testId = "save-indicator" }: { testId?: string }) {
   );
 }
 
+const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+
+/**
+ * Invitation editor: a floating toolbar (back, design switcher, settings,
+ * Edit/Preview, publish) over one calm column. Edit shows collapsible section
+ * cards; Preview shows the invitation as guests see it. Settings and publishing
+ * open as sheets so the page never loses its place.
+ */
 export function InvitationEditor({ initialDraft, templates }: { initialDraft: InvitationDraft; templates: TemplateOption[] }) {
   const load = useEditorStore((s) => s.load);
   const reset = useEditorStore((s) => s.reset);
   const draft = useEditorStore((s) => s.draft);
-  const step = useEditorStore((s) => s.step);
-  const setStep = useEditorStore((s) => s.setStep);
-  const mobilePreviewOpen = useEditorStore((s) => s.mobilePreviewOpen);
-  const setMobilePreviewOpen = useEditorStore((s) => s.setMobilePreviewOpen);
+  const view = useEditorStore((s) => s.view);
+  const settingsOpen = useEditorStore((s) => s.settingsOpen);
+  const setSettingsOpen = useEditorStore((s) => s.setSettingsOpen);
+  const publishOpen = useEditorStore((s) => s.publishOpen);
+  const setPublishOpen = useEditorStore((s) => s.setPublishOpen);
+  const focusTarget = useEditorStore((s) => s.focusTarget);
+  const clearFocusTarget = useEditorStore((s) => s.clearFocusTarget);
 
   useEffect(() => {
     load(initialDraft);
@@ -58,151 +66,115 @@ export function InvitationEditor({ initialDraft, templates }: { initialDraft: In
 
   useAutosave();
 
-  // Keep the active step visible in the horizontally scrolling step bar (phones).
-  const stepsRef = useRef<HTMLOListElement>(null);
+  // goTo(): once the section has started opening, bring it into view.
   useEffect(() => {
-    const list = stepsRef.current;
-    const active = list?.querySelector<HTMLElement>(`[data-testid="step-${step}"]`);
-    if (!list || !active || list.scrollWidth <= list.clientWidth) return;
-    list.scrollTo({ left: active.offsetLeft - (list.clientWidth - active.offsetWidth) / 2, behavior: "smooth" });
-    window.scrollTo({ top: 0 });
-  }, [step]);
+    if (!focusTarget) return;
+    const t = setTimeout(() => {
+      document.getElementById(`editor-${focusTarget}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      clearFocusTarget();
+    }, 120);
+    return () => clearTimeout(t);
+  }, [focusTarget, clearFocusTarget]);
+
+  // Switching views starts at the top of the page.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [view]);
 
   if (!draft || draft.id !== initialDraft.id) return null;
 
-  const title = draft.title || (draft.content as { headline?: string }).headline || "Untitled invitation";
-  const stepIndex = STEPS.findIndex((s) => s.key === step);
+  const content = draft.content as { headline?: string; startsAt?: string; timezone?: string; venue?: { name?: string } };
+  const title = draft.title || content.headline || "Untitled invitation";
+  const def = getTemplateOrFallback(draft.templateKey);
+  const palette = def.palettes.find((p) => p.id === (draft.theme.paletteId || def.defaults.paletteId));
+  const fonts = def.fontPairings.find((f) => f.id === (draft.theme.fontPairingId || def.defaults.fontPairingId));
+  const cover = draft.media.some((m) => m.kind === "cover");
+  const gallery = draft.media.filter((m) => m.kind === "gallery").length;
+  const category = categoryStyle(draft.categorySlug);
+
+  const summaries = {
+    details: [content.headline, content.startsAt ? formatShortDate(content.startsAt, content.timezone ?? "UTC") : "", content.venue?.name].filter(Boolean).join(" · ") || "Names, date and venue",
+    schedule: draft.functions.length ? plural(draft.functions.length, "event") : "Add ceremonies, receptions or a running order",
+    photos: cover || gallery ? [cover ? "Cover photo" : "", gallery ? plural(gallery, "gallery photo") : ""].filter(Boolean).join(" · ") : "Cover and gallery",
+    design: [palette?.name, fonts?.name].filter(Boolean).join(" · "),
+  };
 
   return (
-    <div className="editor-scope -mx-4 -my-6 flex min-h-[calc(100dvh-3.5rem)] flex-col sm:-mx-6 sm:-my-8 sm:min-h-[calc(100dvh-4rem)] lg:-mx-10">
-      {/* Fixed-height toolbar so the step nav below can be sticky at a known offset on small screens. */}
-      <div className="sticky top-14 z-20 flex h-14 items-center justify-between gap-2 border-b border-border bg-background/90 px-3 backdrop-blur-md sm:top-16 sm:gap-3 sm:px-6 lg:px-10">
-        <div className="flex min-w-0 items-center gap-1.5 sm:gap-3">
-          <Button asChild variant="ghost" size="icon-sm" aria-label="Back to invitations">
-            <Link href="/dashboard/invitations">
-              <ArrowLeftIcon />
-            </Link>
-          </Button>
-          <div className="flex min-w-0 items-center gap-3">
-            <h1 className="min-w-0 truncate text-sm font-semibold sm:text-base">{title}</h1>
-            <div className="hidden items-center gap-2 sm:flex">
-              <StatusBadge status={draft.status} />
-              <SaveIndicator />
-            </div>
-          </div>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          {step !== "publish" ? (
-            <Button size="sm" onClick={() => setStep("publish")} data-testid="go-to-publish">
-              <SendIcon aria-hidden /> Publish
+    <div className="editor-scope">
+      {/* Floating toolbar, sticky under the app's header. Its backing uses the same fixed canvas, so it is invisible. */}
+      <div className="sticky top-[4.25rem] z-20 -mx-4 px-4 pt-1 pb-4 sm:top-[4.75rem] sm:-mx-6 sm:px-6">
+        <div aria-hidden className="app-canvas absolute inset-0 -z-10 [mask-image:linear-gradient(to_bottom,black_75%,transparent)]" />
+        <div className="surface-float grid grid-cols-[1fr_auto] items-center gap-2 rounded-2xl p-2 sm:grid-cols-[1fr_auto_1fr]">
+          <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-1.5 sm:gap-2">
+            <Button asChild variant="ghost" size="icon-sm" aria-label="Back to invitations">
+              <Link href="/dashboard/invitations">
+                <ArrowLeftIcon />
+              </Link>
             </Button>
-          ) : null}
+            <TemplateSwitcher templates={templates} />
+            <Button variant="soft" size="icon-sm" onClick={() => setSettingsOpen(true)} aria-label="RSVP and settings" data-testid="open-settings">
+              <Settings2Icon />
+            </Button>
+          </div>
+          <ViewToggle className="col-span-2 row-start-2 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:w-64" />
+          <div className="col-start-2 row-start-1 flex items-center justify-end sm:col-start-3">
+            <Button size="sm" onClick={() => setPublishOpen(true)} data-testid="go-to-publish">
+              <SendIcon aria-hidden /> {draft.status === "published" ? "Share" : "Publish"}
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)] lg:grid-cols-[14rem_minmax(0,1fr)_minmax(22rem,30rem)]">
-        {/* Sticky under the toolbar (4rem header + 3.5rem toolbar) on small screens; a static sidebar column on large screens. */}
-        <nav aria-label="Editor steps" className="sticky top-28 z-10 min-w-0 max-w-full border-b border-border bg-surface sm:top-30 lg:static lg:border-r lg:border-b-0">
-          <div className="flex items-center gap-2 px-3 pt-2 sm:hidden">
-            <StatusBadge status={draft.status} />
-            <SaveIndicator testId="save-indicator-mobile" />
+      <SwapTransition swapKey={view}>
+        {view === "edit" ? (
+          <div className="mx-auto grid w-full max-w-3xl gap-4 pb-10">
+            <header className="mb-1 px-1">
+              <h1 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">{title}</h1>
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <StatusBadge status={draft.status} />
+                <SaveIndicator />
+              </div>
+            </header>
+
+            <EditorSection id="details" title="Basic information" summary={summaries.details} icon={category.icon} tone={category.tone}>
+              <DetailsPanel key={draft.categorySlug} />
+            </EditorSection>
+            <EditorSection id="schedule" title="Schedule" summary={summaries.schedule} icon={CalendarClockIcon} tone="amber">
+              <SchedulePanel />
+            </EditorSection>
+            <EditorSection id="photos" title="Photos" summary={summaries.photos} icon={ImageIcon} tone="teal">
+              <PhotosPanel />
+            </EditorSection>
+            <EditorSection id="design" title="Look & feel" summary={summaries.design} icon={PaletteIcon} tone="violet">
+              <DesignPanel />
+            </EditorSection>
           </div>
-          <ol ref={stepsRef} className="flex overflow-x-auto scroll-px-2 p-2 no-scrollbar lg:flex-col lg:p-3">
-            {STEPS.map((s, i) => {
-              const active = s.key === step;
-              return (
-                <li key={s.key} className="shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setStep(s.key)}
-                    aria-current={active ? "step" : undefined}
-                    data-testid={`step-${s.key}`}
-                    className={cn(
-                      "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors",
-                      active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                    )}
-                  >
-                    <span className={cn("flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold", active ? "bg-primary text-primary-foreground" : "bg-muted")}>{i + 1}</span>
-                    <span className="min-w-0">
-                      <span className="block font-medium whitespace-nowrap">{s.label}</span>
-                      <span className="hidden text-xs text-muted-foreground lg:block">{s.description}</span>
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
-        </nav>
-
-        <section className="min-w-0 px-4 pt-5 pb-28 sm:px-6 sm:pt-6 lg:px-8 lg:pb-6" aria-labelledby={`step-heading-${step}`}>
-          <h2 id={`step-heading-${step}`} className="sr-only">
-            {STEPS[stepIndex]?.label}
-          </h2>
-          <div className="mx-auto max-w-2xl">
-            <SwapTransition swapKey={step}>
-              {step === "details" ? <DetailsPanel key={draft.categorySlug} /> : null}
-              {step === "schedule" ? <SchedulePanel /> : null}
-              {step === "photos" ? <PhotosPanel /> : null}
-              {step === "design" ? <DesignPanel templates={templates} /> : null}
-              {step === "settings" ? <SettingsPanel /> : null}
-              {step === "publish" ? <PublishPanel /> : null}
-            </SwapTransition>
-
-            <div className="mt-10 hidden items-center justify-between border-t border-border pt-6 lg:flex">
-              <Button variant="ghost" disabled={stepIndex === 0} onClick={() => setStep(STEPS[stepIndex - 1].key)}>
-                Back
-              </Button>
-              {stepIndex < STEPS.length - 1 ? (
-                <Button variant="outline" onClick={() => setStep(STEPS[stepIndex + 1].key)} data-testid="next-step">
-                  Next: {STEPS[stepIndex + 1].label}
-                </Button>
-              ) : null}
-            </div>
-          </div>
-        </section>
-
-        <aside className="hidden border-l border-border bg-subtle/50 p-6 lg:block">
-          <div className="sticky top-[8.5rem]">
+        ) : (
+          <div className="pb-10">
             <PreviewPane />
           </div>
-        </aside>
-      </div>
+        )}
+      </SwapTransition>
 
-      {/* Phones and tablets: thumb-reachable step controls with the preview one tap away. */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-3 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur-md lg:hidden">
-        <div className="mx-auto flex max-w-2xl items-center gap-2">
-          <Button variant="ghost" size="icon" disabled={stepIndex === 0} onClick={() => setStep(STEPS[stepIndex - 1].key)} aria-label="Previous step">
-            <ArrowLeftIcon />
-          </Button>
-          <Button variant="outline" className="flex-1" onClick={() => setMobilePreviewOpen(true)}>
-            <EyeIcon aria-hidden /> Preview
-          </Button>
-          {stepIndex < STEPS.length - 1 ? (
-            <Button className="flex-1" onClick={() => setStep(STEPS[stepIndex + 1].key)} data-testid="next-step-mobile">
-              {STEPS[stepIndex + 1].label.split(" ")[0]} <ArrowRightIcon aria-hidden />
-            </Button>
-          ) : null}
-        </div>
-      </div>
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>RSVP &amp; settings</DialogTitle>
+            <DialogDescription>Responses, calendar buttons and the opening card.</DialogDescription>
+          </DialogHeader>
+          <SettingsPanel />
+        </DialogContent>
+      </Dialog>
 
-      <DialogPrimitive.Root open={mobilePreviewOpen} onOpenChange={setMobilePreviewOpen}>
-        <DialogPrimitive.Portal>
-          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-foreground/40 data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out lg:hidden" />
-          <DialogPrimitive.Content className="fixed inset-0 z-50 flex flex-col bg-background p-4 outline-none data-[state=open]:animate-sheet-up data-[state=closed]:animate-sheet-down lg:hidden">
-            <div className="mb-3 flex items-center justify-between">
-              <DialogPrimitive.Title className="text-sm font-semibold">Preview</DialogPrimitive.Title>
-              <DialogPrimitive.Close asChild>
-                <Button variant="ghost" size="icon" aria-label="Close preview">
-                  <XIcon />
-                </Button>
-              </DialogPrimitive.Close>
-            </div>
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              <PreviewPane />
-            </div>
-          </DialogPrimitive.Content>
-        </DialogPrimitive.Portal>
-      </DialogPrimitive.Root>
+      <Dialog open={publishOpen} onOpenChange={setPublishOpen}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>{draft.status === "published" ? "Your invitation is live" : "Publish"}</DialogTitle>
+            <DialogDescription>Check everything is ready, choose your link and share it.</DialogDescription>
+          </DialogHeader>
+          <PublishPanel />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

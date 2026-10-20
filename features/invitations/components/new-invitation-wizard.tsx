@@ -1,14 +1,16 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, LockIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon, CheckIcon, LockIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useCelebrate } from "@/components/brand/celebrate";
 import { SwapTransition } from "@/components/motion/swap-transition";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { categoryIcon } from "@/components/marketing/category-grid";
+import { IconTile } from "@/components/ui/icon-tile";
+import { categoryStyle } from "@/lib/design/tones";
 import { DeviceFrame } from "@/features/templates/components/device-frame";
 import { InvitationRenderer } from "@/features/templates/renderer";
 import { sampleView } from "@/features/templates/sample-data";
@@ -45,6 +47,7 @@ interface Props {
 
 export function NewInvitationWizard({ categories, templates, plan, preselectedTemplate, preselectedCategory }: Props) {
   const router = useRouter();
+  const celebrate = useCelebrate();
   const presetTemplate = templates.find((t) => t.slug === preselectedTemplate);
   const initialCategory = preselectedCategory && categories.some((c) => c.slug === preselectedCategory) ? preselectedCategory : presetTemplate?.categories[0];
   const [category, setCategory] = useState<CategorySlug | undefined>(initialCategory);
@@ -69,7 +72,9 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
         </p>
         <div className="mt-2 grid grid-cols-3 gap-1.5">
           {[1, 2, 3].map((n) => (
-            <span key={n} className={cn("h-1 rounded-full", n <= step ? "bg-primary" : "bg-border")} />
+            <span key={n} className="relative h-1 overflow-hidden rounded-full bg-border">
+              <span className={cn("absolute inset-0 origin-left rounded-full bg-primary transition-[scale] duration-700 ease-(--ease-out-quart)", n <= step ? "scale-x-100" : "scale-x-0")} />
+            </span>
           ))}
         </div>
       </div>
@@ -80,11 +85,15 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
           { n: 3, label: "Details & design" },
         ].map((s, i) => (
           <li key={s.n} className="flex items-center gap-3">
-            <span className={cn("flex size-7 items-center justify-center rounded-full text-xs font-semibold", step >= s.n ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
+            <span className={cn("flex size-7 items-center justify-center rounded-full text-xs font-semibold transition-colors duration-(--duration-slow)", step >= s.n ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
               {step > s.n ? <CheckIcon className="size-3.5" /> : s.n}
             </span>
             <span className={cn(step === s.n ? "font-medium" : "text-muted-foreground")}>{s.label}</span>
-            {i < 2 ? <span className="h-px w-8 bg-border" aria-hidden /> : null}
+            {i < 2 ? (
+              <span className="relative h-px w-10 overflow-hidden bg-border" aria-hidden>
+                <span className={cn("absolute inset-0 origin-left bg-primary transition-[scale] duration-700 ease-(--ease-out-quart)", step > s.n ? "scale-x-100" : "scale-x-0")} />
+              </span>
+            ) : null}
           </li>
         ))}
       </ol>
@@ -97,28 +106,33 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
           </h2>
           <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {categories.map((c) => {
-              const Icon = categoryIcon(c.icon);
+              const style = categoryStyle(c.slug);
               const active = category === c.slug;
               return (
                 <li key={c.slug}>
                   <button
                     type="button"
                     data-testid={`category-${c.slug}`}
-                    onClick={() => {
+                    onClick={(e) => {
+                      // A small blossom flourish from the chosen occasion as the step changes.
+                      celebrate(e.currentTarget, { count: 18, scale: 0.45 });
                       setCategory(c.slug);
                       setTemplateSlug(undefined);
                       setStep(2);
                     }}
                     aria-pressed={active}
                     className={cn(
-                      "flex h-full w-full flex-col gap-2.5 rounded-2xl border bg-surface p-4 text-left sm:gap-3 sm:p-5 transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-soft focus-visible:ring-2 focus-visible:ring-ring",
-                      active ? "border-primary ring-1 ring-primary" : "border-border",
+                      "group surface-card surface-hover flex h-full w-full flex-col gap-2 p-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-5",
+                      active && "ring-2 ring-primary",
                     )}
                   >
-                    <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <Icon className="size-5" aria-hidden />
+                    <span className="mb-2 flex items-start justify-between">
+                      <IconTile icon={style.icon} tone={style.tone} className="transition-[rotate,scale] duration-(--duration-slow) ease-(--ease-out-quart) group-hover:-rotate-6 group-hover:scale-110" />
+                      <span aria-hidden className="flex size-8 items-center justify-center rounded-full bg-fill transition-[background-color,rotate] duration-(--duration-slow) ease-(--ease-out-quart) group-hover:rotate-45 group-hover:bg-fill-hover">
+                        <ArrowUpRightIcon className="size-4" />
+                      </span>
                     </span>
-                    <span className="font-medium">{c.name}</span>
+                    <span className="text-lg leading-snug font-semibold tracking-tight">{c.name}</span>
                     {c.description ? <span className="line-clamp-2 text-xs text-muted-foreground">{c.description}</span> : null}
                   </button>
                 </li>

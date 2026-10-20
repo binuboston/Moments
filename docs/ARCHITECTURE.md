@@ -158,6 +158,30 @@ GSAP is the only animation library. Everything lives in two places:
 
 **App motion.** `NavigationProgress` (top bar on route changes), `SwapTransition` (editor panels and wizard steps), `useFlipList` (invitation grid reorder, enter and delete), and optimistic TanStack Query mutations with rollback in `features/invitations/hooks.ts`.
 
+**App design system.** Canvas, borderless surfaces, elevation, tones and the card anatomy are specified in [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md).
+
+**Brand layer (`components/brand/`).** The motifs guests see in invitations are shared with the app so the product feels like one brand:
+
+- `blossom.tsx`: the six-petal `Blossom`, the `CornerBloom` spray (any colours) and `blossomMarkup()` for imperatively created particles.
+- `burst.ts`: one particle burst (blossoms, blossoms and stars, or confetti) used by the invitation opening card and by the app.
+- `celebrate.tsx`: `CelebrationProvider` (in the dashboard shell) and `useCelebrate()`, which fires brand-coloured bursts from an element (choosing an occasion in the wizard, going live for the first time). It does nothing under reduced motion.
+- The `font-serif` token (Fraunces, shared with the templates) is for emphasis only: names and celebratory lines, never UI text.
+
+**Dashboard motion.** `app/(dashboard)/dashboard/template.tsx` wraps pages in `PageEnter`: top-level blocks rise in on in-app navigation, content that streams in after a skeleton animates when it arrives, and hard loads show content instantly (no flash). The wizard and editor are skipped because their fixed action bars must not sit inside a transformed parent. Other pieces:
+
+- The header navigation highlight glides between links, and the phone tab bar's highlight pops in under the active tab.
+- Invitation cards tilt toward the pointer through `useTilt`, on a wrapper so the CSS hover lift is untouched. They also get a light sweep and a "days to go" chip.
+- Overview stats count up.
+- The overview hero (`features/dashboard/overview-hero.tsx`) shows a live countdown to the next event from `getOverviewSummary`.
+
+**Editor.** The editor (`features/invitations/editor/`) works like this:
+
+- **Toolbar:** a floating bar holding back, `TemplateSwitcher` (a quick design switch with an Undo toast), the settings gear, `ViewToggle` (Edit / Preview) and Publish.
+- **Edit view:** collapsible `EditorSection` cards (Basic information, Schedule, Photos, Look & feel). Collapsed content stays mounted but inert, so forms keep their state.
+- **Preview view:** the invitation at the current screen width. There is no device switcher.
+- **Sheets:** settings and publishing open as dialog sheets.
+- **State:** UI state lives in the editor store (`view`, `openSections`, `settingsOpen`, `publishOpen`). `goTo(target)` opens the right section or sheet from a publish check.
+
 **Dates must be deterministic.** `lib/utils/dates.ts` formats with fixed month and weekday tables instead of `Intl` output, because Node and browsers ship different CLDR data and the mismatch caused hydration errors.
 
 **Build cache.** If a production build does not reflect a CSS change, delete `.next/cache` and build again. A stale Turbopack cache served old CSS once during development.

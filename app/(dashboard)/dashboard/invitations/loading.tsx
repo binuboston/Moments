@@ -10,10 +10,10 @@ export default function InvitationsLoading() {
         </div>
         <Skeleton className="h-10 w-36" />
       </div>
-      <Skeleton className="h-10 w-full max-w-md" />
+      <Skeleton className="h-11 w-full max-w-md rounded-full" />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-56 rounded-2xl" />
+          <Skeleton key={i} className="h-96 rounded-card" />
         ))}
       </div>
     </div>

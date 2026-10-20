@@ -117,7 +117,7 @@ export function RsvpManager({ invitationId }: { invitationId: string }) {
               const r = row.original;
               const b = attendanceBadge[r.attendance];
               return (
-                <li key={r.id} className="rounded-xl border border-border bg-surface p-4">
+                <li key={r.id} className="surface-card p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="font-medium break-words">{r.guestName}</p>
@@ -155,7 +155,7 @@ export function RsvpManager({ invitationId }: { invitationId: string }) {
               );
             })}
           </ul>
-          <div className="relative hidden overflow-x-auto rounded-2xl border border-border bg-surface md:block">
+          <div className="surface-card relative hidden overflow-x-auto md:block">
             <table className="w-full text-sm">
               <thead className="bg-subtle text-left text-xs text-muted-foreground">
                 {table.getHeaderGroups().map((hg) => (

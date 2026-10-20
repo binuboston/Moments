@@ -7,24 +7,35 @@ import type { InvitationSettings } from "@/lib/validation/settings";
 import type { ThemeInput } from "@/lib/validation/theme";
 import type { InvitationDraft, MediaRecord } from "@/features/invitations/types";
 
-export type EditorStep = "details" | "schedule" | "photos" | "design" | "settings" | "publish";
+/** Collapsible sections of the Edit view. */
+export type EditorSection = "details" | "schedule" | "photos" | "design";
+/** Anything the editor can navigate to: a section, or the settings sheet. */
+export type EditorTarget = EditorSection | "settings";
+export type EditorView = "edit" | "preview";
 export type SaveState = "idle" | "saving" | "saved" | "error";
 
 interface EditorState {
   draft: InvitationDraft | null;
   /** The last version confirmed by the server. Used to compute autosave diffs. */
   serverDraft: InvitationDraft | null;
-  step: EditorStep;
   saveState: SaveState;
   lastSavedAt: number | null;
-  previewDevice: "phone" | "desktop";
-  mobilePreviewOpen: boolean;
+  view: EditorView;
+  openSections: EditorSection[];
+  settingsOpen: boolean;
+  publishOpen: boolean;
+  /** Set by goTo(); the editor scrolls the section into view, then clears it. */
+  focusTarget: EditorSection | null;
 
   load: (draft: InvitationDraft) => void;
   reset: () => void;
-  setStep: (step: EditorStep) => void;
-  setPreviewDevice: (device: "phone" | "desktop") => void;
-  setMobilePreviewOpen: (open: boolean) => void;
+  setView: (view: EditorView) => void;
+  toggleSection: (section: EditorSection, open?: boolean) => void;
+  setSettingsOpen: (open: boolean) => void;
+  setPublishOpen: (open: boolean) => void;
+  /** Jump to where something is edited (e.g. from a publish check): opens it and closes the publish sheet. */
+  goTo: (target: EditorTarget) => void;
+  clearFocusTarget: () => void;
 
   setContent: (content: InvitationContentInput) => void;
   setTitle: (title: string) => void;
@@ -44,23 +55,43 @@ interface EditorState {
   markError: () => void;
 }
 
+const UI_DEFAULTS = {
+  view: "edit" as EditorView,
+  openSections: ["details"] as EditorSection[],
+  settingsOpen: false,
+  publishOpen: false,
+  focusTarget: null as EditorSection | null,
+};
+
 const patchDraft = (set: (fn: (s: EditorState) => Partial<EditorState>) => void, patch: (d: InvitationDraft) => Partial<InvitationDraft>) =>
   set((s) => (s.draft ? { draft: { ...s.draft, ...patch(s.draft) } } : {}));
 
 export const useEditorStore = create<EditorState>()((set) => ({
   draft: null,
   serverDraft: null,
-  step: "details",
   saveState: "idle",
   lastSavedAt: null,
-  previewDevice: "phone",
-  mobilePreviewOpen: false,
+  ...UI_DEFAULTS,
 
-  load: (draft) => set({ draft, serverDraft: draft, saveState: "idle", step: "details" }),
-  reset: () => set({ draft: null, serverDraft: null, saveState: "idle", lastSavedAt: null, step: "details", mobilePreviewOpen: false }),
-  setStep: (step) => set({ step }),
-  setPreviewDevice: (previewDevice) => set({ previewDevice }),
-  setMobilePreviewOpen: (mobilePreviewOpen) => set({ mobilePreviewOpen }),
+  load: (draft) => set({ draft, serverDraft: draft, saveState: "idle", ...UI_DEFAULTS }),
+  reset: () => set({ draft: null, serverDraft: null, saveState: "idle", lastSavedAt: null, ...UI_DEFAULTS }),
+  setView: (view) => set({ view }),
+  toggleSection: (section, open) =>
+    set((s) => {
+      const isOpen = s.openSections.includes(section);
+      const next = open ?? !isOpen;
+      if (next === isOpen) return {};
+      return { openSections: next ? [...s.openSections, section] : s.openSections.filter((k) => k !== section) };
+    }),
+  setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
+  setPublishOpen: (publishOpen) => set({ publishOpen }),
+  goTo: (target) =>
+    set((s) =>
+      target === "settings"
+        ? { publishOpen: false, settingsOpen: true }
+        : { publishOpen: false, view: "edit", openSections: s.openSections.includes(target) ? s.openSections : [...s.openSections, target], focusTarget: target },
+    ),
+  clearFocusTarget: () => set({ focusTarget: null }),
 
   setContent: (content) => patchDraft(set, () => ({ content })),
   setTitle: (title) => patchDraft(set, () => ({ title })),

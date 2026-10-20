@@ -190,3 +190,26 @@ export async function getPublishedInvitationView(slug: string): Promise<Invitati
 export function brandingForPlan(plan: PlanTier): boolean {
   return showsBranding(plan);
 }
+
+export interface OverviewSummary {
+  upcoming: number;
+  /** The soonest event that has not started yet. */
+  next: { id: string; title: string; status: InvitationStatus; startsAt: string; timezone: string; publicUrl: string } | null;
+}
+
+/** Upcoming-event figures for the dashboard overview, across all of the owner's invitations. */
+export async function getOverviewSummary(client: Client, ownerId: string, now = Date.now()): Promise<OverviewSummary> {
+  const { data, error } = await client.from("invitations").select("id, slug, title, status, content").eq("owner_id", ownerId);
+  if (error) throw new Error(`Failed to load overview: ${error.message}`);
+  const upcoming = (data ?? [])
+    .map((row) => ({ row, startsAt: rowStartsAt(row) }))
+    .filter((r): r is { row: (typeof data)[number]; startsAt: string } => Boolean(r.startsAt) && new Date(r.startsAt!).getTime() > now)
+    .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+  const first = upcoming[0];
+  return {
+    upcoming: upcoming.length,
+    next: first
+      ? { id: first.row.id, title: first.row.title || "Untitled invitation", status: first.row.status, startsAt: first.startsAt, timezone: rowTimezone(first.row), publicUrl: siteUrl(`/e/${first.row.slug}`) }
+      : null,
+  };
+}

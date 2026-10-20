@@ -1,7 +1,8 @@
 "use client";
 
 import { CheckIcon, CopyIcon, ExternalLinkIcon, MailIcon, MessageCircleIcon, MessageSquareIcon, SendIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useCelebrate } from "@/components/brand/celebrate";
 import { gsap, MQ, useGSAP } from "@/lib/motion/gsap";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,14 @@ function LiveMark() {
 export function ShareDialog({ open, onOpenChange, url, headline, dateLabel, celebrate = false }: ShareDialogProps) {
   const [copied, setCopied] = useState(false);
   const message = buildShareMessage({ headline, dateLabel, url });
+  const burstFrom = useCelebrate();
+
+  // Going live for the first time: a full blossom burst from the top of the screen.
+  useEffect(() => {
+    if (!open || !celebrate) return;
+    const t = setTimeout(() => burstFrom({ x: window.innerWidth / 2, y: window.innerHeight * 0.3 }, { count: 60 }), 180);
+    return () => clearTimeout(t);
+  }, [open, celebrate, burstFrom]);
 
   const copy = async () => {
     try {
