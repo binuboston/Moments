@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { InvitationCard } from "@/features/invitations/components/invitation-card";
+import { InvitationGrid } from "@/features/invitations/components/invitation-grid";
 import { listOwnedInvitations } from "@/features/invitations/queries";
 import { createClient, getCurrentProfile, getCurrentUser } from "@/lib/supabase/server";
 
@@ -88,13 +88,7 @@ export default async function DashboardPage() {
             }
           />
         ) : (
-          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-            {list.items.map((item) => (
-              <li key={item.id}>
-                <InvitationCard item={item} />
-              </li>
-            ))}
-          </ul>
+          <InvitationGrid items={list.items} />
         )}
       </section>
     </div>

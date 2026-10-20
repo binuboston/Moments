@@ -3,11 +3,26 @@ import { expect, test } from "@playwright/test";
 test.describe("marketing site", () => {
   test("landing page renders hero, live preview and key sections", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Choose a design.");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Invitations,");
     await expect(page.getByRole("link", { name: /create an invitation/i }).first()).toBeVisible();
     await expect(page.locator('[data-preview-label="Live invitation preview"]')).toBeVisible();
-    await expect(page.getByRole("heading", { name: /designs that feel like the occasion/i })).toBeVisible();
+    for (const id of ["designs", "occasions", "how", "features", "pricing", "faq"]) await expect(page.locator(`#${id}`)).toHaveCount(1);
     await expect(page.getByRole("heading", { name: /questions, answered/i })).toBeVisible();
+  });
+
+  test("scroll-driven content becomes visible and nothing stays hidden", async ({ page }) => {
+    await page.goto("/");
+    // Re-measure each step: pinned sections add spacer height after ScrollTrigger refreshes.
+    const height = () => page.evaluate(() => document.documentElement.scrollHeight);
+    for (let y = 0; y < (await height()); y += 600) {
+      await page.evaluate((yy) => window.scrollTo(0, yy), y);
+      await page.waitForTimeout(120);
+    }
+    await page.waitForTimeout(1500);
+    const hidden = await page.evaluate(() => [...document.querySelectorAll("[data-reveal],[data-hero]")].filter((e) => getComputedStyle(e).visibility === "hidden").length);
+    expect(hidden).toBe(0);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow).toBeLessThanOrEqual(1);
   });
 
   test("template catalogue filters and detail page work", async ({ page }) => {

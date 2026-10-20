@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Tooltip } from "radix-ui";
 import { useState } from "react";
 import { Toaster } from "sonner";
+import { NavigationProgress } from "@/components/motion/navigation-progress";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -24,6 +25,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <NavigationProgress />
       <Tooltip.Provider delayDuration={200}>{children}</Tooltip.Provider>
       <Toaster
         position="bottom-center"

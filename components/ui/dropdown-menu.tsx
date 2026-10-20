@@ -16,7 +16,7 @@ function DropdownMenuContent({ className, sideOffset = 6, ...props }: React.Comp
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
         className={cn(
-          "z-50 min-w-52 overflow-hidden rounded-xl sm:min-w-44 border border-border bg-surface p-1.5 text-surface-foreground shadow-lift data-[state=open]:animate-fade-up",
+          "z-50 min-w-52 overflow-hidden rounded-xl sm:min-w-44 border border-border bg-surface p-1.5 text-surface-foreground shadow-lift data-[state=open]:animate-pop-in data-[state=closed]:animate-pop-out",
           className,
         )}
         {...props}
@@ -97,7 +97,7 @@ function DropdownMenuSubTrigger({ className, inset, children, ...props }: React.
 function DropdownMenuSubContent({ className, ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>) {
   return (
     <DropdownMenuPrimitive.SubContent
-      className={cn("z-50 min-w-36 overflow-hidden rounded-xl border border-border bg-surface p-1.5 shadow-lift", className)}
+      className={cn("z-50 min-w-36 overflow-hidden rounded-xl border border-border bg-surface p-1.5 shadow-lift data-[state=open]:animate-pop-in data-[state=closed]:animate-pop-out", className)}
       {...props}
     />
   );

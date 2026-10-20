@@ -14,17 +14,33 @@ export function InvitationCard({ item }: { item: InvitationListItem }) {
   const title = item.title || "Untitled invitation";
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-soft transition-shadow hover:shadow-lift">
-      <Link href={`/dashboard/invitations/${item.id}/edit`} className="block h-16 outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-24" style={{ background: def.previewGradient }} aria-label={`Edit ${title}`}>
-        <div className="flex h-full items-end justify-between p-3 sm:p-4">
-          <span className="rounded-full bg-surface/85 px-2.5 py-1 text-xs font-medium text-foreground backdrop-blur">{item.templateName}</span>
-          <StatusBadge status={item.status} />
-        </div>
+    <article className="group interactive-lift flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface">
+      <Link
+        href={`/dashboard/invitations/${item.id}/edit`}
+        className="relative block aspect-[1200/630] overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+        style={{ background: def.previewGradient }}
+        aria-label={`Edit ${title}`}
+      >
+        {/* Real design thumbnail (owner-only route, versioned by updatedAt for caching). Plain <img>: the
+            image optimiser cannot forward the owner's session cookie. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`/api/invitations/${item.id}/thumbnail?v=${encodeURIComponent(item.updatedAt)}`}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 size-full object-cover transition-transform duration-(--duration-slow) ease-(--ease-out-quart) group-hover:scale-[1.03]"
+        />
       </Link>
       <div className="flex flex-1 flex-col gap-2.5 p-3.5 sm:gap-3 sm:p-4">
-        <div className="min-w-0">
-          <h3 className="truncate text-[0.95rem] font-semibold tracking-tight sm:text-base">{title}</h3>
-          <p className="mt-0.5 text-xs text-muted-foreground">{item.categoryName}</p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="truncate text-[0.95rem] font-semibold tracking-tight sm:text-base">{title}</h3>
+            <p className="mt-0.5 truncate text-xs text-muted-foreground">
+              {item.categoryName} · {item.templateName}
+            </p>
+          </div>
+          <StatusBadge status={item.status} />
         </div>
         <dl className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
           {item.startsAt ? (

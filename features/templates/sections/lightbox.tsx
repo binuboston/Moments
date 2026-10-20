@@ -22,9 +22,9 @@ export function Lightbox({ items, index, onIndexChange }: LightboxProps) {
   return (
     <DialogPrimitive.Root open={index !== null} onOpenChange={(o) => !o && onIndexChange(null)}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-[80] bg-black/90 data-[state=open]:animate-fade-in" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-[80] bg-black/90 data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out" />
         <DialogPrimitive.Content
-          className="fixed inset-0 z-[80] flex items-center justify-center p-4 outline-none"
+          className="fixed inset-0 z-[80] flex items-center justify-center p-4 outline-none data-[state=open]:animate-pop-in data-[state=closed]:animate-fade-out"
           onKeyDown={(e) => {
             if (e.key === "ArrowRight") step(1);
             if (e.key === "ArrowLeft") step(-1);

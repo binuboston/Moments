@@ -4,11 +4,14 @@ import { defaultSettings } from "@/lib/validation/settings";
 import type { InvitationView } from "@/features/templates/types";
 
 
-function futureIso(daysAhead: number, hour = 16): string {
-  const d = new Date();
-  d.setDate(d.getDate() + daysAhead);
-  d.setHours(hour, 0, 0, 0);
-  return d.toISOString();
+/**
+ * Sample dates are anchored to UTC midnight so the server render and the
+ * browser hydrate produce the same instant regardless of their time zones
+ * (a local-time setHours() caused hydration text mismatches).
+ */
+function futureIso(daysAhead: number, hourUtc = 16): string {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + daysAhead, hourUtc, 0, 0)).toISOString();
 }
 
 const venue = { name: "The Orangery, Kew", address: "Kew Gardens, Richmond TW9 3AB, London", mapsUrl: "https://maps.google.com/?q=The+Orangery+Kew" };

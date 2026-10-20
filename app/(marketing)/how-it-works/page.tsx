@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
-import { Reveal } from "@/components/marketing/reveal";
 import { SectionHeading } from "@/components/marketing/section-heading";
 import { DeviceFrame } from "@/features/templates/components/device-frame";
 import { getPublishedTemplates } from "@/features/templates/queries";
@@ -34,7 +33,7 @@ export default async function HowItWorksPage() {
       <SectionHeading as="h1" eyebrow="How it works" title="From blank page to beautiful invitation in minutes" description="No design skills required. Mirth guides you step by step and keeps your invitation looking polished." />
 
       <div className="mt-16 grid gap-16 lg:grid-cols-[1fr_22rem] lg:items-start">
-        <Reveal className="grid gap-10" stagger={0.1}>
+        <div className="grid gap-10">
           {steps.map((s) => (
             <div key={s.n} data-reveal className="grid gap-4 sm:grid-cols-[4rem_1fr]">
               <span className="font-display text-3xl font-semibold text-primary/40">{s.n}</span>
@@ -44,7 +43,7 @@ export default async function HowItWorksPage() {
               </div>
             </div>
           ))}
-        </Reveal>
+        </div>
         <div className="mx-auto w-full max-w-[20rem] lg:sticky lg:top-24">
           {t ? (
             <DeviceFrame label="Example invitation">

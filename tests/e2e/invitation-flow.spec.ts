@@ -60,7 +60,8 @@ test("owner publishes and gets a WhatsApp-ready link", async ({ page }) => {
   expect(publicUrl).toMatch(/\/e\/[a-z0-9-]+$/);
   slug = publicUrl.split("/e/")[1];
 
-  await page.getByTestId("open-share").click();
+  // First publish opens the share dialog automatically with a celebration header.
+  await expect(page.getByRole("dialog").getByText("You're live")).toBeVisible();
   const href = await page.getByTestId("share-whatsapp").getAttribute("href");
   expect(href).toContain("https://wa.me/?text=");
   expect(decodeURIComponent(href!)).toContain(publicUrl);
@@ -145,5 +146,6 @@ test("owner can delete the invitation from the dashboard", async ({ page }) => {
   await page.getByRole("menuitem", { name: /delete/i }).click();
   await page.getByRole("button", { name: /delete permanently/i }).click();
   await expect(page.getByText(/no invitations yet/i)).toBeVisible({ timeout: 15_000 });
-  expect((await page.request.get(`/api/invitations/${invitationId}`)).status()).toBe(404);
+  // The UI removes the card optimistically; wait for the server to confirm the deletion.
+  await expect.poll(async () => (await page.request.get(`/api/invitations/${invitationId}`)).status(), { timeout: 15_000 }).toBe(404);
 });

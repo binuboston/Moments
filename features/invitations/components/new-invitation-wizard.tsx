@@ -5,6 +5,7 @@ import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, LockIcon } from "lucide-react
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { SwapTransition } from "@/components/motion/swap-transition";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { categoryIcon } from "@/components/marketing/category-grid";
@@ -88,6 +89,7 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
         ))}
       </ol>
 
+      <SwapTransition swapKey={step}>
       {step === 1 ? (
         <section aria-labelledby="step-category">
           <h2 id="step-category" className="text-lg font-semibold">
@@ -146,15 +148,7 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
               const active = templateSlug === t.slug;
               return (
                 <li key={t.slug}>
-                  <button
-                    type="button"
-                    data-testid={`template-${t.slug}`}
-                    onClick={() => setTemplateSlug(t.slug)}
-                    aria-pressed={active}
-                    className={cn(
-                      "group block w-full rounded-3xl text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background",
-                    )}
-                  >
+                  <div className="group relative">
                     <div className={cn("relative rounded-2xl p-1.5 transition-shadow sm:rounded-3xl sm:p-3", active ? "ring-2 ring-primary shadow-lift" : "ring-1 ring-border")} style={{ background: t.gradient }}>
                       <DeviceFrame variant="card" scrollable={false} className="pointer-events-none" label={`${t.name} preview`}>
                         <InvitationRenderer view={sampleView(category!, { key: t.key, name: t.name, tier: t.tier })} mode="preview" />
@@ -177,29 +171,46 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
                       ) : null}
                     </div>
                     <div className="mt-2 px-1 sm:mt-3">
-                      <h3 className="text-sm font-semibold sm:text-base">{t.name}</h3>
+                      <h3 className="text-sm font-semibold sm:text-base">
+                        {/* Stretched button: previews contain buttons and links, so they must not sit inside this button. */}
+                        <button
+                          type="button"
+                          data-testid={`template-${t.slug}`}
+                          onClick={() => setTemplateSlug(t.slug)}
+                          aria-pressed={active}
+                          className="text-left outline-none after:absolute after:inset-0 after:rounded-3xl focus-visible:after:ring-2 focus-visible:after:ring-ring focus-visible:after:ring-offset-4 focus-visible:after:ring-offset-background"
+                        >
+                          {t.name}
+                        </button>
+                      </h3>
                       <p className="mt-0.5 hidden line-clamp-2 text-xs text-muted-foreground sm:block">{t.description}</p>
                       {!allowed ? <p className="mt-1 text-xs text-warning">Pro plan needed to publish with this design.</p> : null}
                     </div>
-                  </button>
+                  </div>
                 </li>
               );
             })}
           </ul>
 
-          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:sticky sm:bottom-4 sm:flex sm:justify-end sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none [&>button]:w-full sm:[&>button]:w-auto">
-            <Button
-              size="lg"
-              disabled={!selected}
-              loading={create.isPending}
-              data-testid="create-invitation"
-              onClick={() => category && selected && create.mutate({ categorySlug: category, templateSlug: selected.slug, timezone: detectTimeZone() })}
-            >
-              Continue with {selected?.name ?? "a template"} <ArrowRightIcon aria-hidden />
-            </Button>
-          </div>
+
         </section>
       )}
+      </SwapTransition>
+
+      {/* Outside the animated region: a transformed ancestor would break position: fixed mid-transition. */}
+      {step === 2 ? (
+          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:sticky sm:bottom-4 sm:flex sm:justify-end sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none [&>button]:w-full sm:[&>button]:w-auto">
+          <Button
+            size="lg"
+            disabled={!selected}
+            loading={create.isPending}
+            data-testid="create-invitation"
+            onClick={() => category && selected && create.mutate({ categorySlug: category, templateSlug: selected.slug, timezone: detectTimeZone() })}
+          >
+            Continue with {selected?.name ?? "a template"} <ArrowRightIcon aria-hidden />
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

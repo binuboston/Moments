@@ -1,21 +1,32 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, Fraunces } from "next/font/google";
+import { DM_Sans, Fraunces, Geist } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/app/providers";
 import { publicEnv } from "@/lib/env";
+import { PRE_PAINT_SCRIPT } from "@/lib/motion/pre-paint";
 
-const sans = DM_Sans({
+/** Product typeface: a variable grotesk used for UI and display type (weights 100–900). */
+const geist = Geist({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-geist",
   display: "swap",
-  axes: ["opsz"],
 });
 
-const display = Fraunces({
+/** Template-only faces (invitation designs reference them via features/templates/fonts.ts). */
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-display",
+  variable: "--font-dm-sans",
+  display: "swap",
+  axes: ["opsz"],
+  preload: false,
+});
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
   display: "swap",
   axes: ["opsz", "SOFT", "WONK"],
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -47,7 +58,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${sans.variable} ${display.variable} h-full antialiased`}>
+    // suppressHydrationWarning: the pre-paint script adds a class to <html> before React hydrates.
+    <html lang="en" className={`${geist.variable} ${dmSans.variable} ${fraunces.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: PRE_PAINT_SCRIPT }} />
+      </head>
       <body className="flex min-h-full flex-col">
         <Providers>{children}</Providers>
       </body>

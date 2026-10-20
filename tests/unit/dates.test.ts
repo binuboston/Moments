@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatEventDate, formatEventTime, fromLocalInputValue, isPast, safeTimeZone, toLocalInputValue } from "@/lib/utils/dates";
+import { formatEventDate, formatEventTime, formatShortDate, formatTimeRange, formatTimeZoneLabel, fromLocalInputValue, isPast, safeTimeZone, toLocalInputValue } from "@/lib/utils/dates";
 
 describe("time zone helpers", () => {
   it("falls back to UTC for unknown zones", () => {
@@ -31,5 +31,28 @@ describe("time zone helpers", () => {
   it("detects past dates", () => {
     expect(isPast("2000-01-01T00:00:00Z")).toBe(true);
     expect(isPast("2999-01-01T00:00:00Z")).toBe(false);
+  });
+});
+
+describe("deterministic display formatting (identical on server and browser)", () => {
+  it("formats exact strings in the event's zone", () => {
+    const iso = "2026-12-31T23:30:00Z";
+    expect(formatEventDate(iso, "UTC")).toBe("Thursday, 31 December 2026");
+    expect(formatEventDate(iso, "Asia/Kolkata")).toBe("Friday, 1 January 2027");
+    expect(formatShortDate(iso, "Asia/Kolkata")).toBe("1 Jan 2027");
+    expect(formatEventTime(iso, "Asia/Kolkata")).toBe("05:00");
+    expect(formatTimeRange("2026-06-20T18:30:00+01:00", "2026-06-20T23:00:00+01:00", "Europe/London")).toBe("18:30 – 23:00");
+  });
+
+  it("labels offsets without locale-specific abbreviations", () => {
+    expect(formatTimeZoneLabel("UTC", "2026-06-20T12:00:00Z")).toBe("GMT");
+    expect(formatTimeZoneLabel("Europe/London", "2026-06-20T12:00:00Z")).toBe("GMT+1");
+    expect(formatTimeZoneLabel("Asia/Kolkata", "2026-06-20T12:00:00Z")).toBe("GMT+5:30");
+    expect(formatTimeZoneLabel("America/New_York", "2026-01-20T12:00:00Z")).toBe("GMT-5");
+  });
+
+  it("returns empty strings for invalid dates", () => {
+    expect(formatEventDate("not a date", "UTC")).toBe("");
+    expect(formatEventTime("", "UTC")).toBe("");
   });
 });

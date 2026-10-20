@@ -8,34 +8,41 @@
    ------------------------------------------------------------------ */
 
 :root {
-  --background: #faf7f2;
-  --foreground: #1c1917;
+  /* Surfaces: clean white paper with near-black ink; dark "stage" for feature sections. */
+  --background: #ffffff;
+  --foreground: #121317;
   --surface: #ffffff;
-  --surface-foreground: #1c1917;
-  --muted: #f1ece4;
-  --muted-foreground: #6b6560;
-  --subtle: #f6f2eb;
-  --border: #e7e0d6;
-  --input: #ddd5c9;
+  --surface-foreground: #121317;
+  --muted: #f3f3f1;
+  --muted-foreground: #5f666d;
+  --subtle: #f7f7f5;
+  --border: #e7e7e3;
+  --input: #d6d6d1;
+  --stage: #0b0c0f;
+  --stage-foreground: #f4f4f2;
+  --stage-muted: #8d939b;
+  --stage-border: #24262b;
+  /* Brand: Mirth garnet with a champagne accent, used sparingly. */
   --ring: #8b2e3f;
   --primary: #8b2e3f;
-  --primary-hover: #722636;
-  --primary-foreground: #fff8f6;
+  --primary-hover: #74253a;
+  --primary-foreground: #ffffff;
   --accent: #d4b483;
-  --accent-foreground: #2a2117;
+  --accent-foreground: #23190f;
   --destructive: #b42318;
-  --destructive-foreground: #fff5f3;
+  --destructive-foreground: #ffffff;
   --success: #1f7a4d;
   --success-foreground: #f0fbf4;
-  --warning: #b7791f;
+  --warning: #9a6512;
   --warning-foreground: #fff8e6;
   --info: #2b5c8a;
-  --radius: 0.75rem;
+  --radius: 0.875rem;
 }
 
 @theme inline {
-  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: var(--font-display), "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Display shares the product grotesk; size, weight and tracking create hierarchy. */
+  --font-display: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -59,6 +66,10 @@
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-info: var(--info);
+  --color-stage: var(--stage);
+  --color-stage-foreground: var(--stage-foreground);
+  --color-stage-muted: var(--stage-muted);
+  --color-stage-border: var(--stage-border);
 
   /* Brand scale for marketing accents */
   --color-brand-50: #fbf1f3;
@@ -85,17 +96,36 @@
   --radius-2xl: calc(var(--radius) + 12px);
   --radius-3xl: calc(var(--radius) + 20px);
 
-  --shadow-soft: 0 1px 2px rgb(28 25 23 / 0.04), 0 8px 24px -12px rgb(28 25 23 / 0.14);
-  --shadow-lift: 0 2px 4px rgb(28 25 23 / 0.05), 0 24px 48px -24px rgb(28 25 23 / 0.28);
-  --shadow-ring: 0 0 0 1px rgb(28 25 23 / 0.06);
+  --shadow-soft: 0 1px 2px rgb(18 19 23 / 0.04), 0 8px 24px -12px rgb(18 19 23 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(18 19 23 / 0.04), 0 28px 56px -28px rgb(18 19 23 / 0.28);
+  --shadow-ring: 0 0 0 1px rgb(18 19 23 / 0.06);
 
+  /* Motion tokens. Mirrored for GSAP in lib/motion/tokens.ts; keep both in sync. */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --duration-fast: 160ms;
+  --duration-base: 240ms;
+  --duration-slow: 480ms;
+
+  /* Display type scale (fluid). Weight and tight tracking come from the .display-* utilities. */
+  --text-display-1: clamp(3rem, 1.4rem + 7.6vw, 9rem);
+  --text-display-1--line-height: 0.92;
+  --text-display-2: clamp(2.5rem, 1.5rem + 4.8vw, 6rem);
+  --text-display-2--line-height: 0.96;
+  --text-display-3: clamp(2rem, 1.4rem + 2.6vw, 3.75rem);
+  --text-display-3--line-height: 1.02;
+  --text-lead: clamp(1.125rem, 1rem + 0.5vw, 1.5rem);
+  --text-lead--line-height: 1.35;
 
   --animate-fade-up: fade-up 0.6s var(--ease-out-expo) both;
   --animate-fade-in: fade-in 0.4s ease-out both;
   --animate-shimmer: shimmer 1.6s linear infinite;
   --animate-sheet-up: sheet-up 0.38s var(--ease-out-expo) both;
+  --animate-sheet-down: sheet-down 0.24s var(--ease-in-out-soft) both;
+  --animate-fade-out: fade-out 0.16s ease-in both;
+  --animate-pop-in: pop-in 0.22s var(--ease-out-expo) both;
+  --animate-pop-out: pop-out 0.14s ease-in both;
 
   @keyframes fade-up {
     from { opacity: 0; transform: translateY(12px); }
@@ -108,6 +138,22 @@
   @keyframes sheet-up {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
+  }
+  @keyframes sheet-down {
+    from { transform: translateY(0); }
+    to { transform: translateY(100%); }
+  }
+  @keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  @keyframes pop-in {
+    from { opacity: 0; transform: translateY(4px) scale(0.97); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes pop-out {
+    from { opacity: 1; transform: none; }
+    to { opacity: 0; transform: translateY(2px) scale(0.98); }
   }
   @keyframes shimmer {
     from { background-position: -200% 0; }
@@ -123,8 +169,8 @@
   }
 
   html {
-    /* Sticky headers (site header, editor toolbar, step nav) must not cover elements scrolled into view. */
-    scroll-padding-top: 12rem;
+    /* Clears the sticky site header for anchors and smooth scrolling. */
+    scroll-padding-top: 5rem;
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
   }
@@ -133,8 +179,8 @@
     background: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
   /*
@@ -179,17 +225,52 @@
 }
 
 @utility eyebrow {
-  font-size: 0.75rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: var(--color-primary);
+  font-size: 0.8125rem;
+  letter-spacing: 0.01em;
+  font-weight: 500;
+  color: var(--color-muted-foreground);
+}
+
+/* Display headings: large, medium weight, tight tracking (reference standard). */
+@utility display-1 {
+  font-family: var(--font-display);
+  font-size: var(--text-display-1);
+  line-height: 0.92;
+  font-weight: 480;
+  letter-spacing: -0.035em;
+}
+@utility display-2 {
+  font-family: var(--font-display);
+  font-size: var(--text-display-2);
+  line-height: 0.96;
+  font-weight: 480;
+  letter-spacing: -0.03em;
+}
+@utility display-3 {
+  font-family: var(--font-display);
+  font-size: var(--text-display-3);
+  line-height: 1.04;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+@utility lead {
+  font-size: var(--text-lead);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--color-muted-foreground);
+}
+
+/* Shared interaction states: hover lift for cards and tiles. */
+@utility interactive-lift {
+  transition: transform var(--duration-base) var(--ease-out-quart), box-shadow var(--duration-base) var(--ease-out-quart), border-color var(--duration-base) ease;
+  &:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+  &:active { transform: translateY(0); transition-duration: var(--duration-fast); }
 }
 
 @utility paper-grain {
   background-image:
-    radial-gradient(at 20% 0%, color-mix(in oklab, var(--color-gold-200) 55%, transparent) 0, transparent 45%),
-    radial-gradient(at 80% 100%, color-mix(in oklab, var(--color-brand-100) 60%, transparent) 0, transparent 45%);
+    radial-gradient(at 15% 0%, color-mix(in oklab, var(--color-gold-200) 40%, transparent) 0, transparent 40%),
+    radial-gradient(at 90% 100%, color-mix(in oklab, var(--color-brand-100) 45%, transparent) 0, transparent 40%);
 }
 
 @utility skeleton {
@@ -213,4 +294,27 @@
 }
 .invitation-root .inv-display {
   font-family: var(--inv-font-display, var(--font-display));
+}
+
+/* ==================================================================
+   Motion entrance states (see components/motion/reveal-controller.tsx)
+   Hidden only when JS is available and motion is allowed (html.motion-ok).
+   Unbound elements unhide themselves after 2.5s as a failsafe.
+   ================================================================== */
+@keyframes motion-failsafe { to { opacity: 1; visibility: visible; transform: none; } }
+.motion-ok [data-reveal],
+.motion-ok [data-hero] {
+  opacity: 0;
+  visibility: hidden;
+}
+.motion-ok [data-reveal]:not([data-reveal-bound]),
+.motion-ok [data-hero]:not([data-reveal-bound]) {
+  animation: motion-failsafe 0s linear 2.5s forwards;
+}
+.split-line { padding-bottom: 0.06em; margin-bottom: -0.06em; }
+
+/* Editor: fields scrolled into view (focus, validation) clear the header, toolbar and step bar. */
+.editor-scope :is(input, textarea, select, button, [tabindex]) {
+  scroll-margin-top: 12rem;
+  scroll-margin-bottom: 6rem;
 }

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { InvitationCard } from "@/features/invitations/components/invitation-card";
+import { InvitationGrid } from "@/features/invitations/components/invitation-grid";
 import { useInvitationList } from "@/features/invitations/hooks";
 import type { InvitationListResponse } from "@/features/invitations/types";
 import { cn } from "@/lib/utils/cn";
@@ -130,13 +130,7 @@ export function InvitationList({ initialParams, initialData }: Props) {
         )
       ) : (
         <>
-          <ul className={cn("grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 transition-opacity", isFetching && "opacity-70")} aria-busy={isFetching}>
-            {data.items.map((item) => (
-              <li key={item.id}>
-                <InvitationCard item={item} />
-              </li>
-            ))}
-          </ul>
+          <InvitationGrid items={data.items} busy={isFetching} />
           {totalPages > 1 ? (
             <nav aria-label="Pagination" className="flex items-center justify-center gap-2">
               <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>

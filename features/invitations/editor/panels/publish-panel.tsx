@@ -49,6 +49,7 @@ export function PublishPanel() {
   const setStep = useEditorStore((s) => s.setStep);
   const syncStatus = useEditorStore((s) => s.syncStatus);
   const [shareOpen, setShareOpen] = useState(false);
+  const [celebrate, setCelebrate] = useState(false);
 
   const validation = publishableSchema.safeParse({ content: withDerivedHeadline(draft.content), theme: draft.theme, settings: draft.settings, functions: draft.functions });
   const issues = validation.success ? [] : Array.from(new Map(validation.error.issues.map((i) => [i.path.join("."), i])).values());
@@ -63,9 +64,16 @@ export function PublishPanel() {
       return invitationsApi.publish(draft.id);
     },
     onSuccess: () => {
+      const firstPublish = !isPublished;
       syncStatus({ status: "published", publishedAt: draft.publishedAt ?? new Date().toISOString(), slug: draft.slug });
       void qc.invalidateQueries({ queryKey: invitationKeys.all });
-      toast.success(isPublished ? "Changes are live." : "Published! Your invitation is live.");
+      if (firstPublish) {
+        // The product's key moment: celebrate and put sharing one tap away.
+        setCelebrate(true);
+        setShareOpen(true);
+      } else {
+        toast.success("Changes are live.");
+      }
     },
     onError: (err) => toast.error(errorMessage(err)),
   });
@@ -156,7 +164,17 @@ export function PublishPanel() {
         </div>
       </section>
 
-      <ShareDialog open={shareOpen} onOpenChange={setShareOpen} url={draft.publicUrl} headline={headline} dateLabel={dateLabel} />
+      <ShareDialog
+        open={shareOpen}
+        onOpenChange={(open) => {
+          setShareOpen(open);
+          if (!open) setCelebrate(false);
+        }}
+        url={draft.publicUrl}
+        headline={headline}
+        dateLabel={dateLabel}
+        celebrate={celebrate}
+      />
     </div>
   );
 }

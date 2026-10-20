@@ -1,7 +1,8 @@
 "use client";
 
 import { CheckIcon, CopyIcon, ExternalLinkIcon, MailIcon, MessageCircleIcon, MessageSquareIcon, SendIcon } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { gsap, MQ, useGSAP } from "@/lib/motion/gsap";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -14,9 +15,34 @@ interface ShareDialogProps {
   url: string;
   headline: string;
   dateLabel?: string;
+  /** First publish: show a celebratory "You're live" header with a drawn check mark. */
+  celebrate?: boolean;
 }
 
-export function ShareDialog({ open, onOpenChange, url, headline, dateLabel }: ShareDialogProps) {
+function LiveMark() {
+  const ref = useRef<SVGSVGElement>(null);
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add(MQ.motion, () => {
+        const tl = gsap.timeline();
+        tl.fromTo(ref.current, { scale: 0.6, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.5, ease: "back.out(2)" })
+          .fromTo("circle", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.6, ease: "power2.out" }, "<")
+          .fromTo("path", { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.4, ease: "power2.out" }, "-=0.2");
+      });
+      return () => mm.revert();
+    },
+    { scope: ref },
+  );
+  return (
+    <svg ref={ref} viewBox="0 0 52 52" className="size-14 text-success" aria-hidden>
+      <circle cx="26" cy="26" r="24" fill="color-mix(in oklab, currentColor 10%, transparent)" stroke="currentColor" strokeWidth="2" pathLength={1} strokeDasharray="1" />
+      <path d="M15 27 L23 34 L37 19" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" pathLength={1} strokeDasharray="1" />
+    </svg>
+  );
+}
+
+export function ShareDialog({ open, onOpenChange, url, headline, dateLabel, celebrate = false }: ShareDialogProps) {
   const [copied, setCopied] = useState(false);
   const message = buildShareMessage({ headline, dateLabel, url });
 
@@ -48,9 +74,12 @@ export function ShareDialog({ open, onOpenChange, url, headline, dateLabel }: Sh
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Share your invitation</DialogTitle>
-          <DialogDescription>Send the link anywhere. Messaging apps will show a preview with your event details.</DialogDescription>
+        <DialogHeader className={celebrate ? "items-center text-center sm:items-center sm:text-center" : undefined}>
+          {celebrate ? <LiveMark /> : null}
+          <DialogTitle className={celebrate ? "mt-2 text-2xl" : undefined}>{celebrate ? "You're live" : "Share your invitation"}</DialogTitle>
+          <DialogDescription>
+            {celebrate ? "Your invitation is published. Send it to your guests, they'll see a rich preview in their messages." : "Send the link anywhere. Messaging apps will show a preview with your event details."}
+          </DialogDescription>
         </DialogHeader>
         <div className="flex gap-2">
           <Input readOnly value={url} aria-label="Invitation link" onFocus={(e) => e.currentTarget.select()} data-testid="share-url" />

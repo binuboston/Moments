@@ -1,7 +1,5 @@
 /** Date helpers built on Intl so they need no dependencies and respect the event's own time zone. */
 
-const DEFAULT_LOCALE = "en-GB";
-
 export function safeTimeZone(tz: string | undefined | null): string {
   if (!tz) return "UTC";
   try {
@@ -12,44 +10,58 @@ export function safeTimeZone(tz: string | undefined | null): string {
   }
 }
 
-export function formatEventDate(iso: string, tz: string, locale = DEFAULT_LOCALE): string {
+/*
+ * Display formatting is deterministic on purpose. Intl's *text* output differs
+ * between Node and browsers as CLDR data changes (e.g. newer en-GB data drops
+ * the comma after the weekday), which caused hydration mismatches for dates
+ * rendered in client components. Intl is still used to compute numeric parts in
+ * the event's time zone (stable across engines); names and punctuation are ours.
+ */
+const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+function zonedOrNull(iso: string, tz: string) {
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  return new Intl.DateTimeFormat(locale, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: safeTimeZone(tz),
-  }).format(d);
+  if (Number.isNaN(d.getTime())) return null;
+  const p = zonedParts(iso, tz);
+  return { ...p, weekday: new Date(Date.UTC(p.year, p.month - 1, p.day)).getUTCDay() };
 }
 
-export function formatShortDate(iso: string, tz: string, locale = DEFAULT_LOCALE): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric", timeZone: safeTimeZone(tz) }).format(d);
+/** "Saturday, 20 June 2026" in the event's time zone. */
+export function formatEventDate(iso: string, tz: string): string {
+  const p = zonedOrNull(iso, tz);
+  return p ? `${WEEKDAYS[p.weekday]}, ${p.day} ${MONTHS[p.month - 1]} ${p.year}` : "";
 }
 
-export function formatEventTime(iso: string, tz: string, locale = DEFAULT_LOCALE): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  return new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "2-digit", timeZone: safeTimeZone(tz) }).format(d);
+/** "20 Jun 2026" in the event's time zone. */
+export function formatShortDate(iso: string, tz: string): string {
+  const p = zonedOrNull(iso, tz);
+  return p ? `${p.day} ${MONTHS[p.month - 1].slice(0, 3)} ${p.year}` : "";
 }
 
-export function formatTimeRange(startIso: string, endIso: string | "" | undefined, tz: string, locale = DEFAULT_LOCALE): string {
-  const start = formatEventTime(startIso, tz, locale);
+/** "18:30" (24-hour) in the event's time zone. */
+export function formatEventTime(iso: string, tz: string): string {
+  const p = zonedOrNull(iso, tz);
+  return p ? `${String(p.hour).padStart(2, "0")}:${String(p.minute).padStart(2, "0")}` : "";
+}
+
+export function formatTimeRange(startIso: string, endIso: string | "" | undefined, tz: string): string {
+  const start = formatEventTime(startIso, tz);
   if (!endIso) return start;
-  const end = formatEventTime(endIso, tz, locale);
+  const end = formatEventTime(endIso, tz);
   return end ? `${start} – ${end}` : start;
 }
 
-export function formatTimeZoneLabel(tz: string, iso: string, locale = DEFAULT_LOCALE): string {
-  try {
-    const parts = new Intl.DateTimeFormat(locale, { timeZone: safeTimeZone(tz), timeZoneName: "short" }).formatToParts(new Date(iso));
-    return parts.find((p) => p.type === "timeZoneName")?.value ?? tz;
-  } catch {
-    return tz;
-  }
+/** UTC offset label such as "GMT", "GMT+1" or "GMT+5:30" (deterministic, no CLDR abbreviations). */
+export function formatTimeZoneLabel(tz: string, iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const offset = offsetMinutes(d, safeTimeZone(tz));
+  if (offset === 0) return "GMT";
+  const sign = offset > 0 ? "+" : "-";
+  const h = Math.floor(Math.abs(offset) / 60);
+  const m = Math.abs(offset) % 60;
+  return `GMT${sign}${h}${m ? `:${String(m).padStart(2, "0")}` : ""}`;
 }
 
 /** Parts of a date in a given time zone, for calendars and inputs. */

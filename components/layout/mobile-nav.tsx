@@ -23,8 +23,8 @@ export function MobileNav({ isAuthenticated, items }: MobileNavProps) {
         </Button>
       </DialogPrimitive.Trigger>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-foreground/30 backdrop-blur-[2px] data-[state=open]:animate-fade-in md:hidden" />
-        <DialogPrimitive.Content className="fixed inset-x-0 top-0 z-50 rounded-b-3xl border-b border-border bg-background p-4 shadow-lift outline-none data-[state=open]:animate-fade-up md:hidden">
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-foreground/30 backdrop-blur-[2px] data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out md:hidden" />
+        <DialogPrimitive.Content className="fixed inset-x-0 top-0 z-50 rounded-b-3xl border-b border-border bg-background p-4 shadow-lift outline-none data-[state=open]:animate-pop-in data-[state=closed]:animate-pop-out md:hidden">
           <DialogPrimitive.Title className="sr-only">Menu</DialogPrimitive.Title>
           <div className="flex h-12 items-center justify-between">
             <Logo />

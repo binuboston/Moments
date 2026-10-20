@@ -11,8 +11,8 @@ import {
 
 /**
  * Template fonts. Loaded with preload disabled so a route only downloads the
- * families it actually renders. The root layout fonts (DM Sans, Fraunces) are
- * available to templates through --font-sans and --font-display.
+ * families it actually renders. DM Sans and Fraunces are loaded in the root
+ * layout and exposed as --font-dm-sans and --font-fraunces.
  */
 const cormorant = Cormorant_Garamond({ subsets: ["latin"], weight: ["400", "500", "600"], style: ["normal", "italic"], display: "swap", preload: false });
 const playfair = Playfair_Display({ subsets: ["latin"], weight: ["400", "500", "600", "700"], style: ["normal", "italic"], display: "swap", preload: false });
@@ -32,8 +32,8 @@ export const FONT_FAMILIES = {
   lora: { label: "Lora", family: lora.style.fontFamily },
   josefin: { label: "Josefin Sans", family: josefin.style.fontFamily },
   poppins: { label: "Poppins", family: poppins.style.fontFamily },
-  fraunces: { label: "Fraunces", family: "var(--font-display)" },
-  "dm-sans": { label: "DM Sans", family: "var(--font-sans)" },
+  fraunces: { label: "Fraunces", family: "var(--font-fraunces)" },
+  "dm-sans": { label: "DM Sans", family: "var(--font-dm-sans)" },
 } as const;
 
 export type FontKey = keyof typeof FONT_FAMILIES;

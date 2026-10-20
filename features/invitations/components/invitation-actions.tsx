@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { animateOut } from "@/components/motion/use-flip-list";
 import { ShareDialog } from "@/features/invitations/components/share-dialog";
 import { useInvitationMutations } from "@/features/invitations/hooks";
 import type { InvitationListItem } from "@/features/invitations/types";
@@ -89,7 +90,14 @@ export function InvitationActions({ item }: { item: InvitationListItem }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Keep it</AlertDialogCancel>
-            <AlertDialogAction onClick={() => remove.mutate(item.id)}>Delete permanently</AlertDialogAction>
+            <AlertDialogAction
+              onClick={async () => {
+                await animateOut(document.querySelector(`[data-flip-id="${item.id}"]`));
+                remove.mutate(item.id);
+              }}
+            >
+              Delete permanently
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

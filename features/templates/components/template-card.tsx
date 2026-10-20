@@ -1,6 +1,7 @@
 import { LockIcon } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { LazyMount } from "@/components/motion/lazy-mount";
 import { DeviceFrame } from "@/features/templates/components/device-frame";
 import type { CatalogueTemplate } from "@/features/templates/queries";
 import { primaryCategory } from "@/features/templates/queries";
@@ -21,15 +22,17 @@ export function TemplateCard({ template, category, href }: TemplateCardProps) {
   const view = sampleView(cat, { key: def.key, name: def.name, tier: row.tier });
   const target = href ?? `/templates/${row.slug}`;
 
+  // Stretched-link card: the preview is a sibling of the link (never inside it),
+  // because previews contain their own links and buttons (nested <a> breaks hydration).
   return (
-    <Link
-      href={target}
-      className="group block rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
-    >
-      <div className="relative overflow-hidden rounded-3xl bg-muted p-3 transition-transform duration-500 ease-out-expo group-hover:-translate-y-1" style={{ background: def.previewGradient }}>
-        <DeviceFrame variant="card" scrollable={false} label={`${def.name} preview`} className="pointer-events-none">
-          <InvitationRenderer view={view} mode="preview" />
-        </DeviceFrame>
+    <article className="group relative">
+      <div className="relative overflow-hidden rounded-3xl p-3 transition-transform duration-(--duration-slow) ease-(--ease-out-quart) group-hover:-translate-y-1" style={{ background: def.previewGradient }}>
+        {/* Live preview mounts near the viewport; the frame-shaped placeholder prevents layout shift. */}
+        <LazyMount placeholder={<div className="aspect-[3/4] rounded-2xl bg-surface/60" />}>
+          <DeviceFrame variant="card" scrollable={false} label={`${def.name} preview`} className="pointer-events-none">
+            <InvitationRenderer view={view} mode="preview" />
+          </DeviceFrame>
+        </LazyMount>
         <div className="absolute top-5 left-5 flex gap-2">
           {row.tier === "premium" ? (
             <Badge variant="dark">
@@ -42,12 +45,17 @@ export function TemplateCard({ template, category, href }: TemplateCardProps) {
           )}
         </div>
       </div>
-      <div className="mt-4 flex items-start justify-between gap-3 px-1">
-        <div>
-          <h3 className="font-display text-lg font-semibold tracking-tight group-hover:text-primary">{def.name}</h3>
-          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{row.description ?? def.description}</p>
-        </div>
+      <div className="mt-4 px-1">
+        <h3 className="text-lg font-medium tracking-tight">
+          <Link
+            href={target}
+            className="rounded-sm outline-none after:absolute after:inset-0 after:rounded-3xl group-hover:text-primary focus-visible:after:ring-2 focus-visible:after:ring-ring focus-visible:after:ring-offset-4 focus-visible:after:ring-offset-background"
+          >
+            {def.name}
+          </Link>
+        </h3>
+        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{row.description ?? def.description}</p>
       </div>
-    </Link>
+    </article>
   );
 }

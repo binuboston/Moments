@@ -1,93 +1,131 @@
-import { ArrowRightIcon, CheckIcon, ImageIcon, LockIcon, MessageCircleIcon, PaletteIcon, Share2Icon, SmartphoneIcon, SparklesIcon, UsersIcon } from "lucide-react";
+import { ArrowRightIcon, CheckIcon, ImageIcon, LockIcon, MessageCircleIcon, PaletteIcon, Share2Icon, SmartphoneIcon, UsersIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
-import { CategoryGrid } from "@/components/marketing/category-grid";
+import { categoryIcon } from "@/components/marketing/category-grid";
 import { Faq } from "@/components/marketing/faq";
-import { HeroMotion } from "@/components/marketing/hero-motion";
-import { Reveal } from "@/components/marketing/reveal";
-import { SectionHeading } from "@/components/marketing/section-heading";
+import { HorizontalScroller } from "@/components/marketing/horizontal-scroller";
+import { PinnedShowcase, type ShowcaseSlide } from "@/components/marketing/pinned-showcase";
+import { SectionNav } from "@/components/marketing/section-nav";
+import { HeroEntrance } from "@/components/motion/hero-entrance";
+import { LazyMount } from "@/components/motion/lazy-mount";
 import { DeviceFrame } from "@/features/templates/components/device-frame";
-import { TemplateCard } from "@/features/templates/components/template-card";
-import { getActiveCategories, getFeaturedTemplates, getPublishedTemplates } from "@/features/templates/queries";
+import { getActiveCategories, getPublishedTemplates } from "@/features/templates/queries";
 import { InvitationRenderer } from "@/features/templates/renderer";
 import { sampleView } from "@/features/templates/sample-data";
+import type { CategorySlug } from "@/types/domain";
+
+const SECTIONS = [
+  { id: "designs", label: "Designs" },
+  { id: "occasions", label: "Occasions" },
+  { id: "how", label: "How it works" },
+  { id: "features", label: "Features" },
+  { id: "pricing", label: "Pricing" },
+  { id: "faq", label: "FAQ" },
+];
 
 const steps = [
-  { title: "Choose a design", body: "Browse templates made for weddings, birthdays, showers and more. Every one is designed to look beautiful on a phone." },
-  { title: "Make it yours", body: "Add your names, date, venue and photos. Pick a palette and typography that fit the occasion. See every change live." },
-  { title: "Share with everyone", body: "Publish to your own link and send it on WhatsApp in one tap. Guests open it instantly, no app or account needed." },
+  { title: "Choose a design", body: "Live templates for weddings, birthdays, showers and more, each built for the phone your guests will open it on." },
+  { title: "Make it yours", body: "Names, date, venue and photos. Curated colours and type keep it beautiful. Every change shows instantly." },
+  { title: "Share it everywhere", body: "Publish to your own link and send it on WhatsApp in one tap. Guests open it instantly, no app needed." },
 ];
 
 const features = [
-  { icon: SmartphoneIcon, title: "Made for mobile", body: "Guests open invitations on their phones. Every template is designed mobile-first and loads in a blink." },
-  { icon: PaletteIcon, title: "Personal, not generic", body: "Choose from curated palettes and type pairings. Your invitation looks considered, never templated." },
-  { icon: ImageIcon, title: "Your photos, beautifully", body: "Add a cover photo and a gallery. Images are optimised automatically for fast loading everywhere." },
-  { icon: UsersIcon, title: "RSVPs in one place", body: "Collect responses, guest counts and notes. Export the list whenever you need it." },
-  { icon: Share2Icon, title: "Share anywhere", body: "WhatsApp, Messages, email or a QR code. Links show a rich preview with your event details." },
-  { icon: LockIcon, title: "Private by design", body: "Drafts stay private. Guest responses are visible only to you. Nothing is indexed until you publish." },
+  { icon: SmartphoneIcon, title: "Made for mobile", body: "Designed phone-first and fast on mobile data, because that's where every invitation is opened." },
+  { icon: PaletteIcon, title: "Personal, not generic", body: "Curated palettes and type pairings per design. It looks considered, never templated." },
+  { icon: ImageIcon, title: "Your photos, beautifully", body: "A cover photo and a gallery, optimised automatically and shown full screen with a tap." },
+  { icon: UsersIcon, title: "RSVPs in one place", body: "Responses, guest counts and notes collected for you. Export the list whenever you need it." },
+  { icon: Share2Icon, title: "Share anywhere", body: "WhatsApp, Messages, email or a link. Every share shows a rich preview with your details." },
+  { icon: LockIcon, title: "Private by design", body: "Drafts stay private and guest responses are visible only to you. Nothing is indexed." },
 ];
 
 const faqs = [
-  { question: "Is Mirth free to use?", answer: "Yes. You can create and publish invitations with any free template at no cost. Free invitations include a small Mirth badge. Premium templates and extras are part of the Pro plan." },
-  { question: "Do my guests need an account?", answer: "No. Guests simply open your link in any browser. If you enable RSVP, they answer right on the page without signing up." },
-  { question: "Can I edit my invitation after publishing?", answer: "Of course. Change any detail and the live page updates within minutes. You can also unpublish at any time and the link stops working." },
-  { question: "How do I share on WhatsApp?", answer: "After publishing, tap Share on WhatsApp. It opens WhatsApp with a message containing your invitation link and event details, ready to send to any chat or group." },
-  { question: "Can I add multiple functions, like a mehendi and reception?", answer: "Yes. Add as many events as you need with their own time, venue and directions. They appear as a schedule on the invitation." },
-  { question: "What happens to guest data?", answer: "RSVP responses are stored privately and are visible only to you. We never show a guest list publicly and never sell data." },
+  { question: "Is Mirth free to use?", answer: "Yes. Every template is free to use and publish. Free invitations include a small Mirth badge; Pro removes it and adds larger galleries." },
+  { question: "Do my guests need an account?", answer: "No. Guests open your link in any browser and can RSVP right on the page without signing up." },
+  { question: "Can I edit my invitation after publishing?", answer: "Of course. Change any detail and the live page updates within minutes. You can unpublish at any time." },
+  { question: "How do I share on WhatsApp?", answer: "After publishing, tap Share on WhatsApp. It opens with your invitation link and details, ready to send to any chat or group." },
+  { question: "Can I add several functions, like a mehendi and a reception?", answer: "Yes. Add as many events as you need, each with its own time, venue and directions, shown as a schedule." },
+  { question: "What happens to guest data?", answer: "RSVP responses are stored privately and visible only to you. We never show guest lists publicly and never sell data." },
 ];
 
+/** Desktop positions for occasion tiles floating around the headline (percent of the stage). */
+const FLOAT_POSITIONS = [
+  { left: "4%", top: "8%", speed: 0.18 },
+  { left: "72%", top: "4%", speed: 0.28 },
+  { left: "12%", top: "62%", speed: 0.1 },
+  { left: "74%", top: "54%", speed: 0.22 },
+  { left: "36%", top: "-4%", speed: 0.32 },
+  { left: "58%", top: "78%", speed: 0.14 },
+  { left: "2%", top: "34%", speed: 0.26 },
+  { left: "76%", top: "28%", speed: 0.12 },
+];
+
+function PhonePlaceholder({ gradient }: { gradient: string }) {
+  return <div className="aspect-[9/19] w-full rounded-[2.75rem]" style={{ background: gradient }} />;
+}
+
 export default async function HomePage() {
-  const [featured, categories, allTemplates] = await Promise.all([getFeaturedTemplates(4), getActiveCategories(), getPublishedTemplates()]);
-  const heroTemplate = allTemplates.find((t) => t.def.key === "eternal-grace") ?? allTemplates[0];
-  const mobileTemplate = allTemplates.find((t) => t.def.key === "confetti-pop") ?? allTemplates[0];
+  const [templates, categories] = await Promise.all([getPublishedTemplates(), getActiveCategories()]);
+  const hero = templates.find((t) => t.def.key === "eternal-grace") ?? templates[0];
+
+  const slides: ShowcaseSlide[] = templates.slice(0, 6).map((t) => ({
+    key: t.def.key,
+    name: t.def.name,
+    description: t.row.description ?? t.def.description,
+    href: `/templates/${t.row.slug}`,
+    tier: t.row.tier,
+    gradient: t.def.previewGradient,
+    preview: (
+      <LazyMount placeholder={<PhonePlaceholder gradient={t.def.previewGradient} />}>
+        <DeviceFrame label={`${t.def.name} preview`}>
+          <InvitationRenderer view={sampleView((t.row.category_slugs[0] ?? t.def.categories[0]) as CategorySlug, { key: t.def.key, name: t.def.name, tier: t.row.tier })} mode="preview" />
+        </DeviceFrame>
+      </LazyMount>
+    ),
+  }));
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative overflow-hidden paper-grain">
-        <HeroMotion>
-          <Container className="grid items-center gap-12 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:py-24">
-            <div className="max-w-xl">
-              <p data-hero="eyebrow" className="eyebrow">
-                Digital invitations, beautifully done
-              </p>
-              <h1 data-hero="title" className="mt-4 font-display text-[2.75rem] leading-[1.02] font-semibold tracking-tight text-balance sm:text-6xl lg:text-7xl">
-                <span className="block">Choose a design.</span>
-                <span className="block">Make it yours.</span>
-                <span className="block text-primary">Share your event.</span>
-              </h1>
-              <p data-hero="copy" className="mt-6 text-lg leading-relaxed text-muted-foreground text-pretty">
-                Create an elegant invitation for your wedding, birthday or celebration in minutes. Publish to your own link and send it to everyone on WhatsApp.
-              </p>
-              <div data-hero="cta" className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button asChild size="xl">
-                  <Link href="/signup">
-                    Create an invitation <ArrowRightIcon aria-hidden />
-                  </Link>
-                </Button>
-                <Button asChild size="xl" variant="outline">
-                  <Link href="/templates">Browse templates</Link>
-                </Button>
-              </div>
-              <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
-                {["Free to start", "No app for guests", "Ready in minutes"].map((item) => (
-                  <li key={item} className="inline-flex items-center gap-2">
-                    <CheckIcon className="size-4 text-success" aria-hidden /> {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
+      <SectionNav sections={SECTIONS} />
 
-            <div className="relative mx-auto w-full max-w-[22rem] lg:max-w-[24rem]">
+      {/* 1 · Hero: oversized display type anchored bottom-left, live invitation on the right. */}
+      <section className="relative overflow-hidden">
+        <HeroEntrance>
+          <Container className="grid min-h-[calc(100svh-4rem)] grid-cols-1 gap-12 pt-10 pb-12 lg:grid-cols-[1fr_auto] lg:gap-16 lg:pt-16 lg:pb-16">
+            <div className="flex flex-col justify-between gap-12">
+              <div className="max-w-md">
+                <p data-hero className="lead">
+                  Mirth turns the details of your celebration into an invitation guests actually open: designed for phones, shared on WhatsApp, ready in minutes.
+                </p>
+                <div data-hero className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <Button asChild size="lg">
+                    <Link href="/signup">
+                      Create an invitation <ArrowRightIcon aria-hidden />
+                    </Link>
+                  </Button>
+                  <Button asChild size="lg" variant="outline">
+                    <Link href="/templates">Browse designs</Link>
+                  </Button>
+                </div>
+              </div>
+              <h1 className="display-1 order-first max-w-[12ch] text-balance lg:order-none">
+                <span data-hero className="block">
+                  Invitations,
+                </span>
+                <span data-hero className="block text-primary">
+                  beautifully yours.
+                </span>
+              </h1>
+            </div>
+            <div className="relative mx-auto w-full max-w-[18rem] self-center sm:max-w-[20rem] lg:w-[22rem] lg:max-w-none">
               <div data-hero="device">
-                {heroTemplate ? (
+                {hero ? (
                   <DeviceFrame label="Live invitation preview">
-                    <InvitationRenderer view={sampleView("wedding", { key: heroTemplate.def.key, name: heroTemplate.def.name, tier: heroTemplate.row.tier })} mode="preview" />
+                    <InvitationRenderer view={sampleView("wedding", { key: hero.def.key, name: hero.def.name, tier: hero.row.tier })} mode="preview" />
                   </DeviceFrame>
                 ) : null}
               </div>
-              <div data-hero="float" className="absolute -left-6 top-24 hidden rounded-2xl border border-border bg-surface p-3 shadow-lift sm:block">
+              <div data-speed="0.25" className="absolute top-24 -left-14 hidden rounded-2xl border border-border bg-surface/95 p-3 shadow-lift backdrop-blur sm:block">
                 <div className="flex items-center gap-3">
                   <span className="flex size-9 items-center justify-center rounded-full bg-success/10 text-success">
                     <CheckIcon className="size-4" aria-hidden />
@@ -98,7 +136,7 @@ export default async function HomePage() {
                   </div>
                 </div>
               </div>
-              <div data-hero="float" className="absolute -right-4 bottom-28 hidden rounded-2xl border border-border bg-surface p-3 shadow-lift sm:block">
+              <div data-speed="0.4" className="absolute -right-10 bottom-28 hidden rounded-2xl border border-border bg-surface/95 p-3 shadow-lift backdrop-blur sm:block">
                 <div className="flex items-center gap-3">
                   <span className="flex size-9 items-center justify-center rounded-full bg-[#25D366]/15 text-[#128C7E]">
                     <MessageCircleIcon className="size-4" aria-hidden />
@@ -111,167 +149,190 @@ export default async function HomePage() {
               </div>
             </div>
           </Container>
-        </HeroMotion>
+        </HeroEntrance>
       </section>
 
-      {/* Featured templates */}
-      <section className="py-20 sm:py-28">
-        <Container>
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-            <SectionHeading align="left" eyebrow="Templates" title="Designs that feel like the occasion" description="Every template is a complete, responsive invitation. These previews are live renders, not mockups." />
-            <Button asChild variant="outline">
-              <Link href="/templates">
-                All templates <ArrowRightIcon aria-hidden />
-              </Link>
-            </Button>
-          </div>
-          <Reveal className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4" stagger={0.1}>
-            {featured.map((t) => (
-              <div key={t.row.id} data-reveal>
-                <TemplateCard template={t} />
-              </div>
-            ))}
-          </Reveal>
+      {/* 2 · Statement on the dark stage: words brighten as you scroll. */}
+      <section className="relative overflow-hidden bg-stage py-32 text-stage-foreground sm:py-44">
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-50" style={{ backgroundImage: "radial-gradient(rgb(255 255 255 / 0.14) 1px, transparent 1px)", backgroundSize: "28px 28px", maskImage: "radial-gradient(ellipse at center, black 20%, transparent 75%)" }} />
+        <Container size="narrow" className="relative">
+          <p data-scrub-words className="display-3 text-center text-balance">
+            Most invitations get lost in a group chat. Yours should feel like opening an envelope: personal, beautiful and impossible to scroll past.
+          </p>
         </Container>
       </section>
 
-      {/* Categories */}
-      <section className="border-y border-border bg-subtle/60 py-20 sm:py-28">
-        <Container>
-          <SectionHeading eyebrow="Occasions" title="For every kind of celebration" description="Each occasion has its own fields, so a birthday never asks for wedding details." />
-          <Reveal className="mt-12" stagger={0.05}>
-            <CategoryGrid categories={categories} />
-          </Reveal>
+      {/* 3 · Meet the designs (pinned on desktop). */}
+      <section id="designs" className="scroll-mt-0 pt-24 sm:pt-32 lg:pt-0">
+        <Container className="lg:hidden">
+          <h2 data-reveal="split" className="display-2">
+            Meet the designs
+          </h2>
+          <p data-reveal className="lead mt-4 max-w-xl">
+            Every design is a complete, responsive invitation. These are live renders, not mockups.
+          </p>
+        </Container>
+        <div className="mt-10 lg:mt-0">
+          <PinnedShowcase slides={slides} heading={<p aria-hidden className="display-2">Meet the designs</p>} />
+        </div>
+        <Container className="mt-6 lg:-mt-8 lg:pb-8">
+          <Button asChild variant="outline">
+            <Link href="/templates">
+              See all designs <ArrowRightIcon aria-hidden />
+            </Link>
+          </Button>
         </Container>
       </section>
 
-      {/* Steps */}
-      <section className="py-20 sm:py-28">
+      {/* 4 · Occasions floating around a big headline. */}
+      <section id="occasions" className="relative overflow-x-clip py-28 sm:py-40">
         <Container>
-          <SectionHeading eyebrow="How it works" title="Three steps to a beautiful invitation" />
-          <Reveal className="mt-14 grid gap-10 md:grid-cols-3" stagger={0.12}>
-            {steps.map((step, i) => (
-              <div key={step.title} data-reveal className="relative">
-                <span className="font-display text-6xl font-semibold text-primary/15">0{i + 1}</span>
-                <h3 className="-mt-6 text-xl font-semibold tracking-tight">{step.title}</h3>
-                <p className="mt-3 leading-relaxed text-muted-foreground text-pretty">{step.body}</p>
-              </div>
-            ))}
-          </Reveal>
-          <div className="mt-12 text-center">
-            <Button asChild variant="link">
-              <Link href="/how-it-works">
-                See the full walkthrough <ArrowRightIcon aria-hidden />
-              </Link>
-            </Button>
-          </div>
-        </Container>
-      </section>
-
-      {/* Features */}
-      <section className="border-y border-border bg-foreground py-20 text-background sm:py-28">
-        <Container>
-          <SectionHeading eyebrow="Why Mirth" title="Everything an invitation should do" className="[&_p]:text-background/70 [&_.eyebrow]:text-accent" />
-          <Reveal className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" stagger={0.08}>
-            {features.map((f) => (
-              <div key={f.title} data-reveal className="rounded-2xl border border-background/10 bg-background/5 p-6">
-                <f.icon className="size-5 text-accent" aria-hidden />
-                <h3 className="mt-4 text-lg font-semibold tracking-tight">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-background/70 text-pretty">{f.body}</p>
-              </div>
-            ))}
-          </Reveal>
-        </Container>
-      </section>
-
-      {/* Mobile preview */}
-      <section className="py-20 sm:py-28">
-        <Container className="grid items-center gap-12 lg:grid-cols-2">
-          <Reveal className="order-2 mx-auto w-full max-w-[20rem] lg:order-1">
-            <div data-reveal>
-              {mobileTemplate ? (
-                <DeviceFrame label="Mobile invitation preview">
-                  <InvitationRenderer view={sampleView("birthday", { key: mobileTemplate.def.key, name: mobileTemplate.def.name, tier: mobileTemplate.row.tier })} mode="preview" />
-                </DeviceFrame>
-              ) : null}
+          <div className="relative lg:h-[38rem]">
+            <div className="relative z-10 flex flex-col items-center text-center lg:absolute lg:inset-0 lg:justify-center">
+              <h2 data-reveal="split" className="display-2 max-w-[12ch] text-balance">
+                For every kind of celebration
+              </h2>
+              <p data-reveal className="lead mt-5 max-w-md">
+                Each occasion has its own details, so a birthday never asks for wedding fields.
+              </p>
             </div>
-          </Reveal>
-          <Reveal className="order-1 lg:order-2">
-            <div data-reveal>
-              <SectionHeading align="left" eyebrow="Built for phones" title="Opens instantly where your guests already are" description="Most invitations are opened from a WhatsApp message on a phone. Mirth invitations load fast on mobile data, with a rich link preview that shows your event before anyone taps." />
-            </div>
-            <ul data-reveal className="mt-8 space-y-3">
-              {["Rich previews in WhatsApp, iMessage and email", "Add to Google Calendar or Apple Calendar in one tap", "One-tap directions to the venue", "Live countdown to the big day"].map((item) => (
-                <li key={item} className="flex items-start gap-3 text-muted-foreground">
-                  <SparklesIcon className="mt-1 size-4 shrink-0 text-primary" aria-hidden /> {item}
-                </li>
-              ))}
+            <ul className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:mt-0 lg:block">
+              {categories.slice(0, 8).map((c, i) => {
+                const Icon = categoryIcon(c.icon);
+                const pos = FLOAT_POSITIONS[i % FLOAT_POSITIONS.length];
+                return (
+                  <li key={c.id} data-reveal className="lg:absolute" style={{ left: pos.left, top: pos.top }}>
+                    <div data-speed={pos.speed}>
+                      <Link
+                        href={`/templates?category=${c.slug}`}
+                        className="interactive-lift flex items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3.5 outline-none focus-visible:ring-2 focus-visible:ring-ring lg:w-52"
+                      >
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
+                          <Icon className="size-5" aria-hidden />
+                        </span>
+                        <span className="font-medium">{c.name}</span>
+                      </Link>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
-          </Reveal>
+          </div>
         </Container>
       </section>
 
-      {/* Pricing teaser */}
-      <section className="border-y border-border bg-subtle/60 py-20 sm:py-28">
+      {/* 5 · How it works: three large numbered steps. */}
+      <section id="how" className="border-t border-border py-28 sm:py-36">
         <Container>
-          <SectionHeading eyebrow="Pricing" title="Start free. Upgrade when you need more." />
-          <Reveal className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2" stagger={0.1}>
-            <div data-reveal className="rounded-3xl border border-border bg-surface p-8 shadow-soft">
-              <p className="eyebrow">Free</p>
-              <p className="mt-3 font-display text-4xl font-semibold">£0</p>
-              <p className="mt-2 text-sm text-muted-foreground">Everything you need for a beautiful invitation.</p>
-              <ul className="mt-6 space-y-2 text-sm">
-                {["All free templates", "Up to 3 live invitations", "RSVP collection", "WhatsApp sharing", "Mirth badge on the page"].map((i) => (
-                  <li key={i} className="flex gap-2">
-                    <CheckIcon className="size-4 text-success" aria-hidden /> {i}
+          <h2 data-reveal="split" className="display-2 max-w-[14ch]">
+            Ready in three steps
+          </h2>
+          <ol className="mt-16 grid gap-12 md:grid-cols-3 md:gap-10">
+            {steps.map((s, i) => (
+              <li key={s.title} data-reveal className="border-t border-foreground/15 pt-6">
+                <span className="block text-7xl leading-none font-medium tracking-tighter text-foreground/12 tabular-nums sm:text-8xl">{String(i + 1).padStart(2, "0")}</span>
+                <h3 className="mt-6 text-2xl font-medium tracking-tight">{s.title}</h3>
+                <p className="mt-3 leading-relaxed text-muted-foreground text-pretty">{s.body}</p>
+              </li>
+            ))}
+          </ol>
+        </Container>
+      </section>
+
+      {/* 6 · Features on the dark stage, sliding horizontally while pinned. */}
+      <section id="features" className="bg-stage text-stage-foreground">
+        <HorizontalScroller
+          header={
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <h2 className="display-2 max-w-[13ch]">Everything an invitation should do</h2>
+              <p className="max-w-sm text-stage-muted">Thoughtful by default, from the first tap on WhatsApp to the last RSVP.</p>
+            </div>
+          }
+        >
+          {features.map((f) => (
+            <article key={f.title} className="flex h-[22rem] w-[78vw] max-w-[24rem] shrink-0 snap-start flex-col justify-between rounded-3xl border border-stage-border bg-white/[0.03] p-7 sm:w-[24rem]">
+              <span className="flex size-12 items-center justify-center rounded-2xl bg-white/[0.06] text-accent">
+                <f.icon className="size-6" aria-hidden />
+              </span>
+              <div>
+                <h3 className="text-2xl font-medium tracking-tight">{f.title}</h3>
+                <p className="mt-3 leading-relaxed text-stage-muted text-pretty">{f.body}</p>
+              </div>
+            </article>
+          ))}
+        </HorizontalScroller>
+      </section>
+
+      {/* 7 · Pricing. */}
+      <section id="pricing" className="py-28 sm:py-36">
+        <Container>
+          <h2 data-reveal="split" className="display-2 max-w-[14ch]">
+            Start free. Upgrade when you need more.
+          </h2>
+          <div className="mt-14 grid gap-4 md:grid-cols-2">
+            <div data-reveal className="flex flex-col rounded-3xl border border-border p-8 sm:p-10">
+              <p className="font-medium">Free</p>
+              <p className="mt-6 text-6xl font-medium tracking-tighter">£0</p>
+              <p className="mt-2 text-muted-foreground">Everything you need for a beautiful invitation.</p>
+              <ul className="mt-8 space-y-3 text-sm">
+                {["Every template", "Up to 3 live invitations", "RSVP collection", "WhatsApp sharing", "Mirth badge on the page"].map((i) => (
+                  <li key={i} className="flex gap-2.5">
+                    <CheckIcon className="size-4 shrink-0 text-success" aria-hidden /> {i}
                   </li>
                 ))}
               </ul>
-              <Button asChild className="mt-8 w-full" variant="outline">
+              <Button asChild className="mt-10 self-start" variant="outline" size="lg">
                 <Link href="/signup">Get started</Link>
               </Button>
             </div>
-            <div data-reveal className="rounded-3xl border border-primary bg-surface p-8 shadow-lift">
-              <p className="eyebrow">Pro</p>
-              <p className="mt-3 font-display text-4xl font-semibold">
-                £19 <span className="text-base font-normal text-muted-foreground">/ event</span>
+            <div data-reveal className="flex flex-col rounded-3xl bg-stage p-8 text-stage-foreground sm:p-10">
+              <p className="font-medium">Pro</p>
+              <p className="mt-6 text-6xl font-medium tracking-tighter">
+                £19 <span className="text-lg font-normal tracking-normal text-stage-muted">/ event</span>
               </p>
-              <p className="mt-2 text-sm text-muted-foreground">For premium designs and a fully branded experience.</p>
-              <ul className="mt-6 space-y-2 text-sm">
-                {["All premium templates", "No Mirth badge", "Larger photo galleries", "Priority support"].map((i) => (
-                  <li key={i} className="flex gap-2">
-                    <CheckIcon className="size-4 text-success" aria-hidden /> {i}
+              <p className="mt-2 text-stage-muted">For a fully branded experience.</p>
+              <ul className="mt-8 space-y-3 text-sm">
+                {["No Mirth badge", "Larger photo galleries", "More live invitations", "Priority support"].map((i) => (
+                  <li key={i} className="flex gap-2.5">
+                    <CheckIcon className="size-4 shrink-0 text-accent" aria-hidden /> {i}
                   </li>
                 ))}
               </ul>
-              <Button asChild className="mt-8 w-full">
+              <Button asChild className="mt-10 self-start" size="lg">
                 <Link href="/pricing">See pricing</Link>
               </Button>
             </div>
-          </Reveal>
+          </div>
         </Container>
       </section>
 
-      {/* FAQ */}
-      <section className="py-20 sm:py-28">
-        <Container size="narrow">
-          <SectionHeading eyebrow="FAQ" title="Questions, answered" />
-          <Faq items={faqs} className="mt-12" />
+      {/* 8 · FAQ with a sticky heading. */}
+      <section id="faq" className="border-t border-border py-28 sm:py-36">
+        <Container className="grid gap-12 lg:grid-cols-[1fr_1.4fr]">
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <h2 data-reveal="split" className="display-2">
+              Questions, answered
+            </h2>
+          </div>
+          <div data-reveal>
+            <Faq items={faqs} />
+          </div>
         </Container>
       </section>
 
-      {/* Final CTA */}
-      <section className="pb-24">
-        <Container>
-          <div className="relative overflow-hidden rounded-3xl bg-primary px-8 py-16 text-center text-primary-foreground shadow-lift sm:px-16">
-            <div className="absolute inset-0 opacity-20" style={{ background: "radial-gradient(circle at 20% 20%, white 0, transparent 40%), radial-gradient(circle at 80% 80%, white 0, transparent 40%)" }} aria-hidden />
-            <h2 className="relative font-display text-3xl font-semibold tracking-tight text-balance sm:text-5xl">Your celebration deserves a beautiful first impression.</h2>
-            <p className="relative mx-auto mt-4 max-w-xl text-primary-foreground/80 text-pretty">Create your invitation now. It takes a few minutes and your first one is free.</p>
-            <Button asChild size="xl" variant="accent" className="relative mt-8">
+      {/* 9 · Closing call to action. */}
+      <section className="bg-stage py-28 text-stage-foreground sm:py-40">
+        <Container className="flex flex-col items-start gap-10">
+          <h2 data-reveal="split" className="display-1 max-w-[10ch]">
+            Make it yours.
+          </h2>
+          <div data-reveal className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Button asChild size="xl">
               <Link href="/signup">
                 Create an invitation <ArrowRightIcon aria-hidden />
               </Link>
             </Button>
+            <p className="text-stage-muted">Free to start. Ready in minutes.</p>
           </div>
         </Container>
       </section>

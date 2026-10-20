@@ -32,7 +32,7 @@ const columns = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-border bg-subtle/60">
+    <footer className="mt-auto border-t border-border bg-surface">
       <Container className="grid gap-10 py-14 md:grid-cols-[1.4fr_repeat(3,1fr)]">
         <div className="max-w-xs">
           <Logo />
@@ -54,6 +54,10 @@ export function SiteFooter() {
             </ul>
           </div>
         ))}
+      </Container>
+      {/* Oversized closing wordmark, cropped by the page edge. */}
+      <Container aria-hidden className="overflow-hidden">
+        <p className="-mb-[0.18em] select-none text-[clamp(5rem,24vw,22rem)] leading-none font-medium tracking-[-0.06em] text-foreground/[0.06]">Mirth</p>
       </Container>
       <div className="border-t border-border/70">
         <Container className="flex flex-col items-start justify-between gap-2 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center">

@@ -8,13 +8,12 @@ import { SectionHeading } from "@/components/marketing/section-heading";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Mirth is free to start. Upgrade to Pro for premium templates, no badge and larger galleries.",
+  description: "Mirth is free to start. Upgrade to Pro for no badge, larger galleries and more live invitations.",
   alternates: { canonical: "/pricing" },
 };
 
 const rows: { feature: string; free: boolean | string; pro: boolean | string }[] = [
-  { feature: "Free templates", free: true, pro: true },
-  { feature: "Premium templates", free: false, pro: true },
+  { feature: "Every template", free: true, pro: true },
   { feature: "Live invitations", free: "3", pro: "50" },
   { feature: "Gallery photos per invitation", free: "8", pro: "40" },
   { feature: "Multiple functions and schedule", free: true, pro: true },
@@ -25,7 +24,7 @@ const rows: { feature: string; free: boolean | string; pro: boolean | string }[]
 ];
 
 const faqs = [
-  { question: "How does Pro billing work?", answer: "Pro is priced per event and unlocks premium templates and branding removal for that invitation. Payments are not yet live in this release; accounts can be upgraded by the Mirth team." },
+  { question: "How does Pro billing work?", answer: "Pro is priced per event and removes the Mirth badge and raises limits for that invitation. Payments are not yet live in this release; accounts can be upgraded by the Mirth team." },
   { question: "Can I switch templates after publishing?", answer: "Yes. Your content is independent of the design, so you can switch between templates that support your occasion at any time." },
   { question: "What happens after my event?", answer: "Your invitation stays online so guests can revisit photos and details. You can unpublish whenever you like." },
 ];
@@ -38,7 +37,7 @@ function Cell({ value }: { value: boolean | string }) {
 export default function PricingPage() {
   return (
     <Container className="py-14 sm:py-20">
-      <SectionHeading as="h1" eyebrow="Pricing" title="Simple, honest pricing" description="Create and share a beautiful invitation for free. Go Pro when you want premium designs or a fully branded page." />
+      <SectionHeading as="h1" eyebrow="Pricing" title="Simple, honest pricing" description="Create and share a beautiful invitation for free. Go Pro when you want a fully branded page and larger galleries." />
 
       <div className="mx-auto mt-14 grid max-w-4xl gap-6 md:grid-cols-2">
         <div className="rounded-3xl border border-border bg-surface p-8 shadow-soft">

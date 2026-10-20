@@ -21,7 +21,7 @@ Digital event invitation SaaS. Users pick a template, enter event details, perso
 | Client state | Zustand for the invitation editor only |
 | Forms / validation | React Hook Form + Zod v4; Zod schemas are the single source of truth for content shapes |
 | Backend | Supabase Auth, Postgres with RLS, Storage; Next.js Route Handlers for mutations |
-| Motion | GSAP + `@gsap/react` (marketing hero, template reveal), Lenis (single global instance on marketing routes), `motion` only for micro-interactions |
+| Motion | GSAP 3 (ScrollTrigger, SplitText, Flip) + `@gsap/react`, Lenis on marketing routes only. One motion library; see section 10c |
 | Tests | Vitest + Testing Library (unit/component), Playwright (end-to-end), SQL + supabase-js scripts for RLS |
 | Deploy | Vercel (app), Supabase (auth, database, storage) |
 
@@ -38,6 +38,7 @@ app/                     routes only; thin, delegate to features
   api/                   route handlers: invitations, media, rsvp, admin
   sitemap.ts, robots.ts
 components/ui            design system primitives (Button, Input, Dialog, ...)
+components/motion        SmoothScroll, RevealController, HeroEntrance, NavigationProgress, SwapTransition, useFlipList, LazyMount
 components/layout        Container, SiteHeader, SiteFooter, DashboardShell
 components/forms         Field, FormMessage, ImageUploader
 features/templates       registry, definitions, renderer, sections, themes
@@ -46,6 +47,7 @@ features/rsvp            RSVP form, owner RSVP table, export
 features/media           upload client, signed URL helpers
 lib/supabase             browser/server/admin clients, proxy helper
 lib/validation           shared Zod schemas (content, theme, rsvp, env)
+lib/motion               GSAP registration, motion tokens, pre-paint script
 lib/utils                cn, dates, slugs, share links, ics
 stores/                  Zustand stores
 types/                   generated database types + domain types
@@ -127,6 +129,34 @@ Rules:
 ## 10b. Template system (2026-10-21)
 
 The cinematic template engine added earlier was removed for consistency; all designs are classic template components. See [TEMPLATES.md](TEMPLATES.md). The `demo` render mode and `/demo/[slug]` live demos remain and work for every template.
+
+## 10c. Motion system (2026-10-20)
+
+GSAP is the only animation library. Everything lives in two places:
+
+- `lib/motion/gsap.ts` registers plugins once and exports `gsap`, `ScrollTrigger`, `SplitText`, `useGSAP`, `prefersReducedMotion` and `MQ` (media queries for `gsap.matchMedia`). Import GSAP from here, never from `gsap` directly. `Flip` is registered in `components/motion/use-flip-list.ts` so it only ships with the dashboard.
+- `lib/motion/tokens.ts` holds `DURATION`, `EASE`, `STAGGER` and `RISE`. CSS has matching tokens in `app/globals.css` (`--ease-out-quart`, `--duration-fast|base|slow`) for transitions and Radix enter/exit keyframes.
+
+**Declarative reveals.** Pages do not write GSAP code for entrances. They mark elements and `RevealController` binds them (scoped, re-run per pathname, reverted on unmount):
+
+| Attribute | Effect |
+| --- | --- |
+| `data-reveal` | Rise and fade when scrolled into view (batched, once) |
+| `data-reveal="split"` | SplitText line reveal for headings |
+| `data-reveal="mask"` | Clip-path reveal of the first child (images, devices) |
+| `data-scrub-words` | Word opacity scrubbed with scroll (statement copy) |
+| `data-speed="0.2"` | Parallax drift, desktop and motion-OK only |
+| `data-hero` | Played by `HeroEntrance` on load instead of on scroll |
+
+**No-flash and failsafe rules.** `lib/motion/pre-paint.ts` runs in `<head>` and adds `motion-ok` to `<html>` unless the visitor prefers reduced motion. Only under `.motion-ok` are `[data-reveal]`/`[data-hero]` hidden before paint. JS marks elements it has taken over with `data-reveal-bound`; any element still unbound after 2.5s is shown by a CSS animation, so a script failure can never leave content invisible. Reduced motion skips Lenis, parallax and pins and shows content immediately.
+
+**Lenis.** `SmoothScroll` (marketing layout only) drives Lenis from the GSAP ticker and feeds `ScrollTrigger.update`, refreshing after fonts load. Use `useLenis()` for programmatic scrolling. Dashboard, editor and public invitations use native scroll (nested scroll containers and forms behave better).
+
+**Pins.** `PinnedShowcase` and `HorizontalScroller` pin on desktop only and fall back to native swipe rows on phones. Pins add spacer height after the first refresh, so triggers that depend on layout below them use `refreshPriority: -1`. Never put a `position: fixed` element inside a transformed (animated) ancestor.
+
+**App motion.** `NavigationProgress` (top bar on route changes), `SwapTransition` (editor panels and wizard steps), `useFlipList` (invitation grid reorder, enter and delete), and optimistic TanStack Query mutations with rollback in `features/invitations/hooks.ts`.
+
+**Dates must be deterministic.** `lib/utils/dates.ts` formats with fixed month and weekday tables instead of `Intl` output, because Node and browsers ship different CLDR data and the mismatch caused hydration errors.
 
 ## 11. Risks and mitigations
 

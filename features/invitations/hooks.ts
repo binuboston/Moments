@@ -1,10 +1,11 @@
 "use client";
 
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ApiClientError } from "@/lib/api/client";
 import { invitationKeys, invitationsApi, type ListParams } from "@/features/invitations/api";
-import type { InvitationDraft, InvitationListResponse } from "@/features/invitations/types";
+import type { InvitationDraft, InvitationListItem, InvitationListResponse } from "@/features/invitations/types";
 
 export function useInvitationList(params: ListParams, initialData?: InvitationListResponse) {
   return useQuery({
@@ -31,41 +32,101 @@ export function errorMessage(err: unknown, fallback = "Something went wrong. Ple
 }
 
 /** Shared mutations for list cards and the editor. Each invalidates the relevant queries. */
+type ListSnapshot = [readonly unknown[], InvitationListResponse | undefined][];
+type CountKey = keyof InvitationListResponse["counts"];
+
+/** Apply a change to every cached invitation list (all filters and pages). */
+function patchLists(qc: ReturnType<typeof useQueryClient>, update: (list: InvitationListResponse) => InvitationListResponse): ListSnapshot {
+  const filter = { queryKey: invitationKeys.all, predicate: (q: { queryKey: readonly unknown[] }) => q.queryKey[1] === "list" };
+  const snapshot = qc.getQueriesData<InvitationListResponse>(filter);
+  qc.setQueriesData<InvitationListResponse>(filter, (old) => (old ? update(old) : old));
+  return snapshot;
+}
+
+function restore(qc: ReturnType<typeof useQueryClient>, snapshot: ListSnapshot | undefined) {
+  snapshot?.forEach(([key, data]) => qc.setQueryData(key, data));
+}
+
+function moveCount(counts: InvitationListResponse["counts"], from: CountKey, to: CountKey | null): InvitationListResponse["counts"] {
+  const next = { ...counts, [from]: Math.max(0, counts[from] - 1) };
+  if (to) next[to] += 1;
+  else next.all = Math.max(0, next.all - 1);
+  return next;
+}
+
+/**
+ * Shared mutations for list cards and the editor.
+ * Publish, unpublish and delete update cached lists optimistically (instant UI,
+ * rolled back on error). Every mutation then revalidates queries and refreshes
+ * server-rendered pages such as the dashboard overview.
+ */
 export function useInvitationMutations() {
   const qc = useQueryClient();
-  const invalidate = (id?: string) => {
+  const router = useRouter();
+  const settle = (id?: string) => {
     void qc.invalidateQueries({ queryKey: invitationKeys.all });
     if (id) void qc.invalidateQueries({ queryKey: invitationKeys.detail(id) });
+    router.refresh();
   };
+
+  const setStatus = (id: string, status: InvitationListItem["status"]) =>
+    patchLists(qc, (list) => {
+      const item = list.items.find((i) => i.id === id);
+      if (!item || item.status === status) return list;
+      return { ...list, counts: moveCount(list.counts, item.status, status), items: list.items.map((i) => (i.id === id ? { ...i, status } : i)) };
+    });
 
   const publish = useMutation({
     mutationFn: (id: string) => invitationsApi.publish(id),
-    onSuccess: (_data, id) => invalidate(id),
-    onError: (err) => toast.error(errorMessage(err)),
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: invitationKeys.all });
+      return { snapshot: setStatus(id, "published") };
+    },
+    onError: (err, _id, ctx) => {
+      restore(qc, ctx?.snapshot);
+      toast.error(errorMessage(err));
+    },
+    onSettled: (_d, _e, id) => settle(id),
   });
+
   const unpublish = useMutation({
     mutationFn: (id: string) => invitationsApi.unpublish(id),
-    onSuccess: (_data, id) => {
-      invalidate(id);
-      toast.success("Invitation unpublished. The link no longer works.");
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: invitationKeys.all });
+      return { snapshot: setStatus(id, "unpublished") };
     },
-    onError: (err) => toast.error(errorMessage(err)),
+    onSuccess: () => toast.success("Invitation unpublished. The link no longer works."),
+    onError: (err, _id, ctx) => {
+      restore(qc, ctx?.snapshot);
+      toast.error(errorMessage(err));
+    },
+    onSettled: (_d, _e, id) => settle(id),
   });
+
   const duplicate = useMutation({
     mutationFn: (id: string) => invitationsApi.duplicate(id),
-    onSuccess: () => {
-      invalidate();
-      toast.success("Invitation duplicated as a new draft.");
-    },
+    onSuccess: () => toast.success("Invitation duplicated as a new draft."),
     onError: (err) => toast.error(errorMessage(err)),
+    onSettled: () => settle(),
   });
+
   const remove = useMutation({
     mutationFn: (id: string) => invitationsApi.remove(id),
-    onSuccess: () => {
-      invalidate();
-      toast.success("Invitation deleted.");
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: invitationKeys.all });
+      const snapshot = patchLists(qc, (list) => {
+        const item = list.items.find((i) => i.id === id);
+        if (!item) return list;
+        return { ...list, total: Math.max(0, list.total - 1), counts: moveCount(list.counts, item.status, null), items: list.items.filter((i) => i.id !== id) };
+      });
+      return { snapshot };
     },
-    onError: (err) => toast.error(errorMessage(err)),
+    onSuccess: () => toast.success("Invitation deleted."),
+    onError: (err, _id, ctx) => {
+      restore(qc, ctx?.snapshot);
+      toast.error(errorMessage(err));
+    },
+    onSettled: () => settle(),
   });
 
   return { publish, unpublish, duplicate, remove };
