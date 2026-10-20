@@ -85,6 +85,7 @@ export function RsvpForm({ slug, settings, timezone, mode, className }: RsvpForm
 
   return (
     <form
+      data-inv-reveal
       onSubmit={form.handleSubmit(onSubmit)}
       className={cn("mx-auto grid max-w-md gap-4 text-left", className)}
       noValidate

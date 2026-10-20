@@ -18,6 +18,7 @@ export function Schedule({ functions, className, itemClassName, variant = "timel
       {sorted.map((fn, idx) => (
         <li
           key={fn.id ?? `${fn.name}-${idx}`}
+          data-inv-reveal
           className={cn(
             variant === "cards"
               ? "rounded-2xl border border-(--inv-border) bg-(--inv-surface) p-6 text-left"

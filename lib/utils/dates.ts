@@ -39,6 +39,24 @@ export function formatShortDate(iso: string, tz: string): string {
   return p ? `${p.day} ${MONTHS[p.month - 1].slice(0, 3)} ${p.year}` : "";
 }
 
+/** "19 · 10 · 2026" in the event's time zone. */
+export function formatDotDate(iso: string, tz: string): string {
+  const p = zonedOrNull(iso, tz);
+  return p ? `${String(p.day).padStart(2, "0")} · ${String(p.month).padStart(2, "0")} · ${p.year}` : "";
+}
+
+/**
+ * The event's month as a calendar grid (weeks start on Sunday), in the event's
+ * time zone. `leading` is the number of blank cells before day 1.
+ */
+export function monthGrid(iso: string, tz: string) {
+  const p = zonedOrNull(iso, tz);
+  if (!p) return null;
+  const leading = new Date(Date.UTC(p.year, p.month - 1, 1)).getUTCDay();
+  const daysInMonth = new Date(Date.UTC(p.year, p.month, 0)).getUTCDate();
+  return { year: p.year, month: p.month, monthName: MONTHS[p.month - 1], day: p.day, weekday: WEEKDAYS[p.weekday], leading, daysInMonth };
+}
+
 /** "18:30" (24-hour) in the event's time zone. */
 export function formatEventTime(iso: string, tz: string): string {
   const p = zonedOrNull(iso, tz);

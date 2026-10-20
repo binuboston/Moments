@@ -1,32 +1,48 @@
 import { formatEventDate, formatEventTime } from "@/lib/utils/dates";
-import { Branding, CalendarActions, Contacts, Countdown, EventDetails, Gallery, Gifts, RsvpForm, Schedule, Section } from "@/features/templates/sections";
+import { Branding, CalendarActions, Contacts, Countdown, EventDetails, Gallery, Gifts, RsvpForm, Schedule, Section , SaveTheDate, ShareMoments } from "@/features/templates/sections";
 import type { TemplateDefinition, TemplateProps } from "@/features/templates/types";
-import { CoverImage, LeafOrnament, kindDetails, HeroTitle } from "@/features/templates/designs/shared";
+import { CoverImage, LeafOrnament, kindDetails, HeroTitle , Invocation, shareData } from "@/features/templates/designs/shared";
 
 function BotanicalNoir({ view, theme, mode }: TemplateProps) {
   const { content, media } = view;
   const details = kindDetails(view);
   const s = theme.sections;
+  let chapter = 0;
+  const next = () => ++chapter;
 
   return (
     <article className="relative mx-auto w-full max-w-3xl overflow-hidden">
-      <LeafOrnament className="absolute -top-6 -left-8 size-48 opacity-40 sm:size-64" />
-      <LeafOrnament className="absolute -right-10 top-40 size-48 rotate-180 opacity-30 sm:size-64" />
+      <div className="absolute -top-6 -left-8" data-inv-speed="-0.15">
+        <LeafOrnament className="size-48 opacity-40 sm:size-64" />
+      </div>
+      <div className="absolute top-40 -right-10" data-inv-speed="0.2">
+        <LeafOrnament className="size-48 rotate-180 opacity-30 sm:size-64" />
+      </div>
 
       <header className="relative px-6 pt-20 pb-14 text-center sm:px-12 sm:pt-28">
-        <p className="text-[0.7rem] font-medium tracking-[0.32em] uppercase text-(--inv-accent)">{details.eyebrow}</p>
+        <Invocation view={view} />
+        <p className="text-[0.7rem] font-medium tracking-[0.32em] uppercase text-(--inv-accent)" data-inv-hero>
+          {details.eyebrow}
+        </p>
         <HeroTitle view={view} className="inv-display mt-6 text-5xl leading-[1] italic text-balance sm:text-7xl" headlineClassName="tracking-[0.08em] text-(--inv-muted)" />
-        {content.subheading ? <p className="mt-5 text-base tracking-[0.08em] text-(--inv-muted) sm:text-lg">{content.subheading}</p> : null}
-        <div className="mx-auto mt-10 grid max-w-sm grid-cols-[1fr_auto_1fr] items-center gap-4 text-sm">
+        {content.subheading ? (
+          <p className="mt-5 text-base tracking-[0.08em] text-(--inv-muted) sm:text-lg" data-inv-hero>
+            {content.subheading}
+          </p>
+        ) : null}
+        <div className="mx-auto mt-10 grid max-w-sm grid-cols-[1fr_auto_1fr] items-center gap-4 text-sm" data-inv-hero>
           <span className="h-px bg-(--inv-border)" />
           <span className="tracking-[0.2em] uppercase">{formatEventDate(content.startsAt, content.timezone)}</span>
           <span className="h-px bg-(--inv-border)" />
         </div>
-        <p className="mt-3 text-sm text-(--inv-muted)">{formatEventTime(content.startsAt, content.timezone)}{content.venue.name ? ` · ${content.venue.name}` : ""}</p>
+        <p className="mt-3 text-sm text-(--inv-muted)" data-inv-hero>
+          {formatEventTime(content.startsAt, content.timezone)}
+          {content.venue.name ? ` · ${content.venue.name}` : ""}
+        </p>
       </header>
 
       {media.cover ? (
-        <div className="relative mx-6 aspect-[4/5] overflow-hidden rounded-[2rem] ring-1 ring-(--inv-accent)/40 sm:mx-12">
+        <div className="relative mx-6 aspect-[4/5] overflow-hidden rounded-[2rem] ring-1 ring-(--inv-accent)/40 sm:mx-12" data-inv-reveal="mask">
           <CoverImage media={media.cover} priority className="opacity-90" />
           <div className="absolute inset-0 bg-gradient-to-t from-(--inv-bg) via-transparent to-transparent" />
         </div>
@@ -34,10 +50,14 @@ function BotanicalNoir({ view, theme, mode }: TemplateProps) {
 
       {s.intro ? (
         <Section>
-          {content.hosts ? <p className="mb-4 text-sm italic text-(--inv-muted)">{content.hosts}</p> : null}
-          {content.intro ? <p className="mx-auto max-w-xl text-lg leading-relaxed text-pretty sm:text-xl">{content.intro}</p> : null}
+          {content.hosts ? (
+            <p className="mb-4 text-sm italic text-(--inv-muted)" data-inv-reveal>
+              {content.hosts}
+            </p>
+          ) : null}
+          {content.intro ? <p data-inv-reveal className="mx-auto max-w-xl text-lg leading-relaxed text-pretty sm:text-xl">{content.intro}</p> : null}
           {details.lines.length ? (
-            <div className="mt-6 flex flex-col items-center gap-1 text-sm text-(--inv-muted)">
+            <div className="mt-6 flex flex-col items-center gap-1 text-sm text-(--inv-muted)" data-inv-reveal>
               {details.lines.map((l) => (
                 <span key={l}>{l}</span>
               ))}
@@ -47,35 +67,37 @@ function BotanicalNoir({ view, theme, mode }: TemplateProps) {
       ) : null}
 
       {s.countdown ? (
-        <Section className="pt-0">
-          <Countdown targetIso={content.startsAt} className="mx-auto max-w-lg" cellClassName="border-(--inv-accent)/30 bg-(--inv-surface)" numberClassName="text-(--inv-accent)" />
+        <Section>
+          <SaveTheDate view={view} titleClassName="italic" cardClassName="rounded-[2rem] border-(--inv-accent)/30" />
+          <div className="mt-16" />
+          <Countdown targetIso={content.startsAt} endIso={content.endsAt} className="mx-auto max-w-lg" cellClassName="border-(--inv-accent)/30 bg-(--inv-surface)" numberClassName="text-(--inv-accent)" />
         </Section>
       ) : null}
 
       {s.details ? (
-        <Section eyebrow="Join us" title="The details">
-          <div className="mx-auto max-w-xl rounded-[2rem] border border-(--inv-accent)/30 bg-(--inv-surface) p-8 sm:p-10">
+        <Section id="details" index={next()} eyebrow="Join us" title="The details">
+          <div className="mx-auto max-w-xl rounded-[2rem] border border-(--inv-accent)/30 bg-(--inv-surface) p-8 sm:p-10" data-inv-reveal>
             <EventDetails view={view} />
-            {content.dressCode ? <p className="mt-6 text-sm italic text-(--inv-muted)">Attire: {content.dressCode}</p> : null}
+            {content.dressCode ? <p data-inv-reveal className="mt-6 text-sm italic text-(--inv-muted)">Attire: {content.dressCode}</p> : null}
           </div>
           <CalendarActions view={view} className="mt-6" />
         </Section>
       ) : null}
 
       {s.schedule ? (
-        <Section eyebrow="Programme" title="Celebrations">
+        <Section id="schedule" index={next()} eyebrow="Programme" title="Celebrations">
           <Schedule functions={view.functions} variant="cards" itemClassName="border-(--inv-accent)/20" />
         </Section>
       ) : null}
 
       {s.gallery ? (
-        <Section eyebrow="Gallery" title="Moments">
+        <Section id="gallery" index={next()} eyebrow="Gallery" title="Moments">
           <Gallery items={media.gallery} rounded="rounded-[1.25rem]" />
         </Section>
       ) : null}
 
       {s.rsvp ? (
-        <Section eyebrow="Répondez s'il vous plaît" title="Will you join us?">
+        <Section id="rsvp" index={next()} eyebrow="Répondez s'il vous plaît" title="Will you join us?">
           <RsvpForm slug={view.slug} settings={view.settings.rsvp} timezone={content.timezone} mode={mode} />
         </Section>
       ) : null}
@@ -94,13 +116,15 @@ function BotanicalNoir({ view, theme, mode }: TemplateProps) {
 
       {s.message ? (
         <Section>
-          <p className="inv-display mx-auto max-w-lg text-2xl italic leading-relaxed text-pretty sm:text-3xl">{content.message}</p>
+          <p data-inv-reveal className="inv-display mx-auto max-w-lg text-2xl italic leading-relaxed text-pretty sm:text-3xl">{content.message}</p>
         </Section>
       ) : null}
 
       <div className="relative">
         <LeafOrnament className="absolute -bottom-10 -right-6 size-40 -scale-x-100 opacity-30" />
-        <Branding show={view.showBranding} className="relative pt-6" />
+        <ShareMoments hashtag={content.hashtag} share={shareData(view)} className="px-6 py-16 sm:py-20" />
+
+      <Branding show={view.showBranding} className="relative pt-6" />
       </div>
     </article>
   );
@@ -126,5 +150,6 @@ export const botanicalNoir: TemplateDefinition = {
   ],
   defaults: { paletteId: "forest", fontPairingId: "playfair-montserrat" },
   previewGradient: "linear-gradient(160deg, #13231c 0%, #1f3a2e 100%)",
+  particles: "sparkles",
   component: BotanicalNoir,
 };

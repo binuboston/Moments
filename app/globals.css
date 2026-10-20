@@ -313,6 +313,29 @@
 }
 .split-line { padding-bottom: 0.06em; margin-bottom: -0.06em; }
 
+/* Invitation motion (features/templates/motion). Only the full-page modes
+   (public page, live demo) animate; previews render statically. */
+/* Opacity only (no visibility:hidden): content that has not been revealed yet
+   stays focusable and readable by assistive tech; focusing it scrolls it into
+   view, which plays its reveal. */
+.motion-ok .invitation-root:is([data-mode="public"], [data-mode="demo"]) :is([data-inv-reveal], [data-inv-hero]) {
+  opacity: 0;
+}
+.motion-ok .invitation-root:is([data-mode="public"], [data-mode="demo"]) :is([data-inv-reveal], [data-inv-hero]):not([data-reveal-bound]) {
+  animation: motion-failsafe 0s linear 2.5s forwards;
+}
+.motion-ok [data-inv-cover] [data-cover-in]:not([data-reveal-bound]) {
+  opacity: 0;
+  animation: motion-failsafe 0s linear 2.5s forwards;
+}
+@keyframes inv-tick {
+  from { opacity: 0; transform: translateY(-0.45em); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .inv-tick { display: inline-block; animation: inv-tick 0.45s var(--ease-out-quart) both; }
+}
+
 /* Editor: fields scrolled into view (focus, validation) clear the header, toolbar and step bar. */
 .editor-scope :is(input, textarea, select, button, [tabindex]) {
   scroll-margin-top: 12rem;

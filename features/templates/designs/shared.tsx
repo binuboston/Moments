@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import type { InvitationView, MediaItem } from "@/features/templates/types";
-import { titleParts } from "@/features/templates/title";
+import { formatEventDate } from "@/lib/utils/dates";
+import { shareTitle, titleParts } from "@/features/templates/title";
 
 /** Category-specific supporting text each template can place where it fits. */
 export function kindDetails(view: InvitationView): { eyebrow: string; lines: string[] } {
@@ -59,17 +60,17 @@ export function CoverImage({ media, className, priority = false, sizes = "(min-w
 /** Thin rule with a central diamond. */
 export function RuleOrnament({ className }: { className?: string }) {
   return (
-    <div className={cn("flex items-center justify-center gap-3 text-(--inv-accent)", className)} aria-hidden>
-      <span className="h-px w-16 bg-current opacity-60" />
+    <div className={cn("flex items-center justify-center gap-3 text-(--inv-accent)", className)} aria-hidden data-inv-reveal="draw">
+      <span className="h-px w-16 origin-right bg-current opacity-60" data-line />
       <span className="size-1.5 rotate-45 bg-current" />
-      <span className="h-px w-16 bg-current opacity-60" />
+      <span className="h-px w-16 origin-left bg-current opacity-60" data-line />
     </div>
   );
 }
 
 export function LeafOrnament({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 200 200" className={cn("size-40 text-(--inv-accent)", className)} fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden>
+    <svg viewBox="0 0 200 200" className={cn("size-40 text-(--inv-accent)", className)} fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden data-inv-reveal="draw">
       <path d="M20 180 C 60 120, 120 80, 180 20" />
       <path d="M60 140 c -20 -30 -10 -60 20 -70 c 10 30 0 60 -20 70z" />
       <path d="M90 110 c -5 -35 15 -60 45 -65 c 0 35 -20 60 -45 65z" />
@@ -81,7 +82,7 @@ export function LeafOrnament({ className }: { className?: string }) {
 
 export function DecoCorner({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 80 80" className={cn("size-14 text-(--inv-accent)", className)} fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+    <svg viewBox="0 0 80 80" className={cn("size-14 text-(--inv-accent)", className)} fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden data-inv-reveal="draw">
       <path d="M2 78 V 2 H 78" />
       <path d="M12 78 V 12 H 78" opacity="0.6" />
       <path d="M22 78 V 22 H 78" opacity="0.35" />
@@ -107,6 +108,7 @@ export function Confetti({ className }: { className?: string }) {
         <span
           key={i}
           className={cn("absolute block", i % 3 === 0 ? "rounded-full" : "rounded-[2px]")}
+          data-inv-speed={((i % 4) + 1) * 0.12}
           style={{ left: p.x, top: p.y, width: p.s, height: i % 3 === 0 ? p.s : p.s * 0.45, background: p.c, transform: `rotate(${p.r}deg)` }}
         />
       ))}
@@ -123,11 +125,29 @@ export function HeroTitle({ view, className, headlineClassName }: { view: Invita
   return (
     <>
       {headline ? (
-        <p className={cn("mt-4 text-base text-pretty sm:text-lg", headlineClassName)} data-testid="hero-headline">
+        <p className={cn("mt-4 text-base text-pretty sm:text-lg", headlineClassName)} data-testid="hero-headline" data-inv-hero>
           {headline}
         </p>
       ) : null}
-      <h1 className={className}>{title}</h1>
+      <h1 className={className} data-inv-hero="title">
+        {title}
+      </h1>
     </>
   );
+}
+
+/** The owner's blessing line (any script), shown at the very top of the hero. */
+export function Invocation({ view, className }: { view: InvitationView; className?: string }) {
+  if (!view.content.invocation) return null;
+  return (
+    <p className={cn("mb-6 text-sm tracking-wide text-(--inv-accent) sm:text-base", className)} data-inv-hero>
+      {view.content.invocation}
+    </p>
+  );
+}
+
+/** Text shared by every template's closing share block. */
+export function shareData(view: InvitationView) {
+  const title = shareTitle(view.content);
+  return { title, text: `You're invited: ${title}\n${formatEventDate(view.content.startsAt, view.content.timezone)}` };
 }

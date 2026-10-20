@@ -25,7 +25,7 @@ export function CalendarActions({ view, className, buttonClassName }: CalendarAc
     "inline-flex items-center gap-2 rounded-full border border-(--inv-border) bg-(--inv-surface) px-4 py-2 text-sm font-medium transition-colors hover:border-(--inv-accent) hover:text-(--inv-accent) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--inv-accent)";
 
   return (
-    <div className={cn("flex flex-wrap items-center justify-center gap-3", className)}>
+    <div className={cn("flex flex-wrap items-center justify-center gap-3", className)} data-inv-reveal>
       <a href={google} target="_blank" rel="noopener noreferrer" className={cn(base, buttonClassName)}>
         <CalendarPlusIcon className="size-4" aria-hidden /> Google Calendar
       </a>

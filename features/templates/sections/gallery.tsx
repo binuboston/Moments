@@ -18,7 +18,7 @@ export function Gallery({ items, className, rounded = "rounded-xl" }: GalleryPro
 
   return (
     <>
-      <ul className={cn("grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3", className)}>
+      <ul className={cn("grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3", className)} data-inv-reveal="stagger">
         {items.map((item, i) => (
           <li key={item.id} className={cn(i === 0 && items.length >= 5 && "col-span-2 row-span-2")}>
             <button

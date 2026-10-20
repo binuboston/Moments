@@ -18,8 +18,21 @@ export const giftsSchema = z.object({
   url: httpsUrl,
 });
 
+/** "#Aisha Weds Rohan" -> "AishaWedsRohan". Letters (any script), digits and underscores only. */
+export const hashtagSchema = z
+  .string()
+  .trim()
+  .max(60)
+  .transform((v) => v.replace(/^#+/, "").replace(/\s+/g, ""))
+  .refine((v) => /^[\p{L}\p{M}\p{N}_]*$/u.test(v), "Use letters, numbers and underscores only")
+  .default("");
+
 /** Fields shared by every event type. */
 const baseShape = {
+  /** Optional blessing or invocation shown above the title, in any script (e.g. "ॐ श्री गणेशाय नमः"). */
+  invocation: optionalText(120),
+  /** Stored without the leading "#". */
+  hashtag: hashtagSchema,
   headline: requiredText(120),
   subheading: optionalText(160),
   intro: optionalText(600),
@@ -133,6 +146,8 @@ export const draftContentSchema = z
 
 export function emptyContent(kind: ContentKind, startsAt: string, tz: string): InvitationContentInput {
   const base = {
+    invocation: "",
+    hashtag: "",
     headline: "",
     subheading: "",
     intro: "",

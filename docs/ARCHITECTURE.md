@@ -150,13 +150,17 @@ GSAP is the only animation library. Everything lives in two places:
 
 **No-flash and failsafe rules.** `lib/motion/pre-paint.ts` runs in `<head>` and adds `motion-ok` to `<html>` unless the visitor prefers reduced motion. Only under `.motion-ok` are `[data-reveal]`/`[data-hero]` hidden before paint. JS marks elements it has taken over with `data-reveal-bound`; any element still unbound after 2.5s is shown by a CSS animation, so a script failure can never leave content invisible. Reduced motion skips Lenis, parallax and pins and shows content immediately.
 
-**Lenis.** `SmoothScroll` (marketing layout only) drives Lenis from the GSAP ticker and feeds `ScrollTrigger.update`, refreshing after fonts load. Use `useLenis()` for programmatic scrolling. Dashboard, editor and public invitations use native scroll (nested scroll containers and forms behave better).
+**Invitations.** The public page and live demo have their own motion layer: an opening envelope, Lenis, `data-inv-*` reveals and a quick-action dock. See [TEMPLATES.md](TEMPLATES.md#guest-experience-and-motion). Its reveals use opacity only, so unrevealed RSVP fields stay focusable.
+
+**Lenis.** `SmoothScroll` (marketing layout, public invitations and live demos) drives Lenis from the GSAP ticker and feeds `ScrollTrigger.update`, refreshing after fonts load. Use `useLenis()` for programmatic scrolling. Dashboard and editor use native scroll (nested scroll containers and forms behave better).
 
 **Pins.** `PinnedShowcase` and `HorizontalScroller` pin on desktop only and fall back to native swipe rows on phones. Pins add spacer height after the first refresh, so triggers that depend on layout below them use `refreshPriority: -1`. Never put a `position: fixed` element inside a transformed (animated) ancestor.
 
 **App motion.** `NavigationProgress` (top bar on route changes), `SwapTransition` (editor panels and wizard steps), `useFlipList` (invitation grid reorder, enter and delete), and optimistic TanStack Query mutations with rollback in `features/invitations/hooks.ts`.
 
 **Dates must be deterministic.** `lib/utils/dates.ts` formats with fixed month and weekday tables instead of `Intl` output, because Node and browsers ship different CLDR data and the mismatch caused hydration errors.
+
+**Build cache.** If a production build does not reflect a CSS change, delete `.next/cache` and build again. A stale Turbopack cache served old CSS once during development.
 
 ## 11. Risks and mitigations
 

@@ -73,6 +73,9 @@ test("guests open the invitation and RSVP without an account", async ({ browser,
   const page = await guest.newPage();
   const res = await page.goto(`${baseURL}/e/${slug}`);
   expect(res?.status()).toBe(200);
+  // Guests open the sealed envelope first.
+  await page.getByRole("button", { name: /tap to open/i }).click();
+  await expect(page.locator("[data-inv-cover]")).toHaveCount(0);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(headline);
 
   const escaped = headline.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

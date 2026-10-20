@@ -45,7 +45,7 @@ export function EventDetails({ view, className, itemClassName, iconClassName, la
   ];
 
   return (
-    <div className={cn(layout === "row" ? "grid gap-6 sm:grid-cols-3" : "flex flex-col gap-6", className)}>
+    <div className={cn(layout === "row" ? "grid gap-6 sm:grid-cols-3" : "flex flex-col gap-6", className)} data-inv-reveal="stagger">
       {items.map((item) => (
         <div key={item.label} className={cn("flex flex-col items-center gap-2", itemClassName)}>
           {showIcons ? <item.icon className={cn("size-5 text-(--inv-accent)", iconClassName)} aria-hidden /> : null}

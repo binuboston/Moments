@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatEventDate, formatEventTime, formatShortDate, formatTimeRange, formatTimeZoneLabel, fromLocalInputValue, isPast, safeTimeZone, toLocalInputValue } from "@/lib/utils/dates";
+import { formatDotDate, formatEventDate, monthGrid, formatEventTime, formatShortDate, formatTimeRange, formatTimeZoneLabel, fromLocalInputValue, isPast, safeTimeZone, toLocalInputValue } from "@/lib/utils/dates";
 
 describe("time zone helpers", () => {
   it("falls back to UTC for unknown zones", () => {
@@ -54,5 +54,18 @@ describe("deterministic display formatting (identical on server and browser)", (
   it("returns empty strings for invalid dates", () => {
     expect(formatEventDate("not a date", "UTC")).toBe("");
     expect(formatEventTime("", "UTC")).toBe("");
+  });
+});
+
+describe("save-the-date helpers", () => {
+  it("formats a dotted date in the event's time zone", () => {
+    // 23:30 UTC on 18 Oct is already 19 Oct in India.
+    expect(formatDotDate("2026-10-18T23:30:00Z", "Asia/Kolkata")).toBe("19 · 10 · 2026");
+  });
+
+  it("builds the event's month grid starting on Sunday", () => {
+    expect(monthGrid("2026-10-19T06:10:00Z", "Asia/Kolkata")).toEqual({ year: 2026, month: 10, monthName: "October", day: 19, weekday: "Monday", leading: 4, daysInMonth: 31 });
+    expect(monthGrid("2028-02-10T12:00:00Z", "UTC")).toMatchObject({ leading: 2, daysInMonth: 29 });
+    expect(monthGrid("not a date", "UTC")).toBeNull();
   });
 });

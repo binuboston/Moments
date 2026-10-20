@@ -15,6 +15,8 @@ import { useEditorStore } from "@/stores/editor-store";
 /** Flat form shape covering every category; the resolver enforces the active category's schema. */
 export interface ContentFormValues {
   kind: ContentKind;
+  invocation?: string;
+  hashtag?: string;
   headline: string;
   subheading: string;
   intro: string;
@@ -196,6 +198,7 @@ export function DetailsPanel() {
         <TextField id="content-subheading" label="Subheading" optional hint="e.g. “are getting married”, “A garden party”" error={err("subheading")} inputProps={form.register("subheading")} />
         <TextareaField id="content-intro" label="Introduction" optional hint="A short welcome. Two or three sentences work best." error={err("intro")} textareaProps={{ rows: 4, ...form.register("intro") }} />
         <TextField id="content-hosts" label="Hosted by" optional hint="e.g. “With the blessings of the Khan and Mehta families”" error={err("hosts")} inputProps={form.register("hosts")} />
+        <TextField id="content-invocation" label="Blessing line" optional hint="A short invocation shown above everything else, in any language, e.g. “ॐ श्री गणेशाय नमः” or “Bismillah”." error={err("invocation")} inputProps={form.register("invocation")} />
       </fieldset>
 
       <fieldset className="grid gap-5">
@@ -250,6 +253,7 @@ export function DetailsPanel() {
         <TextareaField id="content-gifts-note" label="Gift note" optional hint="e.g. “Your presence is the greatest gift…”" error={err("gifts.note")} textareaProps={{ rows: 3, ...form.register("gifts.note") }} />
         <TextField id="content-gifts-url" label="Registry link" optional error={err("gifts.url")} inputProps={{ type: "url", placeholder: "https://…", ...form.register("gifts.url") }} />
         <TextareaField id="content-message" label="Closing message" optional hint="Shown at the end of the invitation." error={err("message")} textareaProps={{ rows: 3, ...form.register("message") }} />
+        <TextField id="content-hashtag" label="Hashtag" optional hint="Guests can copy it to tag their photos, e.g. AishaWedsRohan." error={err("hashtag")} inputProps={{ autoCapitalize: "off", spellCheck: false, ...form.register("hashtag") }} />
       </fieldset>
     </form>
   );

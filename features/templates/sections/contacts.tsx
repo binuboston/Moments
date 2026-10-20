@@ -5,7 +5,7 @@ import type { InvitationContent } from "@/lib/validation/content";
 export function Contacts({ contacts, className }: { contacts: InvitationContent["contacts"]; className?: string }) {
   if (contacts.length === 0) return null;
   return (
-    <ul className={cn("mx-auto grid max-w-2xl gap-4 sm:grid-cols-2", className)}>
+    <ul className={cn("mx-auto grid max-w-2xl gap-4 sm:grid-cols-2", className)} data-inv-reveal="stagger">
       {contacts.map((c, i) => (
         <li key={`${c.name}-${i}`} className="rounded-2xl border border-(--inv-border) bg-(--inv-surface) p-5 text-left">
           <p className="font-medium">{c.name}</p>

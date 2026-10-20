@@ -8,3 +8,5 @@ export { Gifts } from "./gifts";
 export { CalendarActions } from "./calendar-actions";
 export { Branding } from "./branding";
 export { RsvpForm } from "./rsvp-form";
+export { SaveTheDate } from "./save-the-date";
+export { ShareMoments } from "./share-moments";

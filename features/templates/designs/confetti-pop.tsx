@@ -1,7 +1,7 @@
 import { formatEventDate, formatTimeRange } from "@/lib/utils/dates";
-import { Branding, CalendarActions, Contacts, Countdown, EventDetails, Gallery, Gifts, RsvpForm, Schedule, Section } from "@/features/templates/sections";
+import { Branding, CalendarActions, Contacts, Countdown, EventDetails, Gallery, Gifts, RsvpForm, Schedule, Section , SaveTheDate, ShareMoments } from "@/features/templates/sections";
 import type { TemplateDefinition, TemplateProps } from "@/features/templates/types";
-import { Confetti, CoverImage, kindDetails, HeroTitle } from "@/features/templates/designs/shared";
+import { Confetti, CoverImage, kindDetails, HeroTitle , Invocation, shareData } from "@/features/templates/designs/shared";
 
 function ConfettiPop({ view, theme, mode }: TemplateProps) {
   const { content, media } = view;
@@ -13,10 +13,17 @@ function ConfettiPop({ view, theme, mode }: TemplateProps) {
       <header className="relative overflow-hidden px-6 pt-16 pb-14 text-center sm:px-12 sm:pt-24">
         <Confetti />
         <div className="relative">
-          <span className="inline-flex rounded-full bg-(--inv-accent) px-4 py-1.5 text-xs font-bold tracking-[0.12em] uppercase text-(--inv-accent-contrast)">{details.eyebrow}</span>
+          <Invocation view={view} className="font-semibold" />
+          <div data-inv-hero>
+            <span className="inline-flex rounded-full bg-(--inv-accent) px-4 py-1.5 text-xs font-bold tracking-[0.12em] uppercase text-(--inv-accent-contrast)">{details.eyebrow}</span>
+          </div>
           <HeroTitle view={view} className="inv-display mt-8 text-5xl leading-[1] font-bold tracking-tight text-balance sm:text-7xl" headlineClassName="font-semibold text-(--inv-muted)" />
-          {content.subheading ? <p className="mt-5 text-xl font-medium text-(--inv-muted)">{content.subheading}</p> : null}
-          <div className="mx-auto mt-10 inline-flex flex-col gap-1 rounded-3xl border-2 border-(--inv-text) bg-(--inv-surface) px-8 py-5 shadow-[6px_6px_0_0_var(--inv-c2)]">
+          {content.subheading ? (
+            <p className="mt-5 text-xl font-medium text-(--inv-muted)" data-inv-hero>
+              {content.subheading}
+            </p>
+          ) : null}
+          <div data-inv-hero className="mx-auto mt-10 inline-flex flex-col gap-1 rounded-3xl border-2 border-(--inv-text) bg-(--inv-surface) px-8 py-5 shadow-[6px_6px_0_0_var(--inv-c2)]">
             <span className="text-lg font-bold">{formatEventDate(content.startsAt, content.timezone)}</span>
             <span className="text-sm font-medium text-(--inv-muted)">{formatTimeRange(content.startsAt, content.endsAt, content.timezone)}</span>
           </div>
@@ -24,49 +31,62 @@ function ConfettiPop({ view, theme, mode }: TemplateProps) {
       </header>
 
       {media.cover ? (
-        <div className="relative mx-6 aspect-square overflow-hidden rounded-[2.5rem] border-2 border-(--inv-text) shadow-[10px_10px_0_0_var(--inv-c3)] sm:mx-16">
+        <div className="relative mx-6 aspect-square overflow-hidden rounded-[2.5rem] border-2 border-(--inv-text) shadow-[10px_10px_0_0_var(--inv-c3)] sm:mx-16" data-inv-reveal="mask">
           <CoverImage media={media.cover} priority />
         </div>
       ) : null}
 
       {s.intro ? (
         <Section>
-          {content.hosts ? <p className="mb-3 text-sm font-semibold text-(--inv-muted)">{content.hosts}</p> : null}
-          {content.intro ? <p className="mx-auto max-w-xl text-lg leading-relaxed text-pretty sm:text-xl">{content.intro}</p> : null}
-          {details.lines.length ? <p className="mt-4 text-sm text-(--inv-muted)">{details.lines.join(" · ")}</p> : null}
+          {content.hosts ? (
+            <p className="mb-3 text-sm font-semibold text-(--inv-muted)" data-inv-reveal>
+              {content.hosts}
+            </p>
+          ) : null}
+          {content.intro ? <p data-inv-reveal className="mx-auto max-w-xl text-lg leading-relaxed text-pretty sm:text-xl">{content.intro}</p> : null}
+          {details.lines.length ? <p data-inv-reveal className="mt-4 text-sm text-(--inv-muted)">{details.lines.join(" · ")}</p> : null}
         </Section>
       ) : null}
 
       {s.countdown ? (
-        <Section eyebrow="Party starts in" className="pt-0" eyebrowClassName="text-(--inv-text)">
-          <Countdown targetIso={content.startsAt} className="mx-auto max-w-lg" cellClassName="rounded-2xl border-2 border-(--inv-text) bg-(--inv-surface) shadow-[4px_4px_0_0_var(--inv-accent)]" numberClassName="font-bold" />
+        <Section>
+          <SaveTheDate
+            view={view}
+            title="Save the date!"
+            titleClassName="font-bold tracking-tight"
+            cardClassName="rounded-3xl border-2 border-(--inv-text) shadow-[6px_6px_0_0_var(--inv-c2)]"
+          />
+          <p className="mt-16 mb-6 text-[0.7rem] font-bold tracking-[0.2em] uppercase" data-inv-reveal>
+            Party starts in
+          </p>
+          <Countdown targetIso={content.startsAt} endIso={content.endsAt} className="mx-auto max-w-lg" cellClassName="rounded-2xl border-2 border-(--inv-text) bg-(--inv-surface) shadow-[4px_4px_0_0_var(--inv-accent)]" numberClassName="font-bold" />
         </Section>
       ) : null}
 
       {s.details ? (
-        <Section eyebrow="Where to find us" title="The details" eyebrowClassName="text-(--inv-text)">
-          <div className="mx-auto max-w-xl rounded-[2rem] bg-(--inv-surface) p-8">
+        <Section id="details" eyebrow="Where to find us" title="The details" eyebrowClassName="text-(--inv-text)">
+          <div className="mx-auto max-w-xl rounded-[2rem] bg-(--inv-surface) p-8" data-inv-reveal>
             <EventDetails view={view} layout="row" />
-            {content.dressCode ? <p className="mt-6 text-sm font-medium text-(--inv-muted)">Wear: {content.dressCode}</p> : null}
+            {content.dressCode ? <p data-inv-reveal className="mt-6 text-sm font-medium text-(--inv-muted)">Wear: {content.dressCode}</p> : null}
           </div>
           <CalendarActions view={view} className="mt-6" buttonClassName="border-2 border-(--inv-text) font-semibold" />
         </Section>
       ) : null}
 
       {s.schedule ? (
-        <Section eyebrow="Plan" title="What's happening" eyebrowClassName="text-(--inv-text)">
+        <Section id="schedule" eyebrow="Plan" title="What's happening" eyebrowClassName="text-(--inv-text)">
           <Schedule functions={view.functions} variant="cards" itemClassName="rounded-3xl border-2 border-(--inv-text)" />
         </Section>
       ) : null}
 
       {s.gallery ? (
-        <Section eyebrow="Photos" title="Memories" eyebrowClassName="text-(--inv-text)">
+        <Section id="gallery" eyebrow="Photos" title="Memories" eyebrowClassName="text-(--inv-text)">
           <Gallery items={media.gallery} rounded="rounded-3xl" />
         </Section>
       ) : null}
 
       {s.rsvp ? (
-        <Section eyebrow="Are you in?" title="RSVP" eyebrowClassName="text-(--inv-text)">
+        <Section id="rsvp" eyebrow="Are you in?" title="RSVP" eyebrowClassName="text-(--inv-text)">
           <RsvpForm slug={view.slug} settings={view.settings.rsvp} timezone={content.timezone} mode={mode} />
         </Section>
       ) : null}
@@ -86,9 +106,11 @@ function ConfettiPop({ view, theme, mode }: TemplateProps) {
       {s.message ? (
         <Section className="relative overflow-hidden">
           <Confetti className="opacity-60" />
-          <p className="inv-display relative mx-auto max-w-lg text-3xl font-bold leading-tight text-pretty">{content.message}</p>
+          <p data-inv-reveal className="inv-display relative mx-auto max-w-lg text-3xl font-bold leading-tight text-pretty">{content.message}</p>
         </Section>
       ) : null}
+
+      <ShareMoments hashtag={content.hashtag} share={shareData(view)} className="px-6 py-16 sm:py-20" />
 
       <Branding show={view.showBranding} />
     </article>
@@ -115,5 +137,6 @@ export const confettiPop: TemplateDefinition = {
   ],
   defaults: { paletteId: "candy", fontPairingId: "poppins" },
   previewGradient: "linear-gradient(135deg, #fff8f0 0%, #ffe3ec 60%, #fff1c6 100%)",
+  particles: "confetti",
   component: ConfettiPop,
 };

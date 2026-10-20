@@ -51,3 +51,23 @@ describe("rsvp submission schema", () => {
     expect(rsvpSubmissionSchema.safeParse({ slug: "maya-x1y2", guestName: "Bot", attendance: "yes", website: "http://spam" }).success).toBe(false);
   });
 });
+
+describe("traditional touches", () => {
+  const base = { ...emptyContent("wedding", "2026-10-19T06:10:00Z", "Asia/Kolkata"), headline: "Wedding", partnerOne: "Neelanjana", partnerTwo: "Anurag" };
+
+  it("normalises hashtags and accepts any script", () => {
+    expect(contentSchema.parse({ ...base, hashtag: "#Neelanjana Weds Anurag" }).hashtag).toBe("NeelanjanaWedsAnurag");
+    expect(contentSchema.parse({ ...base, hashtag: "#നീലാഞ്ജന_അനുരാഗ്" }).hashtag).toBe("നീലാഞ്ജന_അനുരാഗ്");
+    expect(contentSchema.safeParse({ ...base, hashtag: "no-hyphens!" }).success).toBe(false);
+  });
+
+  it("keeps invitations saved before these fields existed valid", () => {
+    const legacy: Record<string, unknown> = { ...base };
+    delete legacy.invocation;
+    delete legacy.hashtag;
+    const parsed = contentSchema.parse(legacy);
+    expect(parsed.invocation).toBe("");
+    expect(parsed.hashtag).toBe("");
+    expect(defaultSettings.openingCover).toBe(true);
+  });
+});

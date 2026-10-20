@@ -20,6 +20,8 @@ export const settingsSchema = z.object({
     deadline: "",
   }),
   showCalendarActions: z.boolean().default(true),
+  /** Guests tap an envelope to open the invitation (public page and live demo only). */
+  openingCover: z.boolean().default(true),
 });
 
 export type InvitationSettings = z.infer<typeof settingsSchema>;

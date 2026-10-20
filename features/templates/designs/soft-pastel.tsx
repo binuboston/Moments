@@ -1,7 +1,7 @@
 import { formatEventDate, formatTimeRange } from "@/lib/utils/dates";
-import { Branding, CalendarActions, Contacts, Countdown, EventDetails, Gallery, Gifts, RsvpForm, Schedule, Section } from "@/features/templates/sections";
+import { Branding, CalendarActions, Contacts, Countdown, EventDetails, Gallery, Gifts, RsvpForm, Schedule, Section , SaveTheDate, ShareMoments } from "@/features/templates/sections";
 import type { TemplateDefinition, TemplateProps } from "@/features/templates/types";
-import { CoverImage, kindDetails, HeroTitle } from "@/features/templates/designs/shared";
+import { CoverImage, kindDetails, HeroTitle , Invocation, shareData } from "@/features/templates/designs/shared";
 
 function Blob({ className }: { className?: string }) {
   return (
@@ -22,63 +22,82 @@ function SoftPastel({ view, theme, mode }: TemplateProps) {
 
   return (
     <article className="relative mx-auto w-full max-w-3xl overflow-hidden">
-      <Blob className="absolute -top-20 -left-24 size-72 text-(--inv-c2) opacity-70 sm:size-96" />
-      <Blob className="absolute top-72 -right-28 size-72 text-(--inv-c3) opacity-60 sm:size-96" />
+      <div className="absolute -top-20 -left-24" data-inv-speed="-0.2">
+        <Blob className="size-72 text-(--inv-c2) opacity-70 sm:size-96" />
+      </div>
+      <div className="absolute top-72 -right-28" data-inv-speed="0.25">
+        <Blob className="size-72 text-(--inv-c3) opacity-60 sm:size-96" />
+      </div>
 
       <header className="relative px-6 pt-16 pb-12 text-center sm:px-12 sm:pt-24">
-        <p className="inline-flex rounded-full bg-(--inv-surface) px-4 py-1.5 text-xs font-semibold tracking-[0.14em] uppercase text-(--inv-accent) shadow-sm">{details.eyebrow}</p>
+        <Invocation view={view} />
+        <div data-inv-hero>
+          <p className="inline-flex rounded-full bg-(--inv-surface) px-4 py-1.5 text-xs font-semibold tracking-[0.14em] uppercase text-(--inv-accent) shadow-sm">{details.eyebrow}</p>
+        </div>
         <HeroTitle view={view} className="inv-display mt-8 text-5xl leading-[1.05] text-balance sm:text-6xl" headlineClassName="font-medium text-(--inv-accent)" />
-        {content.subheading ? <p className="mt-4 text-lg text-(--inv-muted)">{content.subheading}</p> : null}
-        <div className="mx-auto mt-8 inline-flex flex-col rounded-[2rem] bg-(--inv-surface)/80 px-8 py-5 shadow-sm backdrop-blur">
+        {content.subheading ? (
+          <p className="mt-4 text-lg text-(--inv-muted)" data-inv-hero>
+            {content.subheading}
+          </p>
+        ) : null}
+        <div data-inv-hero className="mx-auto mt-8 inline-flex flex-col rounded-[2rem] bg-(--inv-surface)/80 px-8 py-5 shadow-sm backdrop-blur">
           <span className="text-base font-semibold">{formatEventDate(content.startsAt, content.timezone)}</span>
           <span className="text-sm text-(--inv-muted)">{formatTimeRange(content.startsAt, content.endsAt, content.timezone)}</span>
         </div>
       </header>
 
       {media.cover ? (
-        <div className="relative mx-8 aspect-[4/5] overflow-hidden rounded-[45%_55%_50%_50%/55%_45%_55%_45%] sm:mx-24">
+        <div className="relative mx-8 aspect-[4/5] overflow-hidden rounded-[45%_55%_50%_50%/55%_45%_55%_45%] sm:mx-24" data-inv-reveal="mask">
           <CoverImage media={media.cover} priority />
         </div>
       ) : null}
 
       {s.intro ? (
         <Section className="relative">
-          {content.hosts ? <p className="mb-3 text-sm text-(--inv-muted)">{content.hosts}</p> : null}
-          {content.intro ? <p className="mx-auto max-w-xl text-lg leading-relaxed text-pretty">{content.intro}</p> : null}
-          {details.lines.length ? <p className="mt-4 text-sm font-medium text-(--inv-accent)">{details.lines.join(" · ")}</p> : null}
+          {content.hosts ? (
+            <p className="mb-3 text-sm text-(--inv-muted)" data-inv-reveal>
+              {content.hosts}
+            </p>
+          ) : null}
+          {content.intro ? <p data-inv-reveal className="mx-auto max-w-xl text-lg leading-relaxed text-pretty">{content.intro}</p> : null}
+          {details.lines.length ? <p data-inv-reveal className="mt-4 text-sm font-medium text-(--inv-accent)">{details.lines.join(" · ")}</p> : null}
         </Section>
       ) : null}
 
       {s.countdown ? (
-        <Section eyebrow="Almost time" className="relative pt-0">
-          <Countdown targetIso={content.startsAt} className="mx-auto max-w-lg" cellClassName="rounded-3xl border-0 bg-(--inv-surface)/80 shadow-sm" />
+        <Section className="relative">
+          <SaveTheDate view={view} cardClassName="rounded-[2.5rem] border-0 bg-(--inv-surface)/80 shadow-sm backdrop-blur" />
+          <p className="mt-16 mb-6 text-[0.7rem] font-semibold tracking-[0.22em] uppercase text-(--inv-accent)" data-inv-reveal>
+            Almost time
+          </p>
+          <Countdown targetIso={content.startsAt} endIso={content.endsAt} className="mx-auto max-w-lg" cellClassName="rounded-3xl border-0 bg-(--inv-surface)/80 shadow-sm" />
         </Section>
       ) : null}
 
       {s.details ? (
-        <Section eyebrow="Details" title="Where & when" className="relative">
-          <div className="mx-auto max-w-xl rounded-[2.5rem] bg-(--inv-surface)/80 p-8 shadow-sm backdrop-blur sm:p-10">
+        <Section id="details" eyebrow="Details" title="Where & when" className="relative">
+          <div className="mx-auto max-w-xl rounded-[2.5rem] bg-(--inv-surface)/80 p-8 shadow-sm backdrop-blur sm:p-10" data-inv-reveal>
             <EventDetails view={view} layout="row" />
-            {content.dressCode ? <p className="mt-6 text-sm text-(--inv-muted)">Dress code: {content.dressCode}</p> : null}
+            {content.dressCode ? <p data-inv-reveal className="mt-6 text-sm text-(--inv-muted)">Dress code: {content.dressCode}</p> : null}
           </div>
           <CalendarActions view={view} className="mt-6" buttonClassName="border-0 bg-(--inv-surface)/80 shadow-sm" />
         </Section>
       ) : null}
 
       {s.schedule ? (
-        <Section eyebrow="Plan" title="The day" className="relative">
+        <Section id="schedule" eyebrow="Plan" title="The day" className="relative">
           <Schedule functions={view.functions} variant="cards" itemClassName="rounded-[2rem] border-0 bg-(--inv-surface)/80 shadow-sm" />
         </Section>
       ) : null}
 
       {s.gallery ? (
-        <Section eyebrow="Photos" title="Little moments" className="relative">
+        <Section id="gallery" eyebrow="Photos" title="Little moments" className="relative">
           <Gallery items={media.gallery} rounded="rounded-[2rem]" />
         </Section>
       ) : null}
 
       {s.rsvp ? (
-        <Section eyebrow="Join us" title="RSVP" className="relative">
+        <Section id="rsvp" eyebrow="Join us" title="RSVP" className="relative">
           <RsvpForm slug={view.slug} settings={view.settings.rsvp} timezone={content.timezone} mode={mode} />
         </Section>
       ) : null}
@@ -97,9 +116,11 @@ function SoftPastel({ view, theme, mode }: TemplateProps) {
 
       {s.message ? (
         <Section className="relative">
-          <p className="inv-display mx-auto max-w-lg text-2xl leading-relaxed text-pretty sm:text-3xl">{content.message}</p>
+          <p data-inv-reveal className="inv-display mx-auto max-w-lg text-2xl leading-relaxed text-pretty sm:text-3xl">{content.message}</p>
         </Section>
       ) : null}
+
+      <ShareMoments hashtag={content.hashtag} share={shareData(view)} className="px-6 py-16 sm:py-20" />
 
       <Branding show={view.showBranding} className="relative" />
     </article>
@@ -126,5 +147,6 @@ export const softPastel: TemplateDefinition = {
   ],
   defaults: { paletteId: "peach", fontPairingId: "fraunces-dm" },
   previewGradient: "linear-gradient(135deg, #fff6f0 0%, #fde2cf 50%, #e5d7f5 100%)",
+  particles: "petals",
   component: SoftPastel,
 };

@@ -17,6 +17,8 @@ function futureIso(daysAhead: number, hourUtc = 16): string {
 const venue = { name: "The Orangery, Kew", address: "Kew Gardens, Richmond TW9 3AB, London", mapsUrl: "https://maps.google.com/?q=The+Orangery+Kew" };
 
 const base = {
+  invocation: "",
+  hashtag: "",
   subheading: "",
   intro: "",
   hosts: "",
@@ -38,6 +40,7 @@ export const SAMPLE_CONTENT: Record<CategorySlug, InvitationContentInput> = {
     intro: "Together with their families, Aisha Khan and Rohan Mehta invite you to celebrate the beginning of their forever.",
     hosts: "With the blessings of the Khan and Mehta families",
     startsAt: futureIso(72, 15),
+    hashtag: "AishaWedsRohan",
     partnerOne: "Aisha",
     partnerTwo: "Rohan",
     familyOne: "Daughter of Farah & Imran Khan",
@@ -52,6 +55,7 @@ export const SAMPLE_CONTENT: Record<CategorySlug, InvitationContentInput> = {
     subheading: "are engaged",
     intro: "Join us for an evening of cocktails and celebration as we toast to the happy couple.",
     startsAt: futureIso(40, 18),
+    hashtag: "SofiaAndDaniel",
     partnerOne: "Sofia",
     partnerTwo: "Daniel",
   },
@@ -62,6 +66,7 @@ export const SAMPLE_CONTENT: Record<CategorySlug, InvitationContentInput> = {
     subheading: "A garden party",
     intro: "Bring your dancing shoes and your appetite for cake. There will be bubbles, face painting and a very enthusiastic magician.",
     startsAt: futureIso(21, 14),
+    hashtag: "MayaTurnsFive",
     celebrantName: "Maya",
     age: 5,
   },
@@ -72,6 +77,7 @@ export const SAMPLE_CONTENT: Record<CategorySlug, InvitationContentInput> = {
     subheading: "Fifty golden years",
     intro: "Half a century of love, laughter and lasting friendship. Please join the family for dinner and dancing.",
     startsAt: futureIso(55, 18),
+    hashtag: "GoldenGraceAndThomas",
     partnerOne: "Grace",
     partnerTwo: "Thomas",
     years: 50,
