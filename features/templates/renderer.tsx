@@ -1,13 +1,11 @@
 import { cn } from "@/lib/utils/cn";
 import { getTemplateOrFallback } from "@/features/templates/registry";
 import { resolveTheme, themeCssVars } from "@/features/templates/theme";
-import type { InvitationView, MotionMode, RenderMode } from "@/features/templates/types";
+import type { InvitationView, RenderMode } from "@/features/templates/types";
 
 interface InvitationRendererProps {
   view: InvitationView;
   mode: RenderMode;
-  /** Defaults to "full" for public pages and "static" for previews unless set. */
-  motion?: MotionMode;
   className?: string;
 }
 
@@ -16,8 +14,7 @@ interface InvitationRendererProps {
  * previews and the public page all go through here so they never diverge.
  * Isomorphic: no server-only APIs, so the editor can re-render it live.
  */
-export function InvitationRenderer({ view, mode, motion, className }: InvitationRendererProps) {
-  const motionMode: MotionMode = motion ?? (mode === "preview" ? "static" : "full");
+export function InvitationRenderer({ view, mode, className }: InvitationRendererProps) {
   const def = getTemplateOrFallback(view.template.key);
   const theme = resolveTheme(def, view.theme, view);
   const Template = def.component;
@@ -31,13 +28,12 @@ export function InvitationRenderer({ view, mode, motion, className }: Invitation
 
   return (
     <div
-      className={cn("invitation-root @container min-h-full w-full", className)}
+      className={cn("invitation-root min-h-full w-full", className)}
       style={{ ...themeCssVars(theme), ...extraVars }}
       data-template={def.key}
       data-mode={mode}
-      data-motion={motionMode}
     >
-      <Template view={view} theme={theme} mode={mode} motion={motionMode} />
+      <Template view={view} theme={theme} mode={mode} />
     </div>
   );
 }

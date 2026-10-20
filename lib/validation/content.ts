@@ -32,19 +32,6 @@ const baseShape = {
   contacts: z.array(contactSchema).max(4).default([]),
   gifts: giftsSchema.default({ note: "", url: "" }),
   dressCode: optionalText(120),
-  // Traditional touches (any script; rendered with Indic-capable font stacks)
-  invocation: optionalText(160),
-  regionalTitle: optionalText(120),
-  ceremonyLabel: optionalText(40),
-  city: optionalText(80),
-  familyMessage: optionalText(600),
-  hashtag: z
-    .string()
-    .trim()
-    .max(60)
-    .transform((v) => v.replace(/^#+/, ""))
-    .refine((v) => v === "" || /^[\p{L}\p{M}\p{N}_]+$/u.test(v), "Use letters, numbers and underscores only")
-    .default(""),
 };
 
 export const weddingContentSchema = z.object({
@@ -158,12 +145,6 @@ export function emptyContent(kind: ContentKind, startsAt: string, tz: string): I
     contacts: [],
     gifts: { note: "", url: "" },
     dressCode: "",
-    invocation: "",
-    regionalTitle: "",
-    ceremonyLabel: "",
-    city: "",
-    familyMessage: "",
-    hashtag: "",
   };
   switch (kind) {
     case "wedding":

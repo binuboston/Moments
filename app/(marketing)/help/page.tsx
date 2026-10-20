@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Container } from "@/components/layout/container";
 import { Faq } from "@/components/marketing/faq";
 import { SectionHeading } from "@/components/marketing/section-heading";
-import { SAMPLE_PHOTOS } from "@/features/templates/cinematic/sample-photos";
 
 export const metadata: Metadata = {
   title: "Help centre",
@@ -61,23 +60,6 @@ export default function HelpPage() {
           We store the details you enter to render your invitation and the responses your guests submit. Draft invitations and guest responses are private to your account. Published invitations are
           public to anyone with the link and are not listed in search engines by default. You can delete an invitation and its responses at any time.
         </p>
-      </section>
-
-      <section id="sample-photography" className="mt-6 scroll-mt-24 rounded-2xl border border-border bg-surface p-6">
-        <h2 className="text-lg font-semibold">Sample photography</h2>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground text-pretty">
-          Template previews and live demos use licensed sample photos from Wikimedia Commons. They are not photos of the people named in the samples. Your invitation only ever shows photos you upload.
-        </p>
-        <ul className="mt-4 grid gap-1 text-xs text-muted-foreground">
-          {Object.values(SAMPLE_PHOTOS).map((p) => (
-            <li key={p.id}>
-              <a href={p.source} className="underline underline-offset-2" target="_blank" rel="noopener noreferrer">
-                {p.alt.replace("Sample photography: ", "")}
-              </a>{" "}
-              · {p.credit} · {p.licence}
-            </li>
-          ))}
-        </ul>
       </section>
 
       <section id="terms" className="mt-6 scroll-mt-24 rounded-2xl border border-border bg-surface p-6">

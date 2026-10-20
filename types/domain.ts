@@ -31,7 +31,6 @@ export const CATEGORY_SLUGS = [
 export type CategorySlug = (typeof CATEGORY_SLUGS)[number];
 
 export const SECTION_KEYS = [
-  "opening",
   "hero",
   "intro",
   "countdown",

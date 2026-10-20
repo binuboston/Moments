@@ -12,9 +12,10 @@ describe("template registry integrity", () => {
       .filter((f) => f.endsWith(".sql"))
       .map((f) => readFileSync(path.join(dir, f), "utf8"))
       .join("\n");
-    const keys = [...sql.matchAll(/\('([a-z0-9-]+)', '([a-z0-9-]+)', '[^']+',/g)].map((m) => m[2]);
-    expect(keys.length).toBeGreaterThanOrEqual(9);
-    for (const key of ["shubh-vivah", "royal-night", "gulmohar-garden"]) expect(keys).toContain(key);
+    // Templates deleted by a later migration no longer need a renderer.
+    const removed = new Set([...sql.matchAll(/delete from public\.templates where slug in \(([^)]*)\)/g)].flatMap((m) => [...m[1].matchAll(/'([a-z0-9-]+)'/g)].map((x) => x[1])));
+    const keys = [...sql.matchAll(/\('([a-z0-9-]+)', '([a-z0-9-]+)', '[^']+',/g)].map((m) => m[2]).filter((k) => !removed.has(k));
+    expect(keys.length).toBe(6);
     for (const key of keys) expect(getTemplate(key), `missing renderer for ${key}`).toBeDefined();
   });
 

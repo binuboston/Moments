@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { REQUIRED_SECTIONS, SECTION_KEYS, type SectionKey } from "@/types/domain";
 import type { ThemeInput } from "@/lib/validation/theme";
-import { INDIC_FONT_STACK, fontFamily } from "@/features/templates/fonts";
+import { fontFamily } from "@/features/templates/fonts";
 import type { InvitationView, ResolvedTheme, TemplateDefinition } from "@/features/templates/types";
 
 /** Whether the invitation has data for a section. Sections with nothing to show are hidden. */
@@ -10,7 +10,6 @@ export function sectionHasContent(section: SectionKey, view: InvitationView): bo
   switch (section) {
     case "hero":
     case "details":
-    case "opening":
       return true;
     case "intro":
       return Boolean(c.intro || c.hosts || c.subheading);
@@ -57,15 +56,9 @@ export function resolveTheme(def: TemplateDefinition, theme: ThemeInput, view: I
 }
 
 /** CSS custom properties for the template root. */
-const kebab = (key: string) => key.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`);
-
 export function themeCssVars(theme: ResolvedTheme): CSSProperties {
   const v = theme.palette.vars;
-  const extra: Record<string, string> = {};
-  for (const [key, value] of Object.entries(theme.palette.extra ?? {})) extra[`--inv-${kebab(key)}`] = value;
-  const display = fontFamily(theme.fonts.display);
   return {
-    ...extra,
     "--inv-bg": v.bg,
     "--inv-surface": v.surface,
     "--inv-text": v.text,
@@ -73,9 +66,7 @@ export function themeCssVars(theme: ResolvedTheme): CSSProperties {
     "--inv-accent": v.accent,
     "--inv-accent-contrast": v.accentContrast,
     "--inv-border": v.border,
-    "--inv-font-display": `${display}, ${INDIC_FONT_STACK}, Georgia, serif`,
-    "--inv-font-body": `${fontFamily(theme.fonts.body)}, ${INDIC_FONT_STACK}, system-ui, sans-serif`,
-    "--inv-font-script": theme.fonts.script ? `${fontFamily(theme.fonts.script)}, ${display}, cursive` : display,
-    "--inv-font-indic": `${INDIC_FONT_STACK}, ${display}, serif`,
+    "--inv-font-display": fontFamily(theme.fonts.display),
+    "--inv-font-body": fontFamily(theme.fonts.body),
   } as CSSProperties;
 }

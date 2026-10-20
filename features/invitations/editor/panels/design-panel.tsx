@@ -20,7 +20,6 @@ export interface TemplateOption {
 }
 
 const SECTION_LABELS: Record<SectionKey, { label: string; hint: string }> = {
-  opening: { label: "Opening envelope", hint: "Guests tap to open the invitation" },
   hero: { label: "Hero", hint: "Always shown" },
   intro: { label: "Introduction", hint: "Hosts, subheading and welcome text" },
   countdown: { label: "Countdown", hint: "Live countdown to the start time" },

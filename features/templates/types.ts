@@ -21,11 +21,6 @@ export interface Palette {
   };
   /** Used for swatches in the editor and catalogue. */
   swatch: [string, string, string];
-  /**
-   * Optional extra roles for richer templates (e.g. contrastBg, rose, olive).
-   * Emitted as --inv-<kebab-case-key> custom properties.
-   */
-  extra?: Record<string, string>;
 }
 
 export interface FontPairing {
@@ -33,8 +28,6 @@ export interface FontPairing {
   name: string;
   display: FontKey;
   body: FontKey;
-  /** Romantic accent face (ampersands, signatures). Falls back to display. */
-  script?: FontKey;
 }
 
 export interface MediaItem {
@@ -75,22 +68,13 @@ export interface ResolvedTheme {
  */
 export type RenderMode = "public" | "demo" | "preview";
 
-/** Full-viewport layout (fixed cover, page scroll lock, parallax). */
-export const isFullPage = (mode: RenderMode) => mode !== "preview";
 /** Side effects that persist data, e.g. RSVP submission. */
 export const canSubmit = (mode: RenderMode) => mode === "public";
-
-/**
- * "full": opening cover, entrance and scroll motion (public page, editor preview, live demo).
- * "static": everything visible immediately, no cover (catalogue cards, marketing mockups).
- */
-export type MotionMode = "full" | "static";
 
 export interface TemplateProps {
   view: InvitationView;
   theme: ResolvedTheme;
   mode: RenderMode;
-  motion: MotionMode;
 }
 
 export interface TemplateDefinition {
@@ -104,8 +88,6 @@ export interface TemplateDefinition {
   palettes: Palette[];
   fontPairings: FontPairing[];
   defaults: { paletteId: string; fontPairingId: string };
-  /** "cinematic" templates are built from art-direction configs; see features/templates/cinematic. */
-  experience?: "classic" | "cinematic";
   /** Small CSS gradient used for cards before the live preview mounts. */
   previewGradient: string;
   component: ComponentType<TemplateProps>;

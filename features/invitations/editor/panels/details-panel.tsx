@@ -41,12 +41,6 @@ export interface ContentFormValues {
   occasion?: string;
   organisation?: string;
   agenda?: string;
-  invocation: string;
-  regionalTitle: string;
-  ceremonyLabel: string;
-  city: string;
-  familyMessage: string;
-  hashtag: string;
 }
 
 interface KindField {
@@ -249,19 +243,6 @@ export function DetailsPanel() {
             </Button>
           </div>
         ) : null}
-      </fieldset>
-
-      <fieldset className="grid gap-5">
-        <legend className="mb-1 text-sm font-semibold">Traditional touches</legend>
-        <p className="-mt-3 text-xs text-muted-foreground">Optional. Type in any language or script: Devanagari, Malayalam, Tamil and more are supported.</p>
-        <TextField id="content-invocation" label="Invocation or blessing" optional hint="e.g. ॐ श्री गणेशाय नमः" error={err("invocation")} inputProps={{ ...form.register("invocation"), lang: "mul" } as React.ComponentProps<"input">} />
-        <TextField id="content-regionalTitle" label="Title in your language" optional hint="e.g. ശുഭ വിവാഹം" error={err("regionalTitle")} inputProps={form.register("regionalTitle")} />
-        <div className="grid gap-5 sm:grid-cols-2">
-          <TextField id="content-ceremonyLabel" label="Ceremony name" optional hint="e.g. Muhurtham, Nikah, Ceremony" error={err("ceremonyLabel")} inputProps={form.register("ceremonyLabel")} />
-          <TextField id="content-city" label="City" optional hint="e.g. Kochi, Kerala" error={err("city")} inputProps={form.register("city")} />
-        </div>
-        <TextField id="content-hashtag" label="Wedding hashtag" optional hint="Without the #. Guests can copy it from the invitation." error={err("hashtag")} inputProps={{ ...form.register("hashtag"), autoCapitalize: "off", spellCheck: false } as React.ComponentProps<"input">} />
-        <TextareaField id="content-familyMessage" label="Message from the families" optional hint="Shown in the closing, e.g. “With love, the families of Ananya and Kiran”" error={err("familyMessage")} textareaProps={{ rows: 2, ...form.register("familyMessage") }} />
       </fieldset>
 
       <fieldset className="grid gap-5">

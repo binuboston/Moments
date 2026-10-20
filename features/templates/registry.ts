@@ -6,13 +6,7 @@ import { goldenGala } from "@/features/templates/designs/golden-gala";
 import { modernMinimal } from "@/features/templates/designs/modern-minimal";
 import { softPastel } from "@/features/templates/designs/soft-pastel";
 import type { TemplateDefinition } from "@/features/templates/types";
-import { defineCinematicTemplate } from "@/features/templates/cinematic/define";
-import { gulmoharGarden } from "@/features/templates/cinematic/templates/gulmohar-garden";
-import { royalNight } from "@/features/templates/cinematic/templates/royal-night";
-import { shubhVivah } from "@/features/templates/cinematic/templates/shubh-vivah";
 
-/** Cinematic templates are art-direction configs over a shared engine. */
-export const CINEMATIC_TEMPLATES = [shubhVivah, royalNight, gulmoharGarden].map(defineCinematicTemplate);
 
 /**
  * Explicit mapping between approved renderer keys and their components.
@@ -20,7 +14,6 @@ export const CINEMATIC_TEMPLATES = [shubhVivah, royalNight, gulmoharGarden].map(
  * `renderer_key`. Nothing user-supplied is ever executed as a template.
  */
 export const TEMPLATE_REGISTRY: Readonly<Record<string, TemplateDefinition>> = Object.freeze({
-  ...Object.fromEntries(CINEMATIC_TEMPLATES.map((t) => [t.key, t])),
   [eternalGrace.key]: eternalGrace,
   [botanicalNoir.key]: botanicalNoir,
   [modernMinimal.key]: modernMinimal,

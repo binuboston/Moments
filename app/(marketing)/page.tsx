@@ -39,7 +39,7 @@ const faqs = [
 
 export default async function HomePage() {
   const [featured, categories, allTemplates] = await Promise.all([getFeaturedTemplates(4), getActiveCategories(), getPublishedTemplates()]);
-  const heroTemplate = allTemplates.find((t) => t.def.key === "shubh-vivah") ?? allTemplates[0];
+  const heroTemplate = allTemplates.find((t) => t.def.key === "eternal-grace") ?? allTemplates[0];
   const mobileTemplate = allTemplates.find((t) => t.def.key === "confetti-pop") ?? allTemplates[0];
 
   return (

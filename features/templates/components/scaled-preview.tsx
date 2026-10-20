@@ -38,8 +38,7 @@ export function ScaledPreview({ contentWidth = 390, className, scrollable = true
   return (
     <div ref={ref} className={cn("relative h-full w-full overflow-hidden", className)}>
       <div
-        // container-type:size lets a cinematic cover size itself to this frame (100cqh).
-        className={cn("absolute top-0 left-0 origin-top-left [container-type:size]", scrollable ? "overflow-y-auto no-scrollbar" : "overflow-hidden")}
+        className={cn("absolute top-0 left-0 origin-top-left", scrollable ? "overflow-y-auto no-scrollbar" : "overflow-hidden")}
         style={{
           width: contentWidth,
           height: height ? height / scale : "100%",

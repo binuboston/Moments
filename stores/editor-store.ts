@@ -19,9 +19,6 @@ interface EditorState {
   lastSavedAt: number | null;
   previewDevice: "phone" | "desktop";
   mobilePreviewOpen: boolean;
-  /** Incremented to remount the preview and replay the opening animation. */
-  previewReplay: number;
-  replayPreview: () => void;
 
   load: (draft: InvitationDraft) => void;
   reset: () => void;
@@ -58,8 +55,6 @@ export const useEditorStore = create<EditorState>()((set) => ({
   lastSavedAt: null,
   previewDevice: "phone",
   mobilePreviewOpen: false,
-  previewReplay: 0,
-  replayPreview: () => set((s) => ({ previewReplay: s.previewReplay + 1 })),
 
   load: (draft) => set({ draft, serverDraft: draft, saveState: "idle", step: "details" }),
   reset: () => set({ draft: null, serverDraft: null, saveState: "idle", lastSavedAt: null, step: "details", mobilePreviewOpen: false }),

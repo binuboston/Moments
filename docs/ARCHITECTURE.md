@@ -124,17 +124,9 @@ Rules:
 - **Local port is 3100.** Port 3000 was occupied on the development machine; every local URL (site URL, Supabase redirect URLs, Playwright base URL) uses 3100.
 - **Category content kinds are code.** Admins can manage names, descriptions, icons, ordering and availability of categories, but a new kind of event needs a Zod schema and wizard fields first. The admin UI only offers slugs that have a schema.
 
-## 10b. Cinematic template engine (added 2026-10-21)
+## 10b. Template system (2026-10-21)
 
-Premium templates are art-direction configs over a shared engine in `features/templates/cinematic/`; see [TEMPLATES.md](TEMPLATES.md). Key decisions:
-
-- Templates are configuration, validated with Zod at module load: palettes, fonts, opening style, layout variants and section order. Adding a design is mostly a config file.
-- One owner per animated property: GSAP for the opening timeline and parallax, IntersectionObserver plus CSS for reveals and the hero entrance, CSS keyframes for ambient effects. Content is visible without JavaScript.
-- Container queries instead of viewport breakpoints, so scaled previews match real phones.
-- New render mode `demo` for `/demo/[slug]` live demos. These are full page but never submit data.
-- Accessible gold: separate `accent` (decorative) and `accentInk` (text, at least 4.5:1) roles, enforced by tests.
-- Catalogue cache keys include the registry's template keys, so a deploy that adds renderers busts the cached catalogue.
-- Sample photography is licensed from Wikimedia Commons (Unsplash's API now requires a key) and limited to face-free detail shots.
+The cinematic template engine added earlier was removed for consistency; all designs are classic template components. See [TEMPLATES.md](TEMPLATES.md). The `demo` render mode and `/demo/[slug]` live demos remain and work for every template.
 
 ## 11. Risks and mitigations
 

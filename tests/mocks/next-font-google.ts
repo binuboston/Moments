@@ -14,6 +14,3 @@ export const DM_Sans = make("DM_Sans");
 export const Fraunces = make("Fraunces");
 export const Geist = make("Geist");
 export const Geist_Mono = make("Geist_Mono");
-export const Pinyon_Script = make("Pinyon_Script");
-export const Noto_Serif_Devanagari = make("Noto_Serif_Devanagari");
-export const Noto_Serif_Malayalam = make("Noto_Serif_Malayalam");

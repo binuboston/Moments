@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: PageProps<"/demo/[slug]">): P
   };
 }
 
-/** Full-screen live demo of a template with sample content and licensed sample photos. */
+/** Full-screen live demo of a template with sample content. */
 export default async function TemplateDemoPage({ params, searchParams }: PageProps<"/demo/[slug]">) {
   const { slug } = await params;
   const sp = await searchParams;
@@ -41,16 +41,7 @@ export default async function TemplateDemoPage({ params, searchParams }: PagePro
           Use this design
         </Link>
       </div>
-      <InvitationRenderer view={view} mode="demo" motion="full" />
-      {def.experience === "cinematic" ? (
-        <p className="bg-neutral-950 px-6 py-4 text-center text-[11px] text-neutral-400">
-          Sample photography from Wikimedia Commons (CC0, CC BY, CC BY-SA); photographers credited in{" "}
-          <Link href="/help#sample-photography" className="underline">
-            our credits
-          </Link>
-          . Names and details are fictional.
-        </p>
-      ) : null}
+      <InvitationRenderer view={view} mode="demo" />
     </main>
   );
 }
