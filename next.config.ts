@@ -27,6 +27,11 @@ const nextConfig: NextConfig = {
     // Local Supabase runs on 127.0.0.1; allow it only when explicitly in development.
     dangerouslyAllowLocalIP: process.env.NODE_ENV === "development",
   },
+  experimental: {
+    // The restored build cache (.next/cache on Vercel) kept serving CSS from an older
+    // globals.css after token changes. Build cold; dev keeps its cache.
+    turbopackFileSystemCacheForBuild: false,
+  },
   turbopack: {
     // Keep Turbopack scoped to this project even when a parent folder has a lockfile.
     root: path.join(__dirname),
