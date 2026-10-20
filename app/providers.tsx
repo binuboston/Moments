@@ -5,6 +5,7 @@ import { Tooltip } from "radix-ui";
 import { useState } from "react";
 import { Toaster } from "sonner";
 import { NavigationProgress } from "@/components/motion/navigation-progress";
+import { AccountProvider } from "@/features/auth/account-context";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -26,11 +27,15 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <NavigationProgress />
-      <Tooltip.Provider delayDuration={200}>{children}</Tooltip.Provider>
+      {/* Resolves the signed-in account lazily, only on pages that show account UI. */}
+      <AccountProvider>
+        <Tooltip.Provider delayDuration={200}>{children}</Tooltip.Provider>
+      </AccountProvider>
       <Toaster
-        position="bottom-center"
-        // Keep toasts clear of the mobile bottom navigation and the home indicator.
-        mobileOffset={{ bottom: "calc(5.5rem + env(safe-area-inset-bottom))" }}
+        // Top: bottom bars (editor) own the bottom edge; clear the floating header.
+        position="top-center"
+        offset={{ top: "5.5rem" }}
+        mobileOffset={{ top: "5rem" }}
         toastOptions={{
           classNames: {
             toast: "!rounded-xl !border-border !bg-surface !text-foreground !shadow-lift",

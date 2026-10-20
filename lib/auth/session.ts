@@ -2,7 +2,7 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 import type { Account } from "@/lib/auth/account";
-import { startPath } from "@/lib/routes";
+import { routes } from "@/lib/routes";
 import { getCurrentProfile, getCurrentUser } from "@/lib/supabase/server";
 
 /**
@@ -12,7 +12,7 @@ import { getCurrentProfile, getCurrentUser } from "@/lib/supabase/server";
  */
 export async function requireAppUser(next?: string) {
   const user = await getCurrentUser();
-  if (!user) redirect(startPath(next));
+  if (!user) redirect(routes.start(next));
   return user;
 }
 

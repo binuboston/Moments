@@ -10,6 +10,7 @@ import { getTemplate } from "@/features/templates/registry";
 import type { InvitationView } from "@/features/templates/types";
 import { draftToView, functionRowToInput, isCategorySlug, looseContent, parseSettings, parseTheme, rowStartsAt, rowTimezone } from "@/features/invitations/mappers";
 import type { InvitationDraft, InvitationListItem, InvitationListResponse, MediaRecord } from "@/features/invitations/types";
+import { routes } from "@/lib/routes";
 
 export const MEDIA_BUCKET = "invitation-media";
 /** Signed URLs outlive the page cache (5 min) by a wide margin. */
@@ -80,7 +81,7 @@ export async function getOwnedInvitationDraft(client: Client, id: string, ownerI
     publishedAt: data.published_at,
     updatedAt: data.updated_at,
     createdAt: data.created_at,
-    publicUrl: siteUrl(`/e/${data.slug}`),
+    publicUrl: siteUrl(routes.invitation(data.slug)),
     plan,
   };
 }
@@ -132,7 +133,7 @@ export async function listOwnedInvitations(client: Client, ownerId: string, para
       rsvpEnabled: settings.rsvp.enabled,
       publishedAt: row.published_at,
       updatedAt: row.updated_at,
-      publicUrl: siteUrl(`/e/${row.slug}`),
+      publicUrl: siteUrl(routes.invitation(row.slug)),
     };
   });
 
@@ -181,7 +182,7 @@ export async function getPublishedInvitationView(slug: string): Promise<Invitati
     settings: data.settings,
     functions: [...data.invitation_functions].sort((a, b) => a.sort_order - b.sort_order).map(functionRowToInput),
     media,
-    publicUrl: siteUrl(`/e/${data.slug}`),
+    publicUrl: siteUrl(routes.invitation(data.slug)),
     showBranding,
   });
 }
@@ -209,7 +210,7 @@ export async function getOverviewSummary(client: Client, ownerId: string, now = 
   return {
     upcoming: upcoming.length,
     next: first
-      ? { id: first.row.id, title: first.row.title || "Untitled invitation", status: first.row.status, startsAt: first.startsAt, timezone: rowTimezone(first.row), publicUrl: siteUrl(`/e/${first.row.slug}`) }
+      ? { id: first.row.id, title: first.row.title || "Untitled invitation", status: first.row.status, startsAt: first.startsAt, timezone: rowTimezone(first.row), publicUrl: siteUrl(routes.invitation(first.row.slug)) }
       : null,
   };
 }

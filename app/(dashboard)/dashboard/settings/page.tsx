@@ -8,11 +8,13 @@ import { ProfileForm, SecurityPanel } from "@/features/auth/settings-forms";
 import { PLAN_LIMITS } from "@/lib/entitlements";
 import { requireAppUser } from "@/lib/auth/session";
 import { getCurrentProfile } from "@/lib/supabase/server";
+import { BRAND } from "@/lib/brand";
+import { ROUTES, routes } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "Settings", robots: { index: false } };
 
 export default async function SettingsPage() {
-  const user = await requireAppUser("/dashboard/settings");
+  const user = await requireAppUser(ROUTES.settings);
   if (user.is_anonymous) {
     // Guests have no profile or password yet.
     return (
@@ -25,10 +27,10 @@ export default async function SettingsPage() {
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             <Button asChild>
-              <Link href="/signup?next=/dashboard/settings">Create free account</Link>
+              <Link href={routes.signup(ROUTES.settings)}>Create free account</Link>
             </Button>
             <Button asChild variant="soft">
-              <Link href="/login?next=/dashboard/settings">Log in</Link>
+              <Link href={routes.login(ROUTES.settings)}>Log in</Link>
             </Button>
           </CardContent>
         </Card>
@@ -88,7 +90,7 @@ export default async function SettingsPage() {
                 <dd className="font-medium">{plan === "pro" ? "Included" : "Pro only"}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted-foreground">Mirth badge</dt>
+                <dt className="text-muted-foreground">{BRAND.badge}</dt>
                 <dd className="font-medium">{limits.branding ? "Shown" : "Removed"}</dd>
               </div>
             </dl>

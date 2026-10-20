@@ -14,6 +14,7 @@ import { errorMessage } from "@/features/invitations/hooks";
 import { formatShortDate } from "@/lib/utils/dates";
 import type { InvitationStatus } from "@/types/domain";
 import { cn } from "@/lib/utils/cn";
+import { ROUTES, routes } from "@/lib/routes";
 
 interface Row {
   id: string;
@@ -48,7 +49,7 @@ export function EventsAdmin({ rows, total, page, pageSize, status }: { rows: Row
     onError: (err) => toast.error(errorMessage(err)),
   });
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const href = (p: number, s?: string) => `/admin/events?${new URLSearchParams({ ...(s ? { status: s } : {}), ...(p > 1 ? { page: String(p) } : {}) }).toString()}`;
+  const href = (p: number, s?: string) => `${ROUTES.adminEvents}?${new URLSearchParams({ ...(s ? { status: s } : {}), ...(p > 1 ? { page: String(p) } : {}) }).toString()}`;
   const chip = (active: boolean) => cn("inline-flex h-10 shrink-0 items-center rounded-full border px-4 text-sm sm:h-8 sm:px-3", active ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hover:text-foreground");
 
   return (
@@ -82,7 +83,7 @@ export function EventsAdmin({ rows, total, page, pageSize, status }: { rows: Row
               {r.status === "published" ? (
                 <>
                   <Button asChild variant="outline" size="sm">
-                    <a href={`/e/${r.slug}`} target="_blank" rel="noopener noreferrer">
+                    <a href={routes.invitation(r.slug)} target="_blank" rel="noopener noreferrer">
                       <ExternalLinkIcon aria-hidden /> Open
                     </a>
                   </Button>
@@ -134,7 +135,7 @@ export function EventsAdmin({ rows, total, page, pageSize, status }: { rows: Row
                     {r.status === "published" ? (
                       <>
                         <Button asChild variant="ghost" size="icon-sm" aria-label="Open">
-                          <a href={`/e/${r.slug}`} target="_blank" rel="noopener noreferrer">
+                          <a href={routes.invitation(r.slug)} target="_blank" rel="noopener noreferrer">
                             <ExternalLinkIcon />
                           </a>
                         </Button>

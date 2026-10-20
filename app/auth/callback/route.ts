@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { safeNextPath } from "@/features/auth/safe-next";
 import { claimGuestDrafts } from "@/lib/auth/guest";
+import { ROUTES } from "@/lib/routes";
 
 /**
  * Exchanges the PKCE code from OAuth (Google) and email links (confirmation,
@@ -24,5 +25,5 @@ export async function GET(request: NextRequest) {
 
   // OAuth providers report cancellations and failures as ?error=…
   const reason = searchParams.get("error") ? "oauth" : "auth";
-  return NextResponse.redirect(`${origin}/login?error=${reason}`);
+  return NextResponse.redirect(`${origin}${ROUTES.login}?error=${reason}`);
 }

@@ -3,6 +3,22 @@ import { PASSWORD, uniqueEmail, waitForDraft } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
+test("starting from the site navigation (client-side) lands in the wizard as a guest", async ({ page, isMobile }) => {
+  await page.goto("/");
+  if (isMobile) {
+    await page.getByRole("button", { name: "Open menu" }).click();
+    await page.getByTestId("mobile-account-start").click();
+  } else {
+    await page.getByTestId("header-new-invitation").click();
+  }
+  await expect(page).toHaveURL(/\/dashboard\/invitations\/new$/, { timeout: 30_000 });
+  await expect(page.getByRole("heading", { name: /create an invitation/i })).toBeVisible();
+  if (isMobile) {
+    await page.getByRole("button", { name: "Open menu" }).click();
+    await expect(page.getByTestId("mobile-guest")).toBeVisible();
+  }
+});
+
 test("a visitor designs without an account and signs up only to publish", async ({ page }) => {
   // Starting from a template CTA: no login wall, a guest session is created on the way.
   await page.goto("/dashboard/invitations/new");

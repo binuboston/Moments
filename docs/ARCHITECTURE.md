@@ -201,17 +201,22 @@ GSAP is the only animation library. Everything lives in two places:
 - **Google** sign-in is behind `NEXT_PUBLIC_AUTH_GOOGLE` and configured in Supabase (SETUP.md).
 - **Cleanup.** `public.purge_stale_guests()` deletes guests inactive for 30 days (schedule it). Their uploaded files remain in storage until a storage sweep is added.
 
-## 10e. App structure (2026-10-21)
+## 10e. App structure and single sources of truth (2026-10-21)
 
-- **Routes.** All route paths and the shared navigation live in `lib/routes.ts`. Links use `ROUTES.*` instead of literals.
-- **Who gets in.** The app (`/dashboard`) is open to everyone:
-  - signed-out visitors are sent to `/start`, which opens a guest session in the browser and returns them where they were going
-  - pages call `requireAppUser()` (`lib/auth/session.ts`) as the page-level guarantee
-  - `/admin` still requires a real login
-- **One header.** `AppHeader` is shared by the marketing layout and the app shell:
-  - in the app, the server passes the account (no flash)
-  - on marketing pages, `useAccount()` resolves it in the browser, so those pages stay static instead of reading cookies on every request
-- **Logo.** It always links to the landing page. "My invitations" in the navigation is the way into the app.
+Each of these has exactly one home. A lint rule (`eslint.config.mjs`, `no-restricted-syntax`) fails the build when route or brand literals appear elsewhere.
+
+| Concern | Source | Used by |
+| --- | --- | --- |
+| Routes | `lib/routes.ts`: `ROUTES` (static), `routes.*()` (with parameters), `PRIMARY_NAV`, `isAppPath`, `isFocusedFlow` | Every link, redirect, robots, sitemap and the proxy |
+| Product name and voice | `lib/brand.ts` (`BRAND.name` is "Invite") | Metadata, social images, footer, the "Made with" badge, plan copy, `.ics` PRODID |
+| Who is using the app (browser) | `features/auth/account-context.tsx`: `AccountProvider` and `useAccount()` | Header, menus, auth UI. The root provider resolves lazily; the app shell seeds it from the server |
+| What each account state can do | `lib/auth/account-actions.ts`: `accountView(account)` gives identity, primary action and actions for signed out, guest and account holder | Desktop account dropdown and phone menu (they cannot disagree) |
+| Entering the app | `components/layout/app-link.tsx`: `AppLink` | Every link into `/dashboard`. Signed-out visitors go straight to `/start` with a full page load, so the client router never caches the proxy's redirect |
+| Who may enter | `lib/supabase/proxy.ts` sends visitors without a session to `/start`; `requireAppUser()` is the page-level guarantee; `/admin` needs a real login | App layout and pages |
+
+- **Header.** `AppHeader` is shared by the marketing layout and the app. The logo always goes to the landing page; "My invitations" in the navigation is the way into the app.
+- **Static marketing.** Marketing pages are statically rendered: they never read cookies on the server.
+- **Tests.** `tests/e2e/navigation.spec.ts` checks every account state on desktop and phone, entering the app by clicking. `tests/unit/account-and-routes.test.ts` covers the account model and the route builders.
 
 ## 11. Risks and mitigations
 

@@ -6,6 +6,8 @@ import { formatEventDate } from "@/lib/utils/dates";
 import { slugSchema } from "@/lib/utils/slug";
 import { truncate } from "@/lib/utils/format";
 import { shareTitle } from "@/features/templates/title";
+import { BRAND } from "@/lib/brand";
+import { routes } from "@/lib/routes";
 
 // Published pages are cached and revalidated on publish/update via revalidatePath.
 export const revalidate = 300;
@@ -29,16 +31,16 @@ export async function generateMetadata({ params }: PageProps<"/e/[slug]">): Prom
   return {
     title: { absolute: title },
     description,
-    alternates: { canonical: `/e/${slug}` },
+    alternates: { canonical: routes.invitation(slug) },
     // Guest-facing pages are for the people who hold the link, not search engines.
     robots: { index: false, follow: false },
     openGraph: {
       type: "website",
       title,
       description,
-      url: `/e/${slug}`,
-      siteName: "Mirth",
-      images: [{ url: `/e/${slug}/opengraph-image`, width: 1200, height: 630, alt: title }],
+      url: routes.invitation(slug),
+      siteName: BRAND.name,
+      images: [{ url: routes.invitationImage(slug), width: 1200, height: 630, alt: title }],
     },
     twitter: { card: "summary_large_image", title, description },
   };

@@ -1,6 +1,6 @@
 # Design system
 
-Mirth has two visual layers that share one brand:
+Invite has two visual layers that share one brand:
 
 - **App** (dashboard, editor, admin): calm, floating, borderless surfaces on a cool grey canvas. Described here.
 - **Invitations** (templates): each design has its own palette and fonts through `--inv-*` variables. See [TEMPLATES.md](TEMPLATES.md).

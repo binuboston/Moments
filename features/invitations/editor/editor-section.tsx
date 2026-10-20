@@ -27,7 +27,7 @@ export function EditorSection({ id, title, summary, icon, tone, children }: Edit
   const panelId = `editor-panel-${id}`;
 
   return (
-    <section id={`editor-${id}`} className="surface-card scroll-mt-40 overflow-hidden">
+    <section id={`editor-${id}`} className="surface-card scroll-mt-28 overflow-hidden">
       <h2>
         <button
           type="button"

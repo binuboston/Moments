@@ -13,6 +13,7 @@ import { Field, fieldAria } from "@/components/forms/field";
 import { createClient } from "@/lib/supabase/client";
 import { safeNextPath } from "@/features/auth/safe-next";
 import { AuthSwitch, claimGuestDrafts, GoogleButton, googleEnabled, GuestNotice, OrDivider, PasswordInput, StrengthMeter } from "@/features/auth/auth-ui";
+import { ROUTES, routes } from "@/lib/routes";
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -113,7 +114,7 @@ export function LoginForm({ embedded = false, next: nextProp, onSuccess }: AuthF
           <PasswordInput autoComplete="current-password" {...fieldAria("password", { error: errors.password?.message })} {...form.register("password")} />
         </Field>
         <div className="-mt-2 text-right">
-          <Link href="/forgot-password" className="text-xs text-muted-foreground hover:text-foreground">
+          <Link href={ROUTES.forgotPassword} className="text-xs text-muted-foreground hover:text-foreground">
             Forgot your password?
           </Link>
         </div>
@@ -151,7 +152,7 @@ export function SignupForm({ embedded = false, next: nextProp, onSuccess }: Auth
       password: values.password,
       options: {
         data: { full_name: values.fullName },
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        emailRedirectTo: `${window.location.origin}${routes.authCallback(next)}`,
       },
     });
     if (error) {
@@ -178,7 +179,7 @@ export function SignupForm({ embedded = false, next: nextProp, onSuccess }: Auth
         </p>
         {embedded ? null : (
           <Button asChild variant="soft" className="mt-8">
-            <Link href="/login">Back to log in</Link>
+            <Link href={ROUTES.login}>Back to log in</Link>
           </Button>
         )}
       </div>
@@ -229,11 +230,11 @@ export function SignupForm({ embedded = false, next: nextProp, onSuccess }: Auth
         </Button>
         <p className="text-center text-xs text-muted-foreground">
           By continuing you agree to our{" "}
-          <Link href="/help#terms" className="underline underline-offset-2">
+          <Link href={ROUTES.terms} className="underline underline-offset-2">
             terms
           </Link>{" "}
           and{" "}
-          <Link href="/help#privacy" className="underline underline-offset-2">
+          <Link href={ROUTES.privacy} className="underline underline-offset-2">
             privacy summary
           </Link>
           .
@@ -253,7 +254,7 @@ export function ForgotPasswordForm() {
     setError(null);
     const supabase = createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/reset-password")}`,
+      redirectTo: `${window.location.origin}${routes.authCallback(ROUTES.resetPassword)}`,
     });
     if (error) {
       setError(friendlyAuthError(error.message));
@@ -271,7 +272,7 @@ export function ForgotPasswordForm() {
         <h1 className="mt-6 text-2xl font-semibold tracking-tight">Check your inbox</h1>
         <p className="mt-3 text-sm text-muted-foreground text-pretty">If an account exists for that address, we've sent a link to reset your password.</p>
         <Button asChild variant="outline" className="mt-8">
-          <Link href="/login">Back to log in</Link>
+          <Link href={ROUTES.login}>Back to log in</Link>
         </Button>
       </div>
     );
@@ -295,7 +296,7 @@ export function ForgotPasswordForm() {
         </Button>
       </form>
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        <Link href="/login" className="font-medium text-primary underline-offset-4 hover:underline">
+        <Link href={ROUTES.login} className="font-medium text-primary underline-offset-4 hover:underline">
           Back to log in
         </Link>
       </p>
@@ -317,7 +318,7 @@ export function ResetPasswordForm() {
       setError(friendlyAuthError(error.message));
       return;
     }
-    router.replace("/dashboard");
+    router.replace(ROUTES.app);
     router.refresh();
   };
 

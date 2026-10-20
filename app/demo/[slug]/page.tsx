@@ -6,6 +6,8 @@ import { getPublishedTemplateBySlug } from "@/features/templates/queries";
 import { InvitationRenderer } from "@/features/templates/renderer";
 import { sampleView } from "@/features/templates/sample-data";
 import { CATEGORY_SLUGS, type CategorySlug } from "@/types/domain";
+import { routes } from "@/lib/routes";
+import { AppLink } from "@/components/layout/app-link";
 
 export async function generateMetadata({ params }: PageProps<"/demo/[slug]">): Promise<Metadata> {
   const { slug } = await params;
@@ -33,13 +35,13 @@ export default async function TemplateDemoPage({ params, searchParams }: PagePro
   return (
     <main className="min-h-screen">
       <div className="fixed top-3 left-3 z-[75] flex items-center gap-2 rounded-full border border-black/10 bg-white/85 py-1.5 pr-1.5 pl-3 text-xs text-neutral-800 shadow-lg backdrop-blur">
-        <Link href={`/templates/${row.slug}`} className="inline-flex items-center gap-1 font-medium hover:underline">
+        <Link href={routes.template(row.slug)} className="inline-flex items-center gap-1 font-medium hover:underline">
           <ArrowLeftIcon className="size-3.5" aria-hidden /> {def.name}
         </Link>
         <span className="text-neutral-500">· Sample</span>
-        <Link href={`/dashboard/invitations/new?template=${row.slug}`} className="rounded-full bg-neutral-900 px-3 py-1 font-medium text-white hover:bg-neutral-700">
+        <AppLink href={routes.newInvitation({ template: row.slug })} className="rounded-full bg-neutral-900 px-3 py-1 font-medium text-white hover:bg-neutral-700">
           Use this design
-        </Link>
+        </AppLink>
       </div>
       <InvitationRenderer view={view} mode="demo" />
     </main>

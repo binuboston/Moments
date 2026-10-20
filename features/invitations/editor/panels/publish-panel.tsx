@@ -20,6 +20,7 @@ import { formatEventDate } from "@/lib/utils/dates";
 import { publishableSchema } from "@/lib/validation/invitation";
 import { withDerivedHeadline } from "@/lib/validation/content";
 import { useEditorStore, type EditorTarget } from "@/stores/editor-store";
+import { routes } from "@/lib/routes";
 
 const FIELD_LABELS: Record<string, { label: string; step: EditorTarget }> = {
   "content.headline": { label: "Headline", step: "details" },
@@ -125,7 +126,7 @@ export function PublishPanel({ isGuest = false }: { isGuest?: boolean }) {
                 <Share2Icon aria-hidden /> Share
               </Button>
               <Button asChild variant="outline">
-                <Link href={`/dashboard/invitations/${draft.id}/rsvps`}>View RSVPs</Link>
+                <Link href={routes.invitationResponses(draft.id)}>View RSVPs</Link>
               </Button>
               <Button variant="ghost" onClick={() => unpublish.mutate()} loading={unpublish.isPending} data-testid="unpublish">
                 Unpublish

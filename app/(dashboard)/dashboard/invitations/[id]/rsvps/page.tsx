@@ -8,6 +8,7 @@ import { RsvpManager } from "@/features/rsvp/rsvp-manager";
 import { uuid } from "@/lib/validation/common";
 import { requireAppUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import { routes } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "RSVPs", robots: { index: false } };
 
@@ -24,7 +25,7 @@ export default async function RsvpsPage({ params }: PageProps<"/dashboard/invita
     <div className="grid min-w-0 grid-cols-1 gap-5 sm:gap-8">
       <div>
         <Button asChild variant="ghost" size="sm" className="-ml-2 mb-2">
-          <Link href={`/dashboard/invitations/${id}/edit`}>
+          <Link href={routes.editInvitation(id)}>
             <ArrowLeftIcon aria-hidden /> Back to editor
           </Link>
         </Button>

@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils/cn";
 
 /*
- * The Mirth blossom: a six-petal flower used across the product (invitation
+ * The Invite blossom: a six-petal flower used across the product (invitation
  * opening card, celebration bursts, dashboard). One geometry, two outputs:
  * a React component for markup and an SVG string for particles that GSAP
  * creates imperatively.

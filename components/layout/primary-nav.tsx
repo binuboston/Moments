@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { AppLink } from "@/components/layout/app-link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/motion/gsap";
@@ -61,7 +61,7 @@ export function PrimaryNav({ className }: { className?: string }) {
           const active = isActivePath(pathname, item.href);
           return (
             <li key={item.href}>
-              <Link
+              <AppLink
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
@@ -71,7 +71,7 @@ export function PrimaryNav({ className }: { className?: string }) {
                 )}
               >
                 {item.label}
-              </Link>
+              </AppLink>
             </li>
           );
         })}

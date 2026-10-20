@@ -29,10 +29,12 @@ export interface Stat {
  */
 export function StatTiles({ stats }: { stats: Stat[] }) {
   const root = useRef<HTMLUListElement>(null);
+  // Count up only when arriving from inside the app (decided at first render, see PageEnter).
+  const arrivedInApp = useRef(navigation.hydrated);
 
   useGSAP(
     () => {
-      if (!navigation.hydrated) return;
+      if (!arrivedInApp.current) return;
       const mm = gsap.matchMedia();
       mm.add(MQ.motion, () => {
         gsap.utils.toArray<HTMLElement>("[data-count]", root.current).forEach((el, i) => {

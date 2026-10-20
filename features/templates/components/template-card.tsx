@@ -8,6 +8,7 @@ import { primaryCategory } from "@/features/templates/queries";
 import { InvitationRenderer } from "@/features/templates/renderer";
 import { sampleView } from "@/features/templates/sample-data";
 import type { CategorySlug } from "@/types/domain";
+import { routes } from "@/lib/routes";
 
 interface TemplateCardProps {
   template: CatalogueTemplate;
@@ -20,7 +21,7 @@ export function TemplateCard({ template, category, href }: TemplateCardProps) {
   const { row, def } = template;
   const cat = category && def.categories.includes(category) ? category : primaryCategory(template);
   const view = sampleView(cat, { key: def.key, name: def.name, tier: row.tier });
-  const target = href ?? `/templates/${row.slug}`;
+  const target = href ?? routes.template(row.slug);
 
   // Stretched-link card: the preview is a sibling of the link (never inside it),
   // because previews contain their own links and buttons (nested <a> breaks hydration).

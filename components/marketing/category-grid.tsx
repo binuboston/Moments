@@ -2,6 +2,7 @@ import * as Icons from "lucide-react";
 import Link from "next/link";
 import type { EventCategory } from "@/types/domain";
 import { cn } from "@/lib/utils/cn";
+import { routes } from "@/lib/routes";
 
 const FALLBACK_ICON = Icons.Sparkles;
 
@@ -20,7 +21,7 @@ export function CategoryGrid({ categories, className, active }: { categories: Ev
         return (
           <li key={cat.id} data-reveal>
             <Link
-              href={`/templates?category=${cat.slug}`}
+              href={routes.templatesFor(cat.slug)}
               className={cn(
                 "group flex h-full flex-col gap-3 rounded-2xl border border-border bg-surface p-5 transition-[transform,box-shadow,border-color] duration-300 ease-out-expo hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-soft focus-visible:ring-2 focus-visible:ring-ring",
                 isActive && "border-primary ring-1 ring-primary",

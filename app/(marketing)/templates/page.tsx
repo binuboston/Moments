@@ -8,11 +8,12 @@ import { getActiveCategories, getPublishedTemplates } from "@/features/templates
 import { cn } from "@/lib/utils/cn";
 import { CATEGORY_SLUGS, type CategorySlug } from "@/types/domain";
 import { LayoutTemplateIcon } from "lucide-react";
+import { ROUTES } from "@/lib/routes";
 
 export const metadata: Metadata = {
   title: "Templates",
   description: "Browse professionally designed digital invitation templates for weddings, birthdays, baby showers, parties and corporate events.",
-  alternates: { canonical: "/templates" },
+  alternates: { canonical: ROUTES.templates },
 };
 
 function isCategory(value: string | undefined): value is CategorySlug {
@@ -36,7 +37,7 @@ export default async function TemplatesPage({ searchParams }: PageProps<"/templa
     if (c) sp.set("category", c);
     if (tr) sp.set("tier", tr);
     const qs = sp.toString();
-    return qs ? `/templates?${qs}` : "/templates";
+    return qs ? `${ROUTES.templates}?${qs}` : ROUTES.templates;
   };
 
   const chip = (active: boolean) =>
@@ -80,7 +81,7 @@ export default async function TemplatesPage({ searchParams }: PageProps<"/templa
           title="No templates match these filters"
           description="Try another occasion or clear the filters to see the full collection."
           action={
-            <Link href="/templates" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+            <Link href={ROUTES.templates} className="text-sm font-medium text-primary underline-offset-4 hover:underline">
               Clear filters
             </Link>
           }

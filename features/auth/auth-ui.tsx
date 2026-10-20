@@ -2,28 +2,21 @@
 
 import { EyeIcon, EyeOffIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { publicEnv } from "@/lib/env";
 import { createClient } from "@/lib/supabase/client";
+import { useAccount } from "@/features/auth/account-context";
 import { cn } from "@/lib/utils/cn";
+import { ROUTES, routes } from "@/lib/routes";
 
 export const googleEnabled = () => publicEnv().NEXT_PUBLIC_AUTH_GOOGLE === "true";
 
 /** Whether this browser is designing as a guest (anonymous session). Null until known. */
 export function useIsGuest(): boolean | null {
-  const [guest, setGuest] = useState<boolean | null>(null);
-  useEffect(() => {
-    let alive = true;
-    void createClient()
-      .auth.getUser()
-      .then(({ data }) => alive && setGuest(Boolean(data.user?.is_anonymous)));
-    return () => {
-      alive = false;
-    };
-  }, []);
-  return guest;
+  const account = useAccount();
+  return account === undefined ? null : Boolean(account?.isGuest);
 }
 
 /** Moves this browser's guest drafts to the account that just signed in (no-op without a guest). */
@@ -53,6 +46,7 @@ function GoogleMark() {
  * are kept (the auth callback moves them). Hidden unless Google is configured.
  */
 export function GoogleButton({ next, label = "Continue with Google" }: { next: string; label?: string }) {
+  const isGuest = useIsGuest();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   if (!googleEnabled()) return null;
@@ -61,12 +55,11 @@ export function GoogleButton({ next, label = "Continue with Google" }: { next: s
     setLoading(true);
     setError(null);
     const supabase = createClient();
-    const { data } = await supabase.auth.getUser();
     // Refresh this browser's guest marker so the callback can keep the drafts.
-    if (data.user?.is_anonymous) await fetch("/api/guest/session", { method: "POST" }).catch(() => undefined);
+    if (isGuest) await fetch("/api/guest/session", { method: "POST" }).catch(() => undefined);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`, queryParams: { prompt: "select_account" } },
+      options: { redirectTo: `${window.location.origin}${routes.authCallback(next)}`, queryParams: { prompt: "select_account" } },
     });
     if (error) {
       setLoading(false);
@@ -97,17 +90,17 @@ export function OrDivider({ label = "or continue with email" }: { label?: string
 
 /** Log in / Sign up switch with a sliding thumb. Links keep `next`. */
 export function AuthSwitch({ active, next }: { active: "login" | "signup"; next: string }) {
-  const q = next !== "/dashboard" ? `?next=${encodeURIComponent(next)}` : "";
+  const keep = next !== ROUTES.app ? next : undefined;
   return (
     <div className="relative grid h-11 grid-cols-2 rounded-full bg-fill p-1 text-sm font-medium" role="navigation" aria-label="Account">
       <span
         aria-hidden
         className={cn("absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-full bg-surface shadow-card transition-transform duration-(--duration-slow) ease-(--ease-out-quart) motion-reduce:transition-none", active === "signup" && "translate-x-full")}
       />
-      <Link href={`/login${q}`} aria-current={active === "login" ? "page" : undefined} className={cn("relative z-10 flex items-center justify-center rounded-full transition-colors", active === "login" ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>
+      <Link href={routes.login(keep)} aria-current={active === "login" ? "page" : undefined} className={cn("relative z-10 flex items-center justify-center rounded-full transition-colors", active === "login" ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>
         Log in
       </Link>
-      <Link href={`/signup${q}`} aria-current={active === "signup" ? "page" : undefined} className={cn("relative z-10 flex items-center justify-center rounded-full transition-colors", active === "signup" ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>
+      <Link href={routes.signup(keep)} aria-current={active === "signup" ? "page" : undefined} className={cn("relative z-10 flex items-center justify-center rounded-full transition-colors", active === "signup" ? "text-foreground" : "text-muted-foreground hover:text-foreground")}>
         Sign up
       </Link>
     </div>

@@ -13,6 +13,7 @@ import { apiFetch } from "@/lib/api/client";
 import { createClient } from "@/lib/supabase/client";
 import { errorMessage } from "@/features/invitations/hooks";
 import { useSignOut } from "@/features/auth/use-sign-out";
+import { ROUTES, routes } from "@/lib/routes";
 
 const profileSchema = z.object({ fullName: z.string().trim().min(1, "Tell us your name").max(120) });
 type ProfileInput = z.infer<typeof profileSchema>;
@@ -52,7 +53,7 @@ export function SecurityPanel({ email }: { email: string }) {
   const reset = useMutation({
     mutationFn: async () => {
       const supabase = createClient();
-      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/reset-password")}` });
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}${routes.authCallback(ROUTES.resetPassword)}` });
       if (error) throw new Error(error.message);
     },
     onSuccess: () => toast.success("Password reset link sent. Check your inbox."),

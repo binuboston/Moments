@@ -176,7 +176,7 @@ refresh_token_reuse_interval = 10
 # Allow/disallow new user signups to your project.
 enable_signup = true
 # Allow/disallow anonymous sign-ins to your project.
-# Mirth uses anonymous (guest) sessions so people can design an invitation before
+# Invite uses anonymous (guest) sessions so people can design an invitation before
 # creating an account; publishing requires a real account (API + database trigger).
 enable_anonymous_sign_ins = true
 # Allow/disallow testing manual linking of accounts

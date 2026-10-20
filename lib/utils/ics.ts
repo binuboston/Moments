@@ -1,4 +1,5 @@
 import { addHours, toGoogleUtc } from "@/lib/utils/share";
+import { BRAND } from "@/lib/brand";
 
 export interface IcsEvent {
   uid: string;
@@ -26,7 +27,7 @@ function fold(line: string): string {
   return out.join("\r\n");
 }
 
-export function buildIcs(event: IcsEvent, prodId = "-//Mirth//Invitations//EN"): string {
+export function buildIcs(event: IcsEvent, prodId: string = BRAND.icsProdId): string {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",

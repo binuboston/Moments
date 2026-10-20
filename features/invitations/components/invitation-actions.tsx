@@ -21,6 +21,7 @@ import { animateOut } from "@/components/motion/use-flip-list";
 import { ShareDialog } from "@/features/invitations/components/share-dialog";
 import { useInvitationMutations } from "@/features/invitations/hooks";
 import type { InvitationListItem } from "@/features/invitations/types";
+import { routes } from "@/lib/routes";
 
 export function InvitationActions({ item }: { item: InvitationListItem }) {
   const router = useRouter();
@@ -65,12 +66,12 @@ export function InvitationActions({ item }: { item: InvitationListItem }) {
           )}
           {item.rsvpEnabled ? (
             <DropdownMenuItem asChild>
-              <Link href={`/dashboard/invitations/${item.id}/rsvps`}>
+              <Link href={routes.invitationResponses(item.id)}>
                 <UsersIcon /> View RSVPs
               </Link>
             </DropdownMenuItem>
           ) : null}
-          <DropdownMenuItem onSelect={() => duplicate.mutate(item.id, { onSuccess: (data) => router.push(`/dashboard/invitations/${data.id}/edit`) })}>
+          <DropdownMenuItem onSelect={() => duplicate.mutate(item.id, { onSuccess: (data) => router.push(routes.editInvitation(data.id)) })}>
             <CopyIcon /> Duplicate
           </DropdownMenuItem>
           <DropdownMenuSeparator />

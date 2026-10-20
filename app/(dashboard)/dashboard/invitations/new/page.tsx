@@ -7,6 +7,7 @@ import { NewInvitationWizard } from "@/features/invitations/components/new-invit
 import { getActiveCategories, getPublishedTemplates } from "@/features/templates/queries";
 import { getCurrentProfile } from "@/lib/supabase/server";
 import type { CategorySlug } from "@/types/domain";
+import { ROUTES } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "New invitation", robots: { index: false } };
 
@@ -20,7 +21,7 @@ export default async function NewInvitationPage({ searchParams }: PageProps<"/da
     <div className="grid min-w-0 grid-cols-1 gap-5 sm:gap-8">
       <div>
         <Button asChild variant="ghost" size="sm" className="-ml-2 mb-1">
-          <Link href="/dashboard/invitations">
+          <Link href={ROUTES.invitations}>
             <ArrowLeftIcon aria-hidden /> Invitations
           </Link>
         </Button>

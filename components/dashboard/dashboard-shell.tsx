@@ -1,5 +1,6 @@
 import { CelebrationProvider } from "@/components/brand/celebrate";
 import { AppHeader } from "@/components/layout/app-header";
+import { AccountProvider } from "@/features/auth/account-context";
 import type { Account } from "@/lib/auth/account";
 
 /**
@@ -8,13 +9,16 @@ import type { Account } from "@/lib/auth/account";
  */
 export function DashboardShell({ account, children }: { account: Account; children: React.ReactNode }) {
   return (
+    // The server already knows the account: seed it so app chrome renders the right state at once.
+    <AccountProvider account={account}>
     <CelebrationProvider>
       <div className="app-canvas flex min-h-dvh flex-col">
-        <AppHeader account={account} variant="app" />
+        <AppHeader variant="app" />
         <main id="main" className="flex-1 px-4 py-6 sm:px-6 sm:py-8">
           <div className="mx-auto w-full max-w-6xl min-w-0">{children}</div>
         </main>
       </div>
     </CelebrationProvider>
+    </AccountProvider>
   );
 }

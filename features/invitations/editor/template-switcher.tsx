@@ -39,7 +39,7 @@ export function TemplateSwitcher({ templates }: { templates: TemplateOption[] })
         <span className="hidden max-w-36 truncate sm:block">{current?.name ?? "Template"}</span>
         <ChevronDownIcon className="size-4 shrink-0 text-muted-foreground transition-transform duration-(--duration-base) group-data-[state=open]:rotate-180" aria-hidden />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-80 max-w-[calc(100vw-1.5rem)] rounded-2xl border-0 p-2 shadow-float">
+      <DropdownMenuContent side="top" align="start" className="w-80 max-w-[calc(100vw-1.5rem)] rounded-2xl border-0 p-2 shadow-float">
         <DropdownMenuLabel className="px-2 pt-1 pb-2 text-xs font-medium text-muted-foreground">Switch design · content stays the same</DropdownMenuLabel>
         <div className="max-h-[min(26rem,60dvh)] overflow-y-auto">
           {templates.map((t) => {

@@ -1,6 +1,5 @@
 import { ArrowRightIcon } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
@@ -8,11 +7,14 @@ import { DeviceFrame } from "@/features/templates/components/device-frame";
 import { getPublishedTemplates } from "@/features/templates/queries";
 import { InvitationRenderer } from "@/features/templates/renderer";
 import { sampleView } from "@/features/templates/sample-data";
+import { BRAND } from "@/lib/brand";
+import { ROUTES } from "@/lib/routes";
+import { AppLink } from "@/components/layout/app-link";
 
 export const metadata: Metadata = {
   title: "How it works",
-  description: "From choosing a template to sharing on WhatsApp: how to create a digital invitation with Mirth in minutes.",
-  alternates: { canonical: "/how-it-works" },
+  description: `From choosing a template to sharing on WhatsApp: how to create a digital invitation with ${BRAND.name} in minutes.`,
+  alternates: { canonical: ROUTES.howItWorks },
 };
 
 const steps = [
@@ -30,7 +32,7 @@ export default async function HowItWorksPage() {
 
   return (
     <Container className="py-14 sm:py-20">
-      <SectionHeading as="h1" eyebrow="How it works" title="From blank page to beautiful invitation in minutes" description="No design skills required. Mirth guides you step by step and keeps your invitation looking polished." />
+      <SectionHeading as="h1" eyebrow="How it works" title="From blank page to beautiful invitation in minutes" description={`No design skills required. ${BRAND.name} guides you step by step and keeps your invitation looking polished.`} />
 
       <div className="mt-16 grid gap-16 lg:grid-cols-[1fr_22rem] lg:items-start">
         <div className="grid gap-10">
@@ -55,9 +57,9 @@ export default async function HowItWorksPage() {
 
       <div className="mt-20 text-center">
         <Button asChild size="xl">
-          <Link href="/dashboard/invitations/new">
+          <AppLink href={ROUTES.newInvitation}>
             Create your invitation <ArrowRightIcon aria-hidden />
-          </Link>
+          </AppLink>
         </Button>
       </div>
     </Container>

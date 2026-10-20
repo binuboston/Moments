@@ -1,103 +1,52 @@
 "use client";
 
-import { LayoutDashboardIcon, LogInIcon, LogOutIcon, SettingsIcon, ShieldIcon, SparklesIcon, UserRoundIcon } from "lucide-react";
-import Link from "next/link";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { AccountAvatar } from "@/components/layout/account-avatar";
+import { AppLink } from "@/components/layout/app-link";
 import { useSignOut } from "@/features/auth/use-sign-out";
 import type { Account } from "@/lib/auth/account";
-import { ROUTES } from "@/lib/routes";
-import { initials } from "@/lib/utils/format";
+import { accountView, type AccountAction } from "@/lib/auth/account-actions";
 
-const trigger = "-mr-1.5 rounded-full p-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
-
-/** The account menu in the header. Guests are offered an account instead of sign-out (which would lose their drafts). */
+/** Desktop account dropdown. Renders the shared account model (lib/auth/account-actions). */
 export function AccountMenu({ account }: { account: Account }) {
   const { signOut } = useSignOut();
+  const view = accountView(account);
+  const identity = view.identity!;
 
-  if (account.isGuest) {
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger className={trigger} aria-label="Account menu">
-          <Avatar>
-            <AvatarFallback>
-              <UserRoundIcon className="size-4" aria-hidden />
-            </AvatarFallback>
-          </Avatar>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-64">
-          <DropdownMenuLabel>
-            <span className="block text-sm font-medium text-foreground">Guest</span>
-            <span className="block text-xs font-normal">Your drafts are saved in this browser.</span>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link href={ROUTES.app}>
-              <LayoutDashboardIcon /> My invitations
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href={ROUTES.signup} className="font-medium text-primary">
-              <SparklesIcon /> Create free account
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href={ROUTES.login}>
-              <LogInIcon /> Log in
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+  const item = (a: AccountAction, emphasis = false) =>
+    a.href ? (
+      <DropdownMenuItem key={a.key} asChild>
+        <AppLink href={a.href} className={emphasis ? "font-medium text-primary" : undefined}>
+          <a.icon /> {a.label}
+        </AppLink>
+      </DropdownMenuItem>
+    ) : (
+      <DropdownMenuItem key={a.key} onSelect={signOut} data-testid="menu-logout">
+        <a.icon /> {a.label}
+      </DropdownMenuItem>
     );
-  }
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className={trigger} aria-label="Account menu">
-        <Avatar>
-          <AvatarFallback>{initials(account.name || account.email)}</AvatarFallback>
-        </Avatar>
+      <DropdownMenuTrigger className="-mr-1.5 rounded-full p-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" aria-label="Account menu">
+        <AccountAvatar identity={identity} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel>
           <span className="flex items-center justify-between gap-2">
-            <span className="truncate text-sm font-medium text-foreground">{account.name || "Your account"}</span>
-            <Badge variant={account.plan === "pro" ? "accent" : "outline"} className="shrink-0 capitalize">
-              {account.plan}
-            </Badge>
+            <span className="truncate text-sm font-medium text-foreground">{identity.title}</span>
+            {identity.plan ? (
+              <Badge variant={identity.plan === "pro" ? "accent" : "outline"} className="shrink-0 capitalize">
+                {identity.plan}
+              </Badge>
+            ) : null}
           </span>
-          <span className="block truncate text-xs font-normal">{account.email}</span>
+          <span className="block truncate text-xs font-normal">{identity.subtitle}</span>
         </DropdownMenuLabel>
-        {account.plan === "free" ? (
-          <DropdownMenuItem asChild>
-            <Link href={ROUTES.pricing} className="font-medium text-primary">
-              <SparklesIcon /> Upgrade to Pro
-            </Link>
-          </DropdownMenuItem>
-        ) : null}
+        {view.primary ? item(view.primary, true) : null}
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href={ROUTES.app}>
-            <LayoutDashboardIcon /> My invitations
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href={ROUTES.settings}>
-            <SettingsIcon /> Settings
-          </Link>
-        </DropdownMenuItem>
-        {account.role === "admin" ? (
-          <DropdownMenuItem asChild>
-            <Link href="/admin">
-              <ShieldIcon /> Admin
-            </Link>
-          </DropdownMenuItem>
-        ) : null}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={signOut} data-testid="menu-logout">
-          <LogOutIcon /> Log out
-        </DropdownMenuItem>
+        {view.actions.map((a) => (a.key === "signOut" ? [<DropdownMenuSeparator key="sep" />, item(a)] : item(a)))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

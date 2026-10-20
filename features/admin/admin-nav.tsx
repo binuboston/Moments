@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
+import { ROUTES } from "@/lib/routes";
 
 const items = [
-  { href: "/admin", label: "Overview", exact: true },
-  { href: "/admin/templates", label: "Templates" },
-  { href: "/admin/events", label: "Events" },
-  { href: "/admin/categories", label: "Categories" },
+  { href: ROUTES.admin, label: "Overview", exact: true },
+  { href: ROUTES.adminTemplates, label: "Templates" },
+  { href: ROUTES.adminEvents, label: "Events" },
+  { href: ROUTES.adminCategories, label: "Categories" },
 ];
 
 export function AdminNav() {

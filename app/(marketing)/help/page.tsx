@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Container } from "@/components/layout/container";
 import { Faq } from "@/components/marketing/faq";
 import { SectionHeading } from "@/components/marketing/section-heading";
+import { BRAND } from "@/lib/brand";
+import { ROUTES } from "@/lib/routes";
+import { AppLink } from "@/components/layout/app-link";
 
 export const metadata: Metadata = {
   title: "Help centre",
-  description: "Answers to common questions about creating, publishing and sharing Mirth invitations, plus our privacy and terms summaries.",
-  alternates: { canonical: "/help" },
+  description: `Answers to common questions about creating, publishing and sharing ${BRAND.name} invitations, plus our privacy and terms summaries.`,
+  alternates: { canonical: ROUTES.help },
 };
 
 const gettingStarted = [
@@ -65,15 +67,15 @@ export default function HelpPage() {
       <section id="terms" className="mt-6 scroll-mt-24 rounded-2xl border border-border bg-surface p-6">
         <h2 className="text-lg font-semibold">Terms summary</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground text-pretty">
-          Use Mirth for genuine events. Don't upload content you don't have the right to share. We may remove invitations that violate these terms. Full terms will be published before public launch.
+          Use {BRAND.name} for genuine events. Don't upload content you don't have the right to share. We may remove invitations that violate these terms. Full terms will be published before public launch.
         </p>
       </section>
 
       <p className="mt-10 text-center text-sm text-muted-foreground">
         Ready to begin?{" "}
-        <Link href="/dashboard/invitations/new" className="font-medium text-primary underline-offset-4 hover:underline">
+        <AppLink href={ROUTES.newInvitation} className="font-medium text-primary underline-offset-4 hover:underline">
           Create your first invitation
-        </Link>
+        </AppLink>
       </p>
     </Container>
   );

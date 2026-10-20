@@ -9,6 +9,7 @@ import { useNow } from "@/hooks/use-now";
 import { gsap, MQ, useGSAP } from "@/lib/motion/gsap";
 import { formatEventDate } from "@/lib/utils/dates";
 import type { OverviewSummary } from "@/features/invitations/queries";
+import { ROUTES, routes } from "@/lib/routes";
 
 /** Drifting blossoms: position (%), size (rem), parallax depth and colour. */
 /** Kept to the edges so they never sit behind text. */
@@ -105,12 +106,12 @@ export function OverviewHero({ firstName, next }: { firstName: string; next: Ove
           <p className="mt-3 max-w-md text-sm text-stage-muted text-pretty sm:text-base">Create, edit and share invitations your guests will remember.</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
-              <Link href="/dashboard/invitations/new">
+              <Link href={ROUTES.newInvitation}>
                 <PlusIcon aria-hidden /> New invitation
               </Link>
             </Button>
             <Button asChild variant="outline" className="border-stage-border bg-transparent text-stage-foreground hover:border-stage-muted hover:bg-white/10 hover:text-stage-foreground">
-              <Link href="/templates">Browse designs</Link>
+              <Link href={ROUTES.templates}>Browse designs</Link>
             </Button>
           </div>
         </div>
@@ -165,7 +166,7 @@ function NextUp({ next }: { next: OverviewSummary["next"] }) {
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
         <Button asChild size="sm" variant="outline" className="border-stage-border bg-transparent text-stage-foreground hover:bg-white/10 hover:text-stage-foreground">
-          <Link href={`/dashboard/invitations/${next.id}/edit`}>
+          <Link href={routes.editInvitation(next.id)}>
             <PencilIcon aria-hidden /> Edit
           </Link>
         </Button>

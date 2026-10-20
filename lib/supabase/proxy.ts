@@ -1,11 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/database";
+import { ROUTES } from "@/lib/routes";
 
 /** The app is open to everyone (guests get a session first); admin needs a real login. */
-const APP_PREFIX = "/dashboard";
-const ADMIN_PREFIX = "/admin";
-const AUTH_PAGES = ["/login", "/signup", "/forgot-password"];
+const APP_PREFIX = ROUTES.app;
+const ADMIN_PREFIX = ROUTES.admin;
+const AUTH_PAGES: readonly string[] = [ROUTES.login, ROUTES.signup, ROUTES.forgotPassword];
 
 /**
  * Refreshes the Supabase session cookie on every matched request and applies
@@ -45,7 +46,7 @@ export async function updateSession(request: NextRequest) {
   const under = (prefix: string) => pathname === prefix || pathname.startsWith(`${prefix}/`);
   if (!isAuthenticated && (under(APP_PREFIX) || under(ADMIN_PREFIX))) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = under(APP_PREFIX) ? "/start" : "/login";
+    redirectUrl.pathname = under(APP_PREFIX) ? ROUTES.start : ROUTES.login;
     redirectUrl.search = "";
     redirectUrl.searchParams.set("next", `${pathname}${search}`);
     return NextResponse.redirect(redirectUrl);
@@ -53,7 +54,7 @@ export async function updateSession(request: NextRequest) {
 
   if (isAuthenticated && !isGuest && AUTH_PAGES.includes(pathname)) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/dashboard";
+    redirectUrl.pathname = ROUTES.app;
     redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }

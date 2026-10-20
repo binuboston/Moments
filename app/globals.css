@@ -2,7 +2,7 @@
 
 /* ------------------------------------------------------------------
    Design tokens
-   Brand: "Mirth" — warm paper, ink text, garnet primary, champagne accent.
+   Brand: "Invite" — warm paper, ink text, garnet primary, champagne accent.
    Semantic tokens live on :root so they can be re-themed later; Tailwind
    utilities are generated from them through @theme inline.
    ------------------------------------------------------------------ */
@@ -22,7 +22,7 @@
   --stage-foreground: #f4f4f2;
   --stage-muted: #8d939b;
   --stage-border: #24262b;
-  /* Brand: Mirth garnet with a champagne accent, used sparingly. */
+  /* Brand: Invite garnet with a champagne accent, used sparingly. */
   --ring: #8b2e3f;
   --primary: #8b2e3f;
   --primary-hover: #74253a;
@@ -418,8 +418,8 @@
   .inv-tick { display: inline-block; animation: inv-tick 0.45s var(--ease-out-quart) both; }
 }
 
-/* Editor: fields scrolled into view (focus, validation) clear the header, toolbar and step bar. */
+/* Editor: fields scrolled into view (focus, validation) clear the header and the bottom editor bar. */
 .editor-scope :is(input, textarea, select, button, [tabindex]) {
-  scroll-margin-top: 12rem;
-  scroll-margin-bottom: 6rem;
+  scroll-margin-top: 7rem; /* the floating header */
+  scroll-margin-bottom: 10rem; /* the floating editor bar */
 }

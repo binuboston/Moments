@@ -2,6 +2,7 @@ import { HeartIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { Blossom, CornerBloom } from "@/components/brand/blossom";
 import { Button } from "@/components/ui/button";
+import { ROUTES } from "@/lib/routes";
 
 /** First-run empty state in the brand language: a miniature opening card with drifting blossoms. */
 export function EmptyInvitations() {
@@ -31,7 +32,7 @@ export function EmptyInvitations() {
       <h3 className="text-lg font-semibold">No invitations yet</h3>
       <p className="mt-1 max-w-sm text-sm text-muted-foreground text-pretty">Start with a template and have a beautiful invitation ready to share in minutes.</p>
       <Button asChild className="mt-6">
-        <Link href="/dashboard/invitations/new">
+        <Link href={ROUTES.newInvitation}>
           <PlusIcon aria-hidden /> Create your first invitation
         </Link>
       </Button>

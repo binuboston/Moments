@@ -25,6 +25,7 @@ import { categoryStyle } from "@/lib/design/tones";
 import { cn } from "@/lib/utils/cn";
 import { formatShortDate } from "@/lib/utils/dates";
 import { isDirty, useEditorStore } from "@/stores/editor-store";
+import { ROUTES } from "@/lib/routes";
 
 function SaveIndicator() {
   const saveState = useEditorStore((s) => s.saveState);
@@ -115,13 +116,13 @@ export function InvitationEditor({ initialDraft, templates, isGuest = false }: {
 
   return (
     <div className="editor-scope">
-      {/* Floating toolbar, sticky under the app's header. Its backing uses the same fixed canvas, so it is invisible. */}
-      <div className="sticky top-[4.25rem] z-20 -mx-4 px-4 pt-1 pb-4 sm:top-[4.75rem] sm:-mx-6 sm:px-6">
-        <div aria-hidden className="app-canvas absolute inset-0 -z-10 [mask-image:linear-gradient(to_bottom,black_75%,transparent)]" />
-        <div className="surface-float grid grid-cols-[1fr_auto] items-center gap-2 rounded-2xl p-2 sm:grid-cols-[1fr_auto_1fr]">
-          <div className="col-start-1 row-start-1 flex min-w-0 items-center gap-1.5 sm:gap-2">
+      {/* Editor controls as a floating bottom bar (thumb-reachable on phones, out of the way of the content). */}
+      <div className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 mx-auto max-w-3xl" data-testid="editor-bar">
+        <div className="surface-float grid grid-cols-[1fr_auto] items-center gap-2 rounded-3xl p-2 sm:grid-cols-[1fr_auto_1fr]">
+          <ViewToggle className="col-span-2 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:w-56" />
+          <div className="flex min-w-0 items-center gap-1.5 sm:col-start-1 sm:row-start-1 sm:gap-2">
             <Button asChild variant="ghost" size="icon-sm" aria-label="Back to invitations">
-              <Link href="/dashboard/invitations">
+              <Link href={ROUTES.invitations}>
                 <ArrowLeftIcon />
               </Link>
             </Button>
@@ -130,8 +131,7 @@ export function InvitationEditor({ initialDraft, templates, isGuest = false }: {
               <Settings2Icon />
             </Button>
           </div>
-          <ViewToggle className="col-span-2 row-start-2 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:w-64" />
-          <div className="col-start-2 row-start-1 flex items-center justify-end sm:col-start-3">
+          <div className="flex items-center justify-end sm:col-start-3 sm:row-start-1">
             <Button size="sm" onClick={() => setPublishOpen(true)} data-testid="go-to-publish">
               <SendIcon aria-hidden /> {draft.status === "published" ? "Share" : "Publish"}
             </Button>
@@ -141,7 +141,7 @@ export function InvitationEditor({ initialDraft, templates, isGuest = false }: {
 
       <SwapTransition swapKey={view}>
         {view === "edit" ? (
-          <div className="mx-auto grid w-full max-w-3xl gap-4 pb-10">
+          <div className="mx-auto grid w-full max-w-3xl gap-4 pb-40 sm:pb-28">
             <header className="mb-1 px-1">
               <h1 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">{title}</h1>
               <div className="mt-2 flex flex-wrap items-center gap-3">
@@ -164,7 +164,7 @@ export function InvitationEditor({ initialDraft, templates, isGuest = false }: {
             </EditorSection>
           </div>
         ) : (
-          <div className="pb-10">
+          <div className="pb-40 sm:pb-28">
             <PreviewPane />
           </div>
         )}

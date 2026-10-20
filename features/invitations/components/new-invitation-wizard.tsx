@@ -20,6 +20,7 @@ import { canUseTemplate } from "@/lib/entitlements";
 import { cn } from "@/lib/utils/cn";
 import { detectTimeZone } from "@/lib/utils/dates";
 import type { CategorySlug, PlanTier, TemplateTier } from "@/types/domain";
+import { routes } from "@/lib/routes";
 
 interface CategoryOption {
   slug: CategorySlug;
@@ -56,7 +57,7 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
 
   const create = useMutation({
     mutationFn: invitationsApi.create,
-    onSuccess: (data) => router.push(`/dashboard/invitations/${data.id}/edit`),
+    onSuccess: (data) => router.push(routes.editInvitation(data.id)),
     onError: (err) => toast.error(errorMessage(err)),
   });
 

@@ -32,8 +32,9 @@ test.describe("marketing site", () => {
     await page.getByRole("link", { name: /eternal grace/i }).click();
     await expect(page).toHaveURL(/\/templates\/eternal-grace/);
     await expect(page.getByRole("heading", { level: 1, name: "Eternal Grace" })).toBeVisible();
-    // No account needed to start: the CTA goes straight to the wizard (guests get a session on the way).
-    await expect(page.getByRole("link", { name: /use this template/i })).toHaveAttribute("href", /\/dashboard\/invitations\/new\?template=eternal-grace/);
+    // No account needed: signed-out visitors go straight to guest setup, which continues to the wizard.
+    const cta = await page.getByRole("link", { name: /use this template/i }).getAttribute("href");
+    expect(decodeURIComponent(cta ?? "")).toMatch(/\/dashboard\/invitations\/new\?template=eternal-grace/);
   });
 
   test("pricing, how it works and help pages respond", async ({ page }) => {

@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/app/providers";
 import { publicEnv } from "@/lib/env";
 import { PRE_PAINT_SCRIPT } from "@/lib/motion/pre-paint";
+import { BRAND } from "@/lib/brand";
 
 /** Product typeface: a variable grotesk used for UI and display type (weights 100–900). */
 const geist = Geist({
@@ -32,16 +33,16 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   metadataBase: new URL(publicEnv().NEXT_PUBLIC_SITE_URL),
   title: {
-    default: "Mirth — Beautiful digital invitations",
-    template: "%s · Mirth",
+    default: BRAND.title,
+    template: `%s · ${BRAND.name}`,
   },
   description:
     "Choose a design, make it yours and share your event with the world. Elegant digital invitations for weddings, birthdays, showers and more.",
-  applicationName: "Mirth",
+  applicationName: BRAND.name,
   openGraph: {
     type: "website",
-    siteName: "Mirth",
-    title: "Mirth — Beautiful digital invitations",
+    siteName: BRAND.name,
+    title: BRAND.title,
     description: "Choose a design. Make it yours. Share your event with the world.",
   },
   twitter: { card: "summary_large_image" },

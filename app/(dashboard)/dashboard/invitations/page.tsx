@@ -5,11 +5,12 @@ import { listOwnedInvitations } from "@/features/invitations/queries";
 import { invitationListQuerySchema } from "@/lib/validation/invitation";
 import { requireAppUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import { ROUTES } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "Invitations", robots: { index: false } };
 
 export default async function InvitationsPage({ searchParams }: PageProps<"/dashboard/invitations">) {
-  const user = await requireAppUser("/dashboard/invitations");
+  const user = await requireAppUser(ROUTES.invitations);
   const sp = await searchParams;
   const params = invitationListQuerySchema.parse({
     status: typeof sp.status === "string" ? sp.status : undefined,

@@ -8,6 +8,8 @@ import { Container } from "@/components/layout/container";
 import { TemplateShowcase } from "@/features/templates/components/template-showcase";
 import { getActiveCategories, getPublishedTemplateBySlug, getPublishedTemplates } from "@/features/templates/queries";
 import type { CategorySlug } from "@/types/domain";
+import { ROUTES, routes } from "@/lib/routes";
+import { AppLink } from "@/components/layout/app-link";
 
 export async function generateMetadata({ params }: PageProps<"/templates/[slug]">): Promise<Metadata> {
   const { slug } = await params;
@@ -16,7 +18,7 @@ export async function generateMetadata({ params }: PageProps<"/templates/[slug]"
   return {
     title: `${template.def.name} invitation template`,
     description: template.row.description ?? template.def.description,
-    alternates: { canonical: `/templates/${slug}` },
+    alternates: { canonical: routes.template(slug) },
   };
 }
 
@@ -29,14 +31,14 @@ export default async function TemplateDetailPage({ params }: PageProps<"/templat
   const supported = categories.filter((c) => def.categories.includes(c.slug as CategorySlug));
   const related = all.filter((t) => t.row.id !== row.id && t.def.categories.some((c) => def.categories.includes(c))).slice(0, 3);
   // No account needed to start: signed-out visitors get a guest session on the way in.
-  const startHref = `/dashboard/invitations/new?template=${row.slug}`;
+  const startHref = routes.newInvitation({ template: row.slug });
 
   return (
     <Container className="py-12 sm:py-16">
       <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
         <ol className="flex items-center gap-2">
           <li>
-            <Link href="/templates" className="hover:text-foreground">
+            <Link href={ROUTES.templates} className="hover:text-foreground">
               Templates
             </Link>
           </li>
@@ -66,7 +68,7 @@ export default async function TemplateDetailPage({ params }: PageProps<"/templat
               <dt className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Works for</dt>
               <dd className="mt-2 flex flex-wrap gap-2">
                 {supported.map((c) => (
-                  <Link key={c.id} href={`/templates?category=${c.slug}`} className="rounded-full border border-border px-3 py-1 text-sm hover:border-foreground/40">
+                  <Link key={c.id} href={routes.templatesFor(c.slug)} className="rounded-full border border-border px-3 py-1 text-sm hover:border-foreground/40">
                     {c.name}
                   </Link>
                 ))}
@@ -105,12 +107,12 @@ export default async function TemplateDetailPage({ params }: PageProps<"/templat
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
-              <Link href={startHref}>
+              <AppLink href={startHref}>
                 Use this template <ArrowRightIcon aria-hidden />
-              </Link>
+              </AppLink>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link href={`/demo/${row.slug}`} target="_blank" data-testid="live-demo">
+              <Link href={routes.demo(row.slug)} target="_blank" data-testid="live-demo">
                 View live demo
               </Link>
             </Button>
@@ -139,7 +141,7 @@ export default async function TemplateDetailPage({ params }: PageProps<"/templat
 
 function RelatedCard({ slug, name, description, gradient, tier }: { slug: string; name: string; description: string; gradient: string; tier: string }) {
   return (
-    <Link href={`/templates/${slug}`} className="group block rounded-2xl border border-border bg-surface p-5 transition-shadow hover:shadow-soft">
+    <Link href={routes.template(slug)} className="group block rounded-2xl border border-border bg-surface p-5 transition-shadow hover:shadow-soft">
       <div className="h-24 rounded-xl" style={{ background: gradient }} aria-hidden />
       <div className="mt-4 flex items-center justify-between">
         <h3 className="font-semibold group-hover:text-primary">{name}</h3>

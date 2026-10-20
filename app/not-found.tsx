@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/layout/logo";
+import { ROUTES } from "@/lib/routes";
 
 export default function NotFound() {
   return (
@@ -11,10 +12,10 @@ export default function NotFound() {
       <p className="mt-4 max-w-md text-muted-foreground text-pretty">The link may be incorrect, or the page may have been moved or unpublished.</p>
       <div className="mt-8 flex gap-3">
         <Button asChild>
-          <Link href="/">Go home</Link>
+          <Link href={ROUTES.home}>Go home</Link>
         </Button>
         <Button asChild variant="outline">
-          <Link href="/templates">Browse templates</Link>
+          <Link href={ROUTES.templates}>Browse templates</Link>
         </Button>
       </div>
     </main>

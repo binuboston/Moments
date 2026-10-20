@@ -9,11 +9,12 @@ import { InvitationGrid } from "@/features/invitations/components/invitation-gri
 import { getOverviewSummary, listOwnedInvitations } from "@/features/invitations/queries";
 import { requireAppUser } from "@/lib/auth/session";
 import { createClient, getCurrentProfile } from "@/lib/supabase/server";
+import { ROUTES, routes } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "Dashboard", robots: { index: false } };
 
 export default async function DashboardPage() {
-  const user = await requireAppUser("/dashboard");
+  const user = await requireAppUser(ROUTES.app);
   const [supabase, profile] = await Promise.all([createClient(), getCurrentProfile()]);
   const [list, summary] = await Promise.all([
     listOwnedInvitations(supabase, user.id, { status: "all", q: "", page: 1, pageSize: 6 }),
@@ -27,10 +28,10 @@ export default async function DashboardPage() {
 
       <StatTiles
         stats={[
-          { key: "invitations", label: "Invitations", value: list.counts.all, href: "/dashboard/invitations" },
-          { key: "published", label: "Published", value: list.counts.published, href: "/dashboard/invitations?status=published" },
-          { key: "drafts", label: "Drafts", value: list.counts.draft, href: "/dashboard/invitations?status=draft" },
-          { key: "upcoming", label: "Upcoming events", value: summary.upcoming, href: "/dashboard/invitations" },
+          { key: "invitations", label: "Invitations", value: list.counts.all, href: ROUTES.invitations },
+          { key: "published", label: "Published", value: list.counts.published, href: routes.invitationsWithStatus("published") },
+          { key: "drafts", label: "Drafts", value: list.counts.draft, href: routes.invitationsWithStatus("draft") },
+          { key: "upcoming", label: "Upcoming events", value: summary.upcoming, href: ROUTES.invitations },
         ]}
       />
 
@@ -41,7 +42,7 @@ export default async function DashboardPage() {
           </h2>
           {list.counts.all > 0 ? (
             <Button asChild variant="link" size="sm" className="group">
-              <Link href="/dashboard/invitations">
+              <Link href={ROUTES.invitations}>
                 View all <ArrowRightIcon aria-hidden className="transition-transform group-hover:translate-x-0.5" />
               </Link>
             </Button>

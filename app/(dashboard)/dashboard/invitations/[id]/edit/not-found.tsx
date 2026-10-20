@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ROUTES } from "@/lib/routes";
 
 export default function EditNotFound() {
   return (
@@ -9,7 +10,7 @@ export default function EditNotFound() {
       description="It may have been deleted, or it belongs to a different account."
       action={
         <Button asChild>
-          <Link href="/dashboard/invitations">Back to invitations</Link>
+          <Link href={ROUTES.invitations}>Back to invitations</Link>
         </Button>
       }
     />

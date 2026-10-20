@@ -6,6 +6,7 @@ import { Blossom } from "@/components/brand/blossom";
 import { Logo } from "@/components/layout/logo";
 import { safeNextPath } from "@/features/auth/safe-next";
 import { createClient } from "@/lib/supabase/client";
+import { ROUTES, routes } from "@/lib/routes";
 
 /**
  * Starts a guest session in the browser (Supabase rate-limits anonymous
@@ -15,7 +16,7 @@ import { createClient } from "@/lib/supabase/client";
 export function GuestStart() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = safeNextPath(searchParams.get("next"), "/dashboard/invitations/new");
+  const next = safeNextPath(searchParams.get("next"), ROUTES.newInvitation);
   const started = useRef(false);
   const [failed, setFailed] = useState(false);
 
@@ -30,13 +31,14 @@ export function GuestStart() {
         if (error) {
           // Guest sessions disabled or rate-limited: fall back to a normal sign-up.
           setFailed(true);
-          router.replace(`/signup?next=${encodeURIComponent(next)}`);
+          router.replace(routes.signup(next));
           return;
         }
         await fetch("/api/guest/session", { method: "POST" }).catch(() => undefined);
       }
-      router.replace(next);
-      router.refresh();
+      // A full navigation, not router.replace: the client router cached the
+      // "no session, go to /start" redirect for `next`, and would replay it.
+      window.location.replace(next);
     })();
   }, [next, router]);
 

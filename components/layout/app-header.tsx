@@ -8,13 +8,11 @@ import { Logo } from "@/components/layout/logo";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { PrimaryNav } from "@/components/layout/primary-nav";
 import { Button } from "@/components/ui/button";
-import { useAccount } from "@/features/auth/use-account";
-import type { Account } from "@/lib/auth/account";
+import { AppLink } from "@/components/layout/app-link";
+import { useAccount } from "@/features/auth/account-context";
 import { ROUTES } from "@/lib/routes";
 
 interface AppHeaderProps {
-  /** Known on the server in the app (no flash); omitted on static marketing pages, resolved in the browser. */
-  account?: Account | null;
   /** "app" paints a canvas backing so content never shows through the gaps around the bar. */
   variant?: "site" | "app";
 }
@@ -23,8 +21,9 @@ interface AppHeaderProps {
  * The one header for the whole product (marketing site and app): logo to the
  * landing page, the shared navigation, "New invitation" and the account.
  */
-export function AppHeader({ account: initial, variant = "site" }: AppHeaderProps) {
-  const account = useAccount(initial);
+export function AppHeader({ variant = "site" }: AppHeaderProps) {
+  // From the nearest AccountProvider: server-known in the app, resolved in the browser on the site.
+  const account = useAccount();
   const pathname = usePathname();
   const creating = pathname.startsWith(ROUTES.newInvitation);
 
@@ -37,10 +36,10 @@ export function AppHeader({ account: initial, variant = "site" }: AppHeaderProps
         <div className="flex items-center justify-end gap-2 sm:gap-3">
           {creating ? null : (
             <Button asChild size="sm" className="max-sm:size-10 max-sm:px-0" data-testid="header-new-invitation">
-              <Link href={ROUTES.newInvitation} aria-label="New invitation">
+              <AppLink href={ROUTES.newInvitation} aria-label="New invitation">
                 <PlusIcon aria-hidden />
                 <span className="max-sm:sr-only">New invitation</span>
-              </Link>
+              </AppLink>
             </Button>
           )}
           {account === undefined ? (

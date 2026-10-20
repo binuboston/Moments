@@ -1,15 +1,17 @@
 import { CheckIcon, MinusIcon } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
 import { Faq } from "@/components/marketing/faq";
 import { SectionHeading } from "@/components/marketing/section-heading";
+import { BRAND } from "@/lib/brand";
+import { ROUTES } from "@/lib/routes";
+import { AppLink } from "@/components/layout/app-link";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Mirth is free to start. Upgrade to Pro for no badge, larger galleries and more live invitations.",
-  alternates: { canonical: "/pricing" },
+  description: `${BRAND.name} is free to start. Upgrade to Pro for no badge, larger galleries and more live invitations.`,
+  alternates: { canonical: ROUTES.pricing },
 };
 
 const rows: { feature: string; free: boolean | string; pro: boolean | string }[] = [
@@ -19,12 +21,12 @@ const rows: { feature: string; free: boolean | string; pro: boolean | string }[]
   { feature: "Multiple functions and schedule", free: true, pro: true },
   { feature: "RSVP collection and export", free: true, pro: true },
   { feature: "WhatsApp and link sharing", free: true, pro: true },
-  { feature: "Mirth badge removed", free: false, pro: true },
+  { feature: `${BRAND.badge} removed`, free: false, pro: true },
   { feature: "Priority support", free: false, pro: true },
 ];
 
 const faqs = [
-  { question: "How does Pro billing work?", answer: "Pro is priced per event and removes the Mirth badge and raises limits for that invitation. Payments are not yet live in this release; accounts can be upgraded by the Mirth team." },
+  { question: "How does Pro billing work?", answer: `Pro is priced per event and removes the ${BRAND.badge} and raises limits for that invitation. Payments are not yet live in this release; accounts can be upgraded by the ${BRAND.name} team.` },
   { question: "Can I switch templates after publishing?", answer: "Yes. Your content is independent of the design, so you can switch between templates that support your occasion at any time." },
   { question: "What happens after my event?", answer: "Your invitation stays online so guests can revisit photos and details. You can unpublish whenever you like." },
 ];
@@ -45,7 +47,7 @@ export default function PricingPage() {
           <p className="mt-3 font-display text-5xl font-semibold">£0</p>
           <p className="mt-2 text-sm text-muted-foreground">Forever free for personal celebrations.</p>
           <Button asChild variant="outline" className="mt-8 w-full" size="lg">
-            <Link href="/dashboard/invitations/new">Start for free</Link>
+            <AppLink href={ROUTES.newInvitation}>Start for free</AppLink>
           </Button>
         </div>
         <div className="relative rounded-3xl border border-primary bg-surface p-8 shadow-lift">
@@ -56,7 +58,7 @@ export default function PricingPage() {
           </p>
           <p className="mt-2 text-sm text-muted-foreground">One payment per invitation. No subscription.</p>
           <Button asChild className="mt-8 w-full" size="lg">
-            <Link href="/dashboard/invitations/new">Create your invitation</Link>
+            <AppLink href={ROUTES.newInvitation}>Create your invitation</AppLink>
           </Button>
         </div>
       </div>

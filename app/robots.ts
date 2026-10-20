@@ -1,14 +1,15 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/env";
+import { ROUTES } from "@/lib/routes";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/templates", "/pricing", "/how-it-works", "/help"],
+        allow: [ROUTES.home, ROUTES.templates, ROUTES.pricing, ROUTES.howItWorks, ROUTES.help],
         // Invitations are for guests, not search engines. Dashboards are private.
-        disallow: ["/demo/", "/dashboard", "/admin", "/api", "/e/", "/login", "/signup", "/forgot-password", "/reset-password", "/auth"],
+        disallow: [ROUTES.demos, ROUTES.app, ROUTES.admin, "/api", ROUTES.publicInvitations, ROUTES.login, ROUTES.signup, ROUTES.forgotPassword, ROUTES.resetPassword, ROUTES.authCallback, ROUTES.signOut],
       },
     ],
     sitemap: siteUrl("/sitemap.xml"),

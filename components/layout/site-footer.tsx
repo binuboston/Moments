@@ -1,31 +1,33 @@
 import Link from "next/link";
 import { Container } from "@/components/layout/container";
 import { Logo } from "@/components/layout/logo";
+import { BRAND } from "@/lib/brand";
+import { ROUTES, routes } from "@/lib/routes";
 
 const columns = [
   {
     heading: "Product",
     links: [
-      { href: "/templates", label: "Templates" },
-      { href: "/how-it-works", label: "How it works" },
-      { href: "/pricing", label: "Pricing" },
+      { href: ROUTES.templates, label: "Templates" },
+      { href: ROUTES.howItWorks, label: "How it works" },
+      { href: ROUTES.pricing, label: "Pricing" },
     ],
   },
   {
     heading: "Occasions",
     links: [
-      { href: "/templates?category=wedding", label: "Weddings" },
-      { href: "/templates?category=birthday", label: "Birthdays" },
-      { href: "/templates?category=baby-shower", label: "Baby showers" },
-      { href: "/templates?category=corporate", label: "Corporate events" },
+      { href: routes.templatesFor("wedding"), label: "Weddings" },
+      { href: routes.templatesFor("birthday"), label: "Birthdays" },
+      { href: routes.templatesFor("baby-shower"), label: "Baby showers" },
+      { href: routes.templatesFor("corporate"), label: "Corporate events" },
     ],
   },
   {
     heading: "Support",
     links: [
-      { href: "/help", label: "Help centre" },
-      { href: "/help#privacy", label: "Privacy" },
-      { href: "/help#terms", label: "Terms" },
+      { href: ROUTES.help, label: "Help centre" },
+      { href: ROUTES.privacy, label: "Privacy" },
+      { href: ROUTES.terms, label: "Terms" },
     ],
   },
 ];
@@ -57,11 +59,11 @@ export function SiteFooter() {
       </Container>
       {/* Oversized closing wordmark, cropped by the page edge. */}
       <Container aria-hidden className="overflow-hidden">
-        <p className="-mb-[0.18em] select-none text-[clamp(5rem,24vw,22rem)] leading-none font-medium tracking-[-0.06em] text-foreground/[0.06]">Mirth</p>
+        <p className="-mb-[0.18em] select-none text-[clamp(5rem,24vw,22rem)] leading-none font-medium tracking-[-0.06em] text-foreground/[0.06]">{BRAND.name}</p>
       </Container>
       <div className="border-t border-border/70">
         <Container className="flex flex-col items-start justify-between gap-2 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center">
-          <p>© {new Date().getFullYear()} Mirth. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {BRAND.name}. All rights reserved.</p>
           <p>Made with care for the moments that matter.</p>
         </Container>
       </div>

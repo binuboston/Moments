@@ -12,6 +12,7 @@ import { getTemplateOrFallback } from "@/features/templates/registry";
 import { useClientNow } from "@/hooks/use-mounted";
 import { categoryStyle } from "@/lib/design/tones";
 import { formatShortDate } from "@/lib/utils/dates";
+import { routes } from "@/lib/routes";
 
 /** "Today", "Tomorrow", "In 12 days" or "Past" (computed in the browser after mount). */
 function daysLabel(startsAt: string, now: number): string {
@@ -40,7 +41,7 @@ export function InvitationCard({ item }: { item: InvitationListItem }) {
     <div ref={tilt} className="h-full">
       <article className="group surface-card surface-hover flex h-full flex-col p-2.5">
         <Link
-          href={`/dashboard/invitations/${item.id}/edit`}
+          href={routes.editInvitation(item.id)}
           className="relative block aspect-[1200/630] overflow-hidden rounded-[calc(var(--card-radius)-0.5rem)] outline-none focus-visible:ring-2 focus-visible:ring-ring"
           style={{ background: def.previewGradient }}
           aria-label={`Edit ${title}`}
@@ -92,7 +93,7 @@ export function InvitationCard({ item }: { item: InvitationListItem }) {
           </dl>
           <div className="mt-auto flex items-center gap-2 pt-5">
             <Button asChild variant="soft" className="flex-1">
-              <Link href={`/dashboard/invitations/${item.id}/edit`}>
+              <Link href={routes.editInvitation(item.id)}>
                 <PencilIcon aria-hidden /> Edit invitation
               </Link>
             </Button>

@@ -3,9 +3,10 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
+import { ROUTES } from "@/lib/routes";
 
 /** Server route that clears the Supabase session cookies (app/auth/signout/route.ts). */
-export const SIGN_OUT_ENDPOINT = "/auth/signout";
+export const SIGN_OUT_ENDPOINT = ROUTES.signOut;
 
 /**
  * The single sign-out implementation for every UI entry point (account menu,
@@ -23,7 +24,7 @@ export function useSignOut() {
     } finally {
       // Drop cached private data, then re-render server components without the session.
       queryClient.clear();
-      router.replace("/");
+      router.replace(ROUTES.home);
       router.refresh();
     }
   }, [queryClient, router]);

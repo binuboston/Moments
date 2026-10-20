@@ -14,6 +14,9 @@ import { getActiveCategories, getPublishedTemplates } from "@/features/templates
 import { InvitationRenderer } from "@/features/templates/renderer";
 import { sampleView } from "@/features/templates/sample-data";
 import type { CategorySlug } from "@/types/domain";
+import { BRAND } from "@/lib/brand";
+import { ROUTES, routes } from "@/lib/routes";
+import { AppLink } from "@/components/layout/app-link";
 
 const SECTIONS = [
   { id: "designs", label: "Designs" },
@@ -40,7 +43,7 @@ const features = [
 ];
 
 const faqs = [
-  { question: "Is Mirth free to use?", answer: "Yes. Every template is free to use and publish. Free invitations include a small Mirth badge; Pro removes it and adds larger galleries." },
+  { question: `Is ${BRAND.name} free to use?`, answer: `Yes. Every template is free to use and publish. Free invitations include a small ${BRAND.badge}; Pro removes it and adds larger galleries.` },
   { question: "Do my guests need an account?", answer: "No. Guests open your link in any browser and can RSVP right on the page without signing up." },
   { question: "Can I edit my invitation after publishing?", answer: "Of course. Change any detail and the live page updates within minutes. You can unpublish at any time." },
   { question: "How do I share on WhatsApp?", answer: "After publishing, tap Share on WhatsApp. It opens with your invitation link and details, ready to send to any chat or group." },
@@ -72,7 +75,7 @@ export default async function HomePage() {
     key: t.def.key,
     name: t.def.name,
     description: t.row.description ?? t.def.description,
-    href: `/templates/${t.row.slug}`,
+    href: routes.template(t.row.slug),
     tier: t.row.tier,
     gradient: t.def.previewGradient,
     preview: (
@@ -95,16 +98,16 @@ export default async function HomePage() {
             <div className="flex flex-col justify-between gap-12">
               <div className="max-w-md">
                 <p data-hero className="lead">
-                  Mirth turns the details of your celebration into an invitation guests actually open: designed for phones, shared on WhatsApp, ready in minutes.
+                  {BRAND.name} turns the details of your celebration into an invitation guests actually open: designed for phones, shared on WhatsApp, ready in minutes.
                 </p>
                 <div data-hero className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <Button asChild size="lg">
-                    <Link href="/dashboard/invitations/new">
+                    <AppLink href={ROUTES.newInvitation}>
                       Create an invitation <ArrowRightIcon aria-hidden />
-                    </Link>
+                    </AppLink>
                   </Button>
                   <Button asChild size="lg" variant="outline">
-                    <Link href="/templates">Browse designs</Link>
+                    <Link href={ROUTES.templates}>Browse designs</Link>
                   </Button>
                 </div>
               </div>
@@ -177,7 +180,7 @@ export default async function HomePage() {
         </div>
         <Container className="mt-6 lg:-mt-8 lg:pb-8">
           <Button asChild variant="outline">
-            <Link href="/templates">
+            <Link href={ROUTES.templates}>
               See all designs <ArrowRightIcon aria-hidden />
             </Link>
           </Button>
@@ -204,7 +207,7 @@ export default async function HomePage() {
                   <li key={c.id} data-reveal className="lg:absolute" style={{ left: pos.left, top: pos.top }}>
                     <div data-speed={pos.speed}>
                       <Link
-                        href={`/templates?category=${c.slug}`}
+                        href={routes.templatesFor(c.slug)}
                         className="interactive-lift flex items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3.5 outline-none focus-visible:ring-2 focus-visible:ring-ring lg:w-52"
                       >
                         <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
@@ -275,14 +278,14 @@ export default async function HomePage() {
               <p className="mt-6 text-6xl font-medium tracking-tighter">£0</p>
               <p className="mt-2 text-muted-foreground">Everything you need for a beautiful invitation.</p>
               <ul className="mt-8 space-y-3 text-sm">
-                {["Every template", "Up to 3 live invitations", "RSVP collection", "WhatsApp sharing", "Mirth badge on the page"].map((i) => (
+                {["Every template", "Up to 3 live invitations", "RSVP collection", "WhatsApp sharing", `${BRAND.badge} on the page`].map((i) => (
                   <li key={i} className="flex gap-2.5">
                     <CheckIcon className="size-4 shrink-0 text-success" aria-hidden /> {i}
                   </li>
                 ))}
               </ul>
               <Button asChild className="mt-10 self-start" variant="outline" size="lg">
-                <Link href="/dashboard/invitations/new">Get started</Link>
+                <AppLink href={ROUTES.newInvitation}>Get started</AppLink>
               </Button>
             </div>
             <div data-reveal className="flex flex-col rounded-3xl bg-stage p-8 text-stage-foreground sm:p-10">
@@ -292,14 +295,14 @@ export default async function HomePage() {
               </p>
               <p className="mt-2 text-stage-muted">For a fully branded experience.</p>
               <ul className="mt-8 space-y-3 text-sm">
-                {["No Mirth badge", "Larger photo galleries", "More live invitations", "Priority support"].map((i) => (
+                {[`No ${BRAND.badge}`, "Larger photo galleries", "More live invitations", "Priority support"].map((i) => (
                   <li key={i} className="flex gap-2.5">
                     <CheckIcon className="size-4 shrink-0 text-accent" aria-hidden /> {i}
                   </li>
                 ))}
               </ul>
               <Button asChild className="mt-10 self-start" size="lg">
-                <Link href="/pricing">See pricing</Link>
+                <Link href={ROUTES.pricing}>See pricing</Link>
               </Button>
             </div>
           </div>
@@ -328,9 +331,9 @@ export default async function HomePage() {
           </h2>
           <div data-reveal className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Button asChild size="xl">
-              <Link href="/dashboard/invitations/new">
+              <AppLink href={ROUTES.newInvitation}>
                 Create an invitation <ArrowRightIcon aria-hidden />
-              </Link>
+              </AppLink>
             </Button>
             <p className="text-stage-muted">Free to start. Ready in minutes.</p>
           </div>
