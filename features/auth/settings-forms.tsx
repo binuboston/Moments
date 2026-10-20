@@ -12,6 +12,7 @@ import { Field, fieldAria } from "@/components/forms/field";
 import { apiFetch } from "@/lib/api/client";
 import { createClient } from "@/lib/supabase/client";
 import { errorMessage } from "@/features/invitations/hooks";
+import { useSignOut } from "@/features/auth/use-sign-out";
 
 const profileSchema = z.object({ fullName: z.string().trim().min(1, "Tell us your name").max(120) });
 type ProfileInput = z.infer<typeof profileSchema>;
@@ -47,6 +48,7 @@ export function ProfileForm({ fullName, email }: { fullName: string; email: stri
 }
 
 export function SecurityPanel({ email }: { email: string }) {
+  const { signOut, pending: signingOut } = useSignOut();
   const reset = useMutation({
     mutationFn: async () => {
       const supabase = createClient();
@@ -62,11 +64,9 @@ export function SecurityPanel({ email }: { email: string }) {
       <Button variant="outline" onClick={() => reset.mutate()} loading={reset.isPending}>
         Send password reset email
       </Button>
-      <form action="/auth/signout" method="post">
-        <Button type="submit" variant="ghost">
-          Log out
-        </Button>
-      </form>
+      <Button variant="ghost" onClick={signOut} loading={signingOut}>
+        Log out
+      </Button>
     </div>
   );
 }

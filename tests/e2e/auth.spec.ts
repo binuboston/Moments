@@ -29,3 +29,15 @@ test.describe("authentication", () => {
     await expect(page.getByRole("alert").filter({ hasText: /couldn't log in/i })).toContainText(/don't match/i);
   });
 });
+
+test.describe("account menu", () => {
+  test("logs out from the dashboard account dropdown", async ({ page }) => {
+    await signUp(page, "menu-logout");
+    await page.getByRole("button", { name: "Account menu" }).click();
+    await page.getByRole("menuitem", { name: /log out/i }).click();
+    await page.waitForURL((url) => url.pathname === "/", { timeout: 15_000 });
+    // The session is really gone: protected pages redirect to login again.
+    await page.goto("/dashboard");
+    await expect(page).toHaveURL(/\/login/);
+  });
+});

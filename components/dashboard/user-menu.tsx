@@ -6,8 +6,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { ShellUser } from "@/components/dashboard/dashboard-shell";
 import { initials } from "@/lib/utils/format";
+import { useSignOut } from "@/features/auth/use-sign-out";
 
 export function UserMenu({ user }: { user: ShellUser }) {
+  const { signOut } = useSignOut();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="-mr-1.5 rounded-full p-1.5 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" aria-label="Account menu">
@@ -39,13 +42,9 @@ export function UserMenu({ user }: { user: ShellUser }) {
           </DropdownMenuItem>
         ) : null}
         <DropdownMenuSeparator />
-        <form action="/auth/signout" method="post">
-          <DropdownMenuItem asChild>
-            <button type="submit" className="w-full">
-              <LogOutIcon /> Log out
-            </button>
-          </DropdownMenuItem>
-        </form>
+        <DropdownMenuItem onSelect={signOut} data-testid="menu-logout">
+          <LogOutIcon /> Log out
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
