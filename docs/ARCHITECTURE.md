@@ -186,6 +186,21 @@ GSAP is the only animation library. Everything lives in two places:
 
 **Build cache.** If a production build does not reflect a CSS change, delete `.next/cache` and build again. A stale Turbopack cache served old CSS once during development.
 
+## 10d. Guest drafts and sign-in (2026-10-21)
+
+- **Guests.** Anyone can start creating without an account. When a signed-out visitor opens `/dashboard/invitations/new`, the proxy sends them to `/start`. That page starts an anonymous Supabase session **in the browser**: anonymous sign-ins are rate-limited per client IP, so they must not run on the server. A guest is a real `authenticated` user, so every owner policy, autosave and the photo storage work unchanged.
+- **Publishing needs an account.** It is enforced three times:
+  - the publish API uses `requireAccount()`
+  - the database trigger `prevent_guest_publish` (`20261021000005_guest_sessions.sql`) blocks it
+  - the publish sheet shows `AccountGate` (sign up or log in in place) instead of the Publish button
+- **Keeping the draft.** `/api/guest/session` sets an httpOnly, HMAC-signed cookie naming the guest (`lib/auth/guest.ts`). After any sign-in, the guest's invitations move to the account (using the service role) and the guest user is deleted:
+  - **Google:** `/auth/callback` does the move
+  - **Email and password:** `/api/guest/claim` does it
+
+  Storage folders are keyed by invitation id, so photos follow automatically.
+- **Google** sign-in is behind `NEXT_PUBLIC_AUTH_GOOGLE` and configured in Supabase (SETUP.md).
+- **Cleanup.** `public.purge_stale_guests()` deletes guests inactive for 30 days (schedule it). Their uploaded files remain in storage until a storage sweep is added.
+
 ## 11. Risks and mitigations
 
 | Risk | Mitigation |

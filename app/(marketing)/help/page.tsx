@@ -71,7 +71,7 @@ export default function HelpPage() {
 
       <p className="mt-10 text-center text-sm text-muted-foreground">
         Ready to begin?{" "}
-        <Link href="/signup" className="font-medium text-primary underline-offset-4 hover:underline">
+        <Link href="/dashboard/invitations/new" className="font-medium text-primary underline-offset-4 hover:underline">
           Create your first invitation
         </Link>
       </p>

@@ -41,7 +41,7 @@ export async function SiteHeader() {
                 <Link href="/login">Log in</Link>
               </Button>
               <Button asChild>
-                <Link href="/signup">Create an invitation</Link>
+                <Link href="/dashboard/invitations/new">Create an invitation</Link>
               </Button>
             </>
           )}

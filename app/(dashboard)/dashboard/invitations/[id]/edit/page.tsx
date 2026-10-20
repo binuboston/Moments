@@ -22,5 +22,5 @@ export default async function EditInvitationPage({ params }: PageProps<"/dashboa
     .filter((t) => t.def.categories.includes(draft.categorySlug))
     .map((t) => ({ slug: t.row.slug, key: t.def.key, name: t.def.name, description: t.row.description ?? t.def.description, tier: t.row.tier, gradient: t.def.previewGradient }));
 
-  return <InvitationEditor initialDraft={draft} templates={options} />;
+  return <InvitationEditor initialDraft={draft} templates={options} isGuest={Boolean(user.is_anonymous)} />;
 }

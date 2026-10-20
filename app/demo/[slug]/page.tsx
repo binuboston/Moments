@@ -37,7 +37,7 @@ export default async function TemplateDemoPage({ params, searchParams }: PagePro
           <ArrowLeftIcon className="size-3.5" aria-hidden /> {def.name}
         </Link>
         <span className="text-neutral-500">· Sample</span>
-        <Link href={`/signup?next=${encodeURIComponent(`/dashboard/invitations/new?template=${row.slug}`)}`} className="rounded-full bg-neutral-900 px-3 py-1 font-medium text-white hover:bg-neutral-700">
+        <Link href={`/dashboard/invitations/new?template=${row.slug}`} className="rounded-full bg-neutral-900 px-3 py-1 font-medium text-white hover:bg-neutral-700">
           Use this design
         </Link>
       </div>

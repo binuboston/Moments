@@ -3,6 +3,7 @@ import { Logo } from "@/components/layout/logo";
 import { BottomNav, BottomNavSpacer } from "@/components/dashboard/bottom-nav";
 import { HeaderNav } from "@/components/dashboard/header-nav";
 import { TopBarAction } from "@/components/dashboard/top-bar-context";
+import { GuestBanner } from "@/components/dashboard/guest-banner";
 import { UserMenu } from "@/components/dashboard/user-menu";
 
 export interface ShellUser {
@@ -10,6 +11,8 @@ export interface ShellUser {
   name: string;
   role: "user" | "admin";
   plan: "free" | "pro";
+  /** Designing without an account (anonymous session). */
+  isGuest: boolean;
 }
 
 /**
@@ -33,6 +36,7 @@ export function DashboardShell({ user, children }: { user: ShellUser; children: 
           </div>
         </header>
         <main id="main" className="flex-1 px-4 py-6 sm:px-6 sm:py-8">
+          {user.isGuest ? <GuestBanner /> : null}
           <div className="mx-auto w-full max-w-6xl min-w-0">{children}</div>
           <BottomNavSpacer />
         </main>

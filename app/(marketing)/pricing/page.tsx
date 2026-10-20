@@ -45,7 +45,7 @@ export default function PricingPage() {
           <p className="mt-3 font-display text-5xl font-semibold">£0</p>
           <p className="mt-2 text-sm text-muted-foreground">Forever free for personal celebrations.</p>
           <Button asChild variant="outline" className="mt-8 w-full" size="lg">
-            <Link href="/signup">Start for free</Link>
+            <Link href="/dashboard/invitations/new">Start for free</Link>
           </Button>
         </div>
         <div className="relative rounded-3xl border border-primary bg-surface p-8 shadow-lift">
@@ -56,7 +56,7 @@ export default function PricingPage() {
           </p>
           <p className="mt-2 text-sm text-muted-foreground">One payment per invitation. No subscription.</p>
           <Button asChild className="mt-8 w-full" size="lg">
-            <Link href="/signup">Create your invitation</Link>
+            <Link href="/dashboard/invitations/new">Create your invitation</Link>
           </Button>
         </div>
       </div>

@@ -47,6 +47,13 @@ export async function requireUser() {
   return { user, supabase };
 }
 
+/** Requires a real (non-guest) account, e.g. for publishing. */
+export async function requireAccount() {
+  const ctx = await requireUser();
+  if (ctx.user.is_anonymous) throw new ApiError(403, "Create a free account to publish your invitation.", "account_required");
+  return ctx;
+}
+
 /** Requires an admin profile. Relies on RLS as the second line of defence. */
 export async function requireAdmin() {
   const { user, supabase } = await requireUser();

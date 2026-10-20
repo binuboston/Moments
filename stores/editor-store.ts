@@ -73,7 +73,8 @@ export const useEditorStore = create<EditorState>()((set) => ({
   lastSavedAt: null,
   ...UI_DEFAULTS,
 
-  load: (draft) => set({ draft, serverDraft: draft, saveState: "idle", ...UI_DEFAULTS }),
+  // Reloading the same invitation (router.refresh after sign-in or a URL change) keeps the UI as it is.
+  load: (draft) => set((s) => ({ draft, serverDraft: draft, saveState: "idle", ...(s.draft?.id === draft.id ? {} : UI_DEFAULTS) })),
   reset: () => set({ draft: null, serverDraft: null, saveState: "idle", lastSavedAt: null, ...UI_DEFAULTS }),
   setView: (view) => set({ view }),
   toggleSection: (section, open) =>

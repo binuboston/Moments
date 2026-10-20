@@ -9,7 +9,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <DashboardShell
-      user={{ email: user.email ?? "", name: profile?.full_name || user.user_metadata?.full_name || "", role: profile?.role ?? "user", plan: profile?.plan ?? "free" }}
+      user={{
+        email: user.email ?? "",
+        name: profile?.full_name || user.user_metadata?.full_name || "",
+        role: profile?.role ?? "user",
+        plan: profile?.plan ?? "free",
+        isGuest: Boolean(user.is_anonymous),
+      }}
     >
       {children}
     </DashboardShell>

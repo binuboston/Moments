@@ -54,7 +54,7 @@ export function MobileNav({ isAuthenticated, items }: MobileNavProps) {
             ) : (
               <>
                 <Button asChild size="lg" onClick={() => setOpen(false)}>
-                  <Link href="/signup">Create an invitation</Link>
+                  <Link href="/dashboard/invitations/new">Create an invitation</Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" onClick={() => setOpen(false)}>
                   <Link href="/login">Log in</Link>

@@ -55,7 +55,7 @@ export default async function HowItWorksPage() {
 
       <div className="mt-20 text-center">
         <Button asChild size="xl">
-          <Link href="/signup">
+          <Link href="/dashboard/invitations/new">
             Create your invitation <ArrowRightIcon aria-hidden />
           </Link>
         </Button>

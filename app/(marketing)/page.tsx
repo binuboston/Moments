@@ -99,7 +99,7 @@ export default async function HomePage() {
                 </p>
                 <div data-hero className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <Button asChild size="lg">
-                    <Link href="/signup">
+                    <Link href="/dashboard/invitations/new">
                       Create an invitation <ArrowRightIcon aria-hidden />
                     </Link>
                   </Button>
@@ -282,7 +282,7 @@ export default async function HomePage() {
                 ))}
               </ul>
               <Button asChild className="mt-10 self-start" variant="outline" size="lg">
-                <Link href="/signup">Get started</Link>
+                <Link href="/dashboard/invitations/new">Get started</Link>
               </Button>
             </div>
             <div data-reveal className="flex flex-col rounded-3xl bg-stage p-8 text-stage-foreground sm:p-10">
@@ -328,7 +328,7 @@ export default async function HomePage() {
           </h2>
           <div data-reveal className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Button asChild size="xl">
-              <Link href="/signup">
+              <Link href="/dashboard/invitations/new">
                 Create an invitation <ArrowRightIcon aria-hidden />
               </Link>
             </Button>

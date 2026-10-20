@@ -37,6 +37,20 @@ Local auth has email confirmations disabled (`supabase/config.toml`) so sign-up 
 3. In Authentication → URL configuration set the site URL to your production domain and add `https://<domain>/auth/callback` to redirect URLs.
 4. The `invitation-media` bucket is created by the first migration (private, 8 MB, images only).
 
+5. In Authentication → Sign In / Providers, turn on **Allow anonymous sign-ins** (guests design before creating an account). Consider enabling CAPTCHA (Authentication → Attack Protection) to stop abuse.
+6. Schedule guest cleanup, for example daily with pg_cron: `select cron.schedule('purge-guests', '0 3 * * *', $$select public.purge_stale_guests()$$);`. It removes guest users inactive for 30 days, along with their drafts.
+
+### Google sign-in
+
+1. In Google Cloud Console, create an OAuth client (type: Web application). Add these authorised redirect URIs:
+   - `https://<project-ref>.supabase.co/auth/v1/callback` (hosted)
+   - `http://127.0.0.1:54321/auth/v1/callback` (local)
+2. **Hosted:** in Supabase, go to Authentication → Sign In / Providers → Google. Enable it, then paste the client ID and secret.
+3. **Local:** export `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` and `SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET`, set `enabled = true` under `[auth.external.google]` in `supabase/config.toml`, then restart with `pnpm db:stop && pnpm db:start`.
+4. Set `NEXT_PUBLIC_AUTH_GOOGLE=true` (in `.env.local` and on Vercel) to show the "Continue with Google" buttons.
+
+Google sign-in also works for guests: the auth callback moves their drafts to the account they sign in with.
+
 ### Making someone an admin
 
 ```sql

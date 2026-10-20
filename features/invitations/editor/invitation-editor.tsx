@@ -2,6 +2,7 @@
 
 import { ArrowLeftIcon, CalendarClockIcon, CheckIcon, CloudOffIcon, ImageIcon, Loader2Icon, PaletteIcon, SendIcon, Settings2Icon } from "lucide-react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { SwapTransition } from "@/components/motion/swap-transition";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,10 @@ const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? o
  * cards; Preview shows the invitation as guests see it. Settings and publishing
  * open as sheets so the page never loses its place.
  */
-export function InvitationEditor({ initialDraft, templates }: { initialDraft: InvitationDraft; templates: TemplateOption[] }) {
+export function InvitationEditor({ initialDraft, templates, isGuest = false }: { initialDraft: InvitationDraft; templates: TemplateOption[]; isGuest?: boolean }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const load = useEditorStore((s) => s.load);
   const reset = useEditorStore((s) => s.reset);
   const draft = useEditorStore((s) => s.draft);
@@ -59,12 +63,22 @@ export function InvitationEditor({ initialDraft, templates }: { initialDraft: In
   const focusTarget = useEditorStore((s) => s.focusTarget);
   const clearFocusTarget = useEditorStore((s) => s.clearFocusTarget);
 
+  // Fresh server data for the same invitation (refresh) updates the draft and keeps the UI;
+  // a full reset happens only when leaving or switching to another invitation.
   useEffect(() => {
     load(initialDraft);
-    return () => reset();
-  }, [initialDraft, load, reset]);
+  }, [initialDraft, load]);
+  useEffect(() => () => reset(), [initialDraft.id, reset]);
 
   useAutosave();
+
+  // ?publish=1 (after signing in from the publish sheet, or returning from Google): reopen it.
+  const loaded = draft?.id === initialDraft.id;
+  useEffect(() => {
+    if (!loaded || searchParams.get("publish") !== "1") return;
+    setPublishOpen(true);
+    router.replace(pathname, { scroll: false });
+  }, [loaded, searchParams, setPublishOpen, router, pathname]);
 
   // goTo(): once the section has started opening, bring it into view.
   useEffect(() => {
@@ -172,7 +186,7 @@ export function InvitationEditor({ initialDraft, templates }: { initialDraft: In
             <DialogTitle>{draft.status === "published" ? "Your invitation is live" : "Publish"}</DialogTitle>
             <DialogDescription>Check everything is ready, choose your link and share it.</DialogDescription>
           </DialogHeader>
-          <PublishPanel />
+          <PublishPanel isGuest={isGuest} />
         </DialogContent>
       </Dialog>
     </div>

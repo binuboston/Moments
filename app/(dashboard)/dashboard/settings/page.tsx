@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/dashboard/page-header";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileForm, SecurityPanel } from "@/features/auth/settings-forms";
 import { PLAN_LIMITS } from "@/lib/entitlements";
@@ -12,6 +14,28 @@ export const metadata: Metadata = { title: "Settings", robots: { index: false } 
 export default async function SettingsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+  if (user.is_anonymous) {
+    // Guests have no profile or password yet.
+    return (
+      <div className="grid min-w-0 grid-cols-1 gap-5 sm:gap-8">
+        <PageHeader title="Settings" description="Your profile, plan and account security." />
+        <Card className="max-w-xl">
+          <CardHeader>
+            <CardTitle>Create your account</CardTitle>
+            <CardDescription>You&apos;re designing as a guest. Create a free account to publish, set up your profile and use your drafts on any device. Your work comes with you.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+            <Button asChild>
+              <Link href="/signup?next=/dashboard/settings">Create free account</Link>
+            </Button>
+            <Button asChild variant="soft">
+              <Link href="/login?next=/dashboard/settings">Log in</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   const profile = await getCurrentProfile();
   const plan = profile?.plan ?? "free";
   const limits = PLAN_LIMITS[plan];

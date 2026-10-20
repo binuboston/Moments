@@ -1,6 +1,6 @@
 import { revalidatePath } from "next/cache";
 import type { NextRequest } from "next/server";
-import { ApiError, handle, json, mapDbError, requireUser } from "@/lib/api/respond";
+import { ApiError, handle, json, mapDbError, requireAccount } from "@/lib/api/respond";
 import { siteUrl } from "@/lib/env";
 import { uuid } from "@/lib/validation/common";
 import { publishableSchema } from "@/lib/validation/invitation";
@@ -11,7 +11,8 @@ import { assertCanPublishAnother, assertTemplateAllowed, getProfilePlan } from "
 export const POST = handle(async (_req: NextRequest, ctx: RouteContext<"/api/invitations/[id]/publish">) => {
   const { id } = await ctx.params;
   uuid.parse(id);
-  const { user, supabase } = await requireUser();
+  // Guests can design and save drafts, but publishing needs an account.
+  const { user, supabase } = await requireAccount();
   const { plan } = await getProfilePlan(supabase, user.id);
   const draft = await getOwnedInvitationDraft(supabase, id, user.id, plan);
   if (!draft) throw new ApiError(404, "Invitation not found.", "not_found");

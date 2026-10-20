@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
 import { TemplateShowcase } from "@/features/templates/components/template-showcase";
 import { getActiveCategories, getPublishedTemplateBySlug, getPublishedTemplates } from "@/features/templates/queries";
-import { getCurrentUser } from "@/lib/supabase/server";
 import type { CategorySlug } from "@/types/domain";
 
 export async function generateMetadata({ params }: PageProps<"/templates/[slug]">): Promise<Metadata> {
@@ -23,13 +22,14 @@ export async function generateMetadata({ params }: PageProps<"/templates/[slug]"
 
 export default async function TemplateDetailPage({ params }: PageProps<"/templates/[slug]">) {
   const { slug } = await params;
-  const [template, categories, all, user] = await Promise.all([getPublishedTemplateBySlug(slug), getActiveCategories(), getPublishedTemplates(), getCurrentUser()]);
+  const [template, categories, all] = await Promise.all([getPublishedTemplateBySlug(slug), getActiveCategories(), getPublishedTemplates()]);
   if (!template) notFound();
 
   const { row, def } = template;
   const supported = categories.filter((c) => def.categories.includes(c.slug as CategorySlug));
   const related = all.filter((t) => t.row.id !== row.id && t.def.categories.some((c) => def.categories.includes(c))).slice(0, 3);
-  const startHref = user ? `/dashboard/invitations/new?template=${row.slug}` : `/signup?next=${encodeURIComponent(`/dashboard/invitations/new?template=${row.slug}`)}`;
+  // No account needed to start: signed-out visitors get a guest session on the way in.
+  const startHref = `/dashboard/invitations/new?template=${row.slug}`;
 
   return (
     <Container className="py-12 sm:py-16">

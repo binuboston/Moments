@@ -4,6 +4,8 @@ import type { Database } from "@/types/database";
 
 const PROTECTED_PREFIXES = ["/dashboard", "/admin"];
 const AUTH_PAGES = ["/login", "/signup", "/forgot-password"];
+/** Routes a visitor can start without an account: they get a guest session first. */
+const GUEST_ENTRY = "/dashboard/invitations/new";
 
 /**
  * Refreshes the Supabase session cookie on every matched request and applies
@@ -35,18 +37,20 @@ export async function updateSession(request: NextRequest) {
   // creation and this call.
   const { data } = await supabase.auth.getClaims();
   const isAuthenticated = Boolean(data?.claims?.sub);
+  // Guests (anonymous sessions) may design drafts but are not "logged in" for auth pages.
+  const isGuest = data?.claims?.is_anonymous === true;
 
   const { pathname, search } = request.nextUrl;
 
   if (!isAuthenticated && PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/login";
+    redirectUrl.pathname = pathname.startsWith(GUEST_ENTRY) ? "/start" : "/login";
     redirectUrl.search = "";
     redirectUrl.searchParams.set("next", `${pathname}${search}`);
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (isAuthenticated && AUTH_PAGES.includes(pathname)) {
+  if (isAuthenticated && !isGuest && AUTH_PAGES.includes(pathname)) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/dashboard";
     redirectUrl.search = "";
