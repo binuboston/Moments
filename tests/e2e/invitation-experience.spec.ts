@@ -5,11 +5,11 @@ const hiddenCount = (page: import("@playwright/test").Page) =>
   page.evaluate(() => [...document.querySelectorAll("[data-inv-reveal],[data-inv-hero]")].filter((e) => getComputedStyle(e).opacity === "0").length);
 
 test.describe("invitation experience", () => {
-  test("the envelope opens from the keyboard and reveals the invitation", async ({ page }) => {
+  test("the opening card opens from the keyboard and reveals the invitation", async ({ page }) => {
     await page.goto(DEMO);
     const cover = page.getByRole("dialog");
     await expect(cover).toBeVisible();
-    await expect(page.getByRole("button", { name: /tap to open/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Open", exact: true })).toBeVisible();
     await page.keyboard.press("Enter");
     await expect(page.locator("[data-inv-cover]")).toHaveCount(0, { timeout: 6000 });
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
@@ -17,7 +17,7 @@ test.describe("invitation experience", () => {
 
   test("scrolling reveals every section and shows the quick-action dock", async ({ page }) => {
     await page.goto(DEMO);
-    await page.getByRole("button", { name: /tap to open/i }).click();
+    await page.getByRole("button", { name: "Open", exact: true }).click();
     await expect(page.locator("[data-inv-cover]")).toHaveCount(0, { timeout: 6000 });
     const height = () => page.evaluate(() => document.documentElement.scrollHeight);
     for (let y = 0; y < (await height()); y += 600) {
@@ -34,7 +34,14 @@ test.describe("invitation experience", () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
   });
 
-  test("deep links skip the envelope", async ({ page }) => {
+  test("a guest link greets the guest by name", async ({ page }) => {
+    await page.goto(`${DEMO}?guest=Priya%20Sharma`);
+    const cover = page.getByRole("dialog");
+    await expect(cover.getByText("Priya Sharma")).toBeVisible();
+    await expect(cover.getByText(/cordially invites/i)).toBeVisible();
+  });
+
+  test("deep links skip the opening card", async ({ page }) => {
     await page.goto(`${DEMO}#rsvp`);
     await expect(page.locator("[data-inv-cover]")).toHaveCount(0);
     await expect(page.locator("#rsvp")).toBeInViewport();
@@ -44,7 +51,7 @@ test.describe("invitation experience", () => {
     const context = await browser.newContext({ reducedMotion: "reduce" });
     const page = await context.newPage();
     await page.goto(DEMO);
-    await page.getByRole("button", { name: /tap to open/i }).click();
+    await page.getByRole("button", { name: "Open", exact: true }).click();
     await expect(page.locator("[data-inv-cover]")).toHaveCount(0, { timeout: 3000 });
     expect(await hiddenCount(page)).toBe(0);
     await context.close();

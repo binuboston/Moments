@@ -150,7 +150,7 @@ GSAP is the only animation library. Everything lives in two places:
 
 **No-flash and failsafe rules.** `lib/motion/pre-paint.ts` runs in `<head>` and adds `motion-ok` to `<html>` unless the visitor prefers reduced motion. Only under `.motion-ok` are `[data-reveal]`/`[data-hero]` hidden before paint. JS marks elements it has taken over with `data-reveal-bound`; any element still unbound after 2.5s is shown by a CSS animation, so a script failure can never leave content invisible. Reduced motion skips Lenis, parallax and pins and shows content immediately.
 
-**Invitations.** The public page and live demo have their own motion layer: an opening envelope, Lenis, `data-inv-*` reveals and a quick-action dock. See [TEMPLATES.md](TEMPLATES.md#guest-experience-and-motion). Its reveals use opacity only, so unrevealed RSVP fields stay focusable.
+**Invitations.** The public page and live demo have their own motion layer: an opening card, Lenis, `data-inv-*` reveals and a quick-action dock. See [TEMPLATES.md](TEMPLATES.md#guest-experience-and-motion). Its reveals use opacity only, so unrevealed RSVP fields stay focusable.
 
 **Lenis.** `SmoothScroll` (marketing layout, public invitations and live demos) drives Lenis from the GSAP ticker and feeds `ScrollTrigger.update`, refreshing after fonts load. Use `useLenis()` for programmatic scrolling. Dashboard and editor use native scroll (nested scroll containers and forms behave better).
 

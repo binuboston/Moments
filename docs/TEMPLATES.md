@@ -19,12 +19,12 @@ All invitation designs follow one pattern so they stay consistent and easy to ma
 
 On the public page (`/e/[slug]`) and the live demo (`/demo/[slug]`) the renderer wraps every template in `InvitationExperience` (`features/templates/motion/`):
 
-- **Opening envelope** (`opening-cover.tsx`): a sealed envelope styled from the template's palette, with the monogram on a wax seal. Guests open it with the button, Enter, Space or Escape. Owners can turn it off (Settings → Opening envelope). Links with a hash (such as `#rsvp`) skip it, and without JavaScript it is hidden.
-- **Celebration burst** (`burst.ts`): petals, confetti or sparkles, chosen by the definition's `particles` field.
+- **Opening card** (`opening-cover.tsx`): a welcome card over a blurred, tinted backdrop, with corner blooms, a heart (or sparkle) badge, the names, the date and an Open button. Opening ripples the badge, blooms the corners outwards, bursts blossoms from the card and lifts it away. Guests open it with the button, Enter, Space or Escape. A `?guest=Name` link adds “Cordially invites Name”. Owners can turn it off (Settings → Opening card). Links with a hash (such as `#rsvp`) skip it, and without JavaScript it is hidden.
+- **Celebration burst** (`burst.ts`): six-petal blossoms in pink tones (`petals`) or the accent colour (`sparkles`, mixed with stars), or confetti, chosen by the definition's `particles` field.
 - **Smooth scrolling** with Lenis, and **scroll motion** with GSAP (`use-invitation-motion.ts`).
 - **Quick-action dock** (`action-dock.tsx`): Directions, Calendar, RSVP and Share, shown once the guest scrolls.
 
-Previews (the editor, catalogue cards and marketing mockups) render statically: no envelope, no motion, no dock.
+Previews (the editor, catalogue cards and marketing mockups) render statically: no opening card, no motion, no dock.
 
 Templates opt into motion with data attributes and never write GSAP code themselves:
 

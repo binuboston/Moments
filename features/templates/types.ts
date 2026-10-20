@@ -90,7 +90,7 @@ export interface TemplateDefinition {
   defaults: { paletteId: string; fontPairingId: string };
   /** Small CSS gradient used for cards before the live preview mounts. */
   previewGradient: string;
-  /** Celebration burst when the guest opens the envelope. Defaults to petals. */
+  /** Celebration burst when the guest opens the invitation. Defaults to petals. */
   particles?: "petals" | "confetti" | "sparkles";
   component: ComponentType<TemplateProps>;
 }

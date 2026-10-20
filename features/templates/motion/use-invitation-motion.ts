@@ -22,7 +22,7 @@ const DRAWABLE = "path, line, polyline, polygon, circle, ellipse, rect";
  *   data-inv-reveal="stagger" direct children rise one after another
  *   data-inv-speed="0.15"    parallax drift (desktop and phones)
  *
- * Until `started` is true (the guest has not opened the envelope yet) every
+ * Until `started` is true (the guest has not opened the invitation yet) every
  * marked element is claimed and kept hidden, so the CSS failsafe does not
  * reveal content behind the cover. Reduced motion: CSS never hides anything
  * and this hook does nothing.

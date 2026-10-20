@@ -1,8 +1,9 @@
 import { cn } from "@/lib/utils/cn";
 import { formatEventDate } from "@/lib/utils/dates";
 import { googleCalendarUrl } from "@/lib/utils/share";
-import { kindDetails, monogram, shareData } from "@/features/templates/designs/shared";
+import { shareData } from "@/features/templates/designs/shared";
 import { InvitationExperience } from "@/features/templates/motion/invitation-experience";
+import type { CoverData } from "@/features/templates/motion/opening-cover";
 import { getTemplateOrFallback } from "@/features/templates/registry";
 import { resolveTheme, themeCssVars } from "@/features/templates/theme";
 import { titleParts } from "@/features/templates/title";
@@ -19,7 +20,7 @@ interface InvitationRendererProps {
  * previews and the public page all go through here so they never diverge.
  * Isomorphic: no server-only APIs, so the editor can re-render it live.
  *
- * Full-page modes (public, demo) add the guest experience: opening envelope,
+ * Full-page modes (public, demo) add the guest experience: opening card,
  * smooth scrolling, motion and quick actions. Previews render statically.
  */
 export function InvitationRenderer({ view, mode, className }: InvitationRendererProps) {
@@ -33,6 +34,8 @@ export function InvitationRenderer({ view, mode, className }: InvitationRenderer
   const extraVars = {
     "--inv-c2": palette.swatch[2],
     "--inv-c3": palette.swatch[1],
+    // The palette's darkest tone, for deep washes such as the opening backdrop.
+    "--inv-deep": luminance(palette.vars.bg) < luminance(palette.vars.text) ? palette.vars.bg : palette.vars.text,
   } as React.CSSProperties;
 
   return (
@@ -53,14 +56,14 @@ export function InvitationRenderer({ view, mode, className }: InvitationRenderer
   );
 }
 
-function coverData(view: InvitationView) {
+function coverData(view: InvitationView): CoverData {
   const { content } = view;
+  const couple = "partnerOne" in content && "partnerTwo" in content && content.partnerOne && content.partnerTwo;
   return {
-    monogram: monogram(view),
-    eyebrow: kindDetails(view).eyebrow,
-    title: titleParts(content).title,
+    names: couple ? [content.partnerOne, content.partnerTwo] : [titleParts(content).title],
     date: formatEventDate(content.startsAt, content.timezone),
     invocation: content.invocation,
+    icon: ["wedding", "engagement", "anniversary", "baby-shower"].includes(content.kind) ? "heart" : "sparkle",
   };
 }
 
@@ -76,4 +79,13 @@ function dockData(view: InvitationView, theme: ResolvedTheme) {
     rsvpTarget: view.settings.rsvp.enabled && theme.sections.rsvp ? "rsvp" : "",
     share,
   };
+}
+
+/** Relative luminance of a #rgb/#rrggbb colour (0 black to 1 white); 0.5 for anything else. */
+function luminance(color: string): number {
+  const hex = color.trim().replace("#", "");
+  const full = hex.length === 3 ? [...hex].map((c) => c + c).join("") : hex;
+  if (!/^[0-9a-f]{6}$/i.test(full)) return 0.5;
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16) / 255);
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }

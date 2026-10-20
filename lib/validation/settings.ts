@@ -20,7 +20,7 @@ export const settingsSchema = z.object({
     deadline: "",
   }),
   showCalendarActions: z.boolean().default(true),
-  /** Guests tap an envelope to open the invitation (public page and live demo only). */
+  /** Guests tap Open on a welcome card to reveal the invitation (public page and live demo only). */
   openingCover: z.boolean().default(true),
 });
 

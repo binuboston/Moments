@@ -142,10 +142,10 @@ export function SettingsPanel() {
       <section className="grid gap-4">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-base font-semibold">Opening envelope</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Guests tap a sealed envelope to open your invitation. Links to a section (such as #rsvp) skip it.</p>
+            <h2 className="text-base font-semibold">Opening card</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Guests see a welcome card and tap Open to reveal your invitation. Add ?guest=Name to a link to greet someone by name. Links to a section (such as #rsvp) skip it.</p>
           </div>
-          <Switch checked={draft.settings.openingCover} onCheckedChange={(v) => setSettings({ openingCover: v })} aria-label="Show opening envelope" />
+          <Switch checked={draft.settings.openingCover} onCheckedChange={(v) => setSettings({ openingCover: v })} aria-label="Show opening card" />
         </div>
       </section>
     </div>

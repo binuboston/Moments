@@ -8,7 +8,7 @@ import { OpeningCover, type CoverData } from "@/features/templates/motion/openin
 import { useInvitationMotion } from "@/features/templates/motion/use-invitation-motion";
 
 interface InvitationExperienceProps {
-  /** null when the owner turned the opening envelope off. */
+  /** null when the owner turned the opening card off. */
   cover: CoverData | null;
   dock: DockData;
   particles: ParticleKind;
@@ -19,7 +19,7 @@ type Phase = "closed" | "revealing" | "open";
 
 /**
  * The guest-facing layer around a template on the public page and live demo:
- * Lenis smooth scrolling, the opening envelope, scroll-driven motion and the
+ * Lenis smooth scrolling, the opening card, scroll-driven motion and the
  * quick-action dock. Previews (editor, catalogue) never use it, so they stay
  * static and cheap.
  */
@@ -46,7 +46,7 @@ function Experience({ cover, dock, particles, children }: InvitationExperiencePr
     if (window.location.hash) setPhase((p) => (p === "closed" ? "open" : p));
   }, []);
 
-  // While the envelope is closed the page behind it cannot scroll or take focus.
+  // While the opening card is shown the page behind it cannot scroll or take focus.
   useEffect(() => {
     if (phase !== "closed") return;
     const html = document.documentElement;
@@ -64,11 +64,12 @@ function Experience({ cover, dock, particles, children }: InvitationExperiencePr
 
   return (
     <>
-      {/* Without JavaScript the envelope could never open, so it is not shown at all. */}
+      {/* Without JavaScript the opening card could never open, so it is not shown at all. */}
       <noscript dangerouslySetInnerHTML={{ __html: "<style>[data-inv-cover]{display:none!important}</style>" }} />
       {cover && phase !== "open" ? (
         <OpeningCover
           {...cover}
+          particles={particles}
           onBurst={(x, y) => layer.current && burst(layer.current, particles, x, y)}
           onReveal={() => setPhase("revealing")}
           onDone={() => {
