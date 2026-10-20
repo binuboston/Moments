@@ -60,6 +60,7 @@ function useAfterAuth({ next, onSuccess }: { next: string; onSuccess?: () => voi
 const ERRORS: Record<string, string> = {
   auth: "Your sign-in link was invalid or has expired. Please try again.",
   oauth: "Google sign-in was cancelled or didn't complete. Please try again.",
+  expired: "Your session has expired. Please log in again to continue.",
 };
 
 export function LoginForm({ embedded = false, next: nextProp, onSuccess }: AuthFormProps = {}) {
