@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { InvitationEditor } from "@/features/invitations/editor/invitation-editor";
 import { getOwnedInvitationDraft } from "@/features/invitations/queries";
 import { getPublishedTemplates } from "@/features/templates/queries";
 import { uuid } from "@/lib/validation/common";
-import { createClient, getCurrentProfile, getCurrentUser } from "@/lib/supabase/server";
+import { requireAppUser } from "@/lib/auth/session";
+import { createClient, getCurrentProfile } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Edit invitation", robots: { index: false } };
 
 export default async function EditInvitationPage({ params }: PageProps<"/dashboard/invitations/[id]/edit">) {
   const { id } = await params;
   if (!uuid.safeParse(id).success) notFound();
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  const user = await requireAppUser();
 
   const [supabase, profile, templates] = await Promise.all([createClient(), getCurrentProfile(), getPublishedTemplates()]);
   const draft = await getOwnedInvitationDraft(supabase, id, user.id, profile?.plan ?? "free");

@@ -57,7 +57,7 @@ An invitation card follows the same anatomy, with the design thumbnail inset at 
 
 ## Layout
 
-- **Shell.** There is no sidebar. One floating header (`surface-float`, aligned to the `max-w-6xl` content column) holds the logo, a pill navigation with a gliding highlight, the contextual primary action and the account menu, which also shows the plan and the upgrade link. Phones get the same header plus a floating bottom tab bar.
+- **Header.** One header (`components/layout/app-header.tsx`) serves the whole product, both the marketing site and the app. It is a floating `surface-float` bar, aligned to the `max-w-6xl` column. The logo always goes to the landing page. Next to it is the shared `PrimaryNav` (Templates, How it works, Pricing, My invitations) with a gliding highlight, then a global "New invitation" button and the account menu, which holds the plan, Settings, Admin and Log out. On phones the navigation moves into a menu sheet. In the app, the header paints a canvas backing so content never shows through. There is no sidebar and no tab bar.
 - **Grids.** Use `gap-4` on phones and `gap-5` from `sm` up. Cards stretch to equal height (`h-full`).
 - **Toolbars on the canvas.** Search is a white pill input (`border-0 bg-surface shadow-card`); filters are a white segmented pill with a dark active segment.
 

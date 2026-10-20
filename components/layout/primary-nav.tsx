@@ -6,21 +6,16 @@ import { useEffect, useRef, useState } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/motion/gsap";
 import { cn } from "@/lib/utils/cn";
 
-const ITEMS = [
-  { href: "/dashboard", label: "Overview", exact: true },
-  { href: "/dashboard/invitations", label: "Invitations" },
-  { href: "/dashboard/settings", label: "Settings" },
-];
-
-const isActive = (pathname: string, href: string, exact?: boolean) => (exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`));
+import { isActivePath, PRIMARY_NAV } from "@/lib/routes";
 
 /**
- * Primary navigation in the app header (from md up; phones use the bottom tab
- * bar). One highlight glides to the active link. Until it is measured (first
+ * The site-wide navigation in the header (from md up; phones use the menu
+ * sheet). Shared by the marketing site and the app. One highlight glides to
+ * the active link; on pages outside the nav (the landing page) it fades out. Until it is measured (first
  * paint, or without JavaScript) the active link draws its own highlight, so the
  * state is always correct.
  */
-export function HeaderNav({ className }: { className?: string }) {
+export function PrimaryNav({ className }: { className?: string }) {
   const pathname = usePathname();
   const list = useRef<HTMLUListElement>(null);
   const pill = useRef<HTMLSpanElement>(null);
@@ -59,18 +54,18 @@ export function HeaderNav({ className }: { className?: string }) {
   }, [pathname]);
 
   return (
-    <nav aria-label="Dashboard" className={className}>
+    <nav aria-label="Primary" className={className}>
       <ul ref={list} className="relative flex items-center gap-1 rounded-full bg-fill p-1">
         <span ref={pill} aria-hidden className="pointer-events-none absolute top-1 bottom-1 left-0 w-0 rounded-full bg-surface opacity-0 shadow-card" />
-        {ITEMS.map((item) => {
-          const active = isActive(pathname, item.href, item.exact);
+        {PRIMARY_NAV.map((item) => {
+          const active = isActivePath(pathname, item.href);
           return (
             <li key={item.href}>
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative flex h-8 items-center rounded-full px-4 text-sm font-medium transition-colors duration-(--duration-base) outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  "relative flex h-8 items-center rounded-full px-3.5 text-sm font-medium whitespace-nowrap transition-colors duration-(--duration-base) outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                   active && !ready && "bg-surface shadow-card",
                 )}

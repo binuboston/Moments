@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { InvitationList } from "@/features/invitations/components/invitation-list";
 import { listOwnedInvitations } from "@/features/invitations/queries";
 import { invitationListQuerySchema } from "@/lib/validation/invitation";
-import { createClient, getCurrentUser } from "@/lib/supabase/server";
+import { requireAppUser } from "@/lib/auth/session";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Invitations", robots: { index: false } };
 
 export default async function InvitationsPage({ searchParams }: PageProps<"/dashboard/invitations">) {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  const user = await requireAppUser("/dashboard/invitations");
   const sp = await searchParams;
   const params = invitationListQuerySchema.parse({
     status: typeof sp.status === "string" ? sp.status : undefined,

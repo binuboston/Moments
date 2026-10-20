@@ -2,11 +2,22 @@ import { expect, test } from "@playwright/test";
 import { logIn, logOut, signUp } from "./helpers";
 
 test.describe("authentication", () => {
-  test("protected routes redirect to login with a return path", async ({ page }) => {
+  test("signed-out visitors open the app as guests; admin and the API still need a session", async ({ page, playwright, baseURL }) => {
     await page.goto("/dashboard/invitations");
-    await expect(page).toHaveURL(/\/login\?next=%2Fdashboard%2Finvitations/);
-    const api = await page.request.get("/api/invitations");
-    expect(api.status()).toBe(401);
+    await expect(page).toHaveURL(/\/dashboard\/invitations$/, { timeout: 30_000 });
+    await expect(page.getByTestId("guest-banner")).toBeVisible();
+
+    // The logo always goes to the landing page.
+    await page.getByRole("link", { name: "Mirth home" }).first().click();
+    await expect(page).toHaveURL(/\/$/);
+
+    // Without any session the API refuses and admin asks for a real login.
+    const anonymous = await playwright.request.newContext({ baseURL });
+    expect((await anonymous.get("/api/invitations")).status()).toBe(401);
+    await anonymous.dispose();
+    await page.context().clearCookies();
+    await page.goto("/admin");
+    await expect(page).toHaveURL(/\/login\?next=%2Fadmin/);
   });
 
   test("sign up, log out and log back in", async ({ page }) => {
@@ -36,8 +47,8 @@ test.describe("account menu", () => {
     await page.getByRole("button", { name: "Account menu" }).click();
     await page.getByRole("menuitem", { name: /log out/i }).click();
     await page.waitForURL((url) => url.pathname === "/", { timeout: 15_000 });
-    // The session is really gone: protected pages redirect to login again.
+    // The account session is really gone: the app opens as a fresh guest.
     await page.goto("/dashboard");
-    await expect(page).toHaveURL(/\/login/);
+    await expect(page.getByTestId("guest-banner")).toBeVisible({ timeout: 30_000 });
   });
 });

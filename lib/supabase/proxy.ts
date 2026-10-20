@@ -2,10 +2,10 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/database";
 
-const PROTECTED_PREFIXES = ["/dashboard", "/admin"];
+/** The app is open to everyone (guests get a session first); admin needs a real login. */
+const APP_PREFIX = "/dashboard";
+const ADMIN_PREFIX = "/admin";
 const AUTH_PAGES = ["/login", "/signup", "/forgot-password"];
-/** Routes a visitor can start without an account: they get a guest session first. */
-const GUEST_ENTRY = "/dashboard/invitations/new";
 
 /**
  * Refreshes the Supabase session cookie on every matched request and applies
@@ -42,9 +42,10 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname, search } = request.nextUrl;
 
-  if (!isAuthenticated && PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+  const under = (prefix: string) => pathname === prefix || pathname.startsWith(`${prefix}/`);
+  if (!isAuthenticated && (under(APP_PREFIX) || under(ADMIN_PREFIX))) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = pathname.startsWith(GUEST_ENTRY) ? "/start" : "/login";
+    redirectUrl.pathname = under(APP_PREFIX) ? "/start" : "/login";
     redirectUrl.search = "";
     redirectUrl.searchParams.set("next", `${pathname}${search}`);
     return NextResponse.redirect(redirectUrl);

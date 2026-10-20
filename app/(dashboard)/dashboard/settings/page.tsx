@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/dashboard/page-header";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -7,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileForm, SecurityPanel } from "@/features/auth/settings-forms";
 import { PLAN_LIMITS } from "@/lib/entitlements";
-import { getCurrentProfile, getCurrentUser } from "@/lib/supabase/server";
+import { requireAppUser } from "@/lib/auth/session";
+import { getCurrentProfile } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Settings", robots: { index: false } };
 
 export default async function SettingsPage() {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  const user = await requireAppUser("/dashboard/settings");
   if (user.is_anonymous) {
     // Guests have no profile or password yet.
     return (

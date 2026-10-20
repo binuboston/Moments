@@ -1,23 +1,9 @@
-import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
-import { getCurrentProfile, getCurrentUser } from "@/lib/supabase/server";
+import { getAccount, requireAppUser } from "@/lib/auth/session";
 
+/** The app. Everyone gets in: signed-out visitors start a guest session first. */
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login?next=/dashboard");
-  const profile = await getCurrentProfile();
-
-  return (
-    <DashboardShell
-      user={{
-        email: user.email ?? "",
-        name: profile?.full_name || user.user_metadata?.full_name || "",
-        role: profile?.role ?? "user",
-        plan: profile?.plan ?? "free",
-        isGuest: Boolean(user.is_anonymous),
-      }}
-    >
-      {children}
-    </DashboardShell>
-  );
+  await requireAppUser();
+  const account = (await getAccount())!;
+  return <DashboardShell account={account}>{children}</DashboardShell>;
 }

@@ -169,7 +169,7 @@ GSAP is the only animation library. Everything lives in two places:
 
 **Dashboard motion.** `app/(dashboard)/dashboard/template.tsx` wraps pages in `PageEnter`: top-level blocks rise in on in-app navigation, content that streams in after a skeleton animates when it arrives, and hard loads show content instantly (no flash). The wizard and editor are skipped because their fixed action bars must not sit inside a transformed parent. Other pieces:
 
-- The header navigation highlight glides between links, and the phone tab bar's highlight pops in under the active tab.
+- The shared header's navigation highlight glides between links.
 - Invitation cards tilt toward the pointer through `useTilt`, on a wrapper so the CSS hover lift is untouched. They also get a light sweep and a "days to go" chip.
 - Overview stats count up.
 - The overview hero (`features/dashboard/overview-hero.tsx`) shows a live countdown to the next event from `getOverviewSummary`.
@@ -200,6 +200,18 @@ GSAP is the only animation library. Everything lives in two places:
   Storage folders are keyed by invitation id, so photos follow automatically.
 - **Google** sign-in is behind `NEXT_PUBLIC_AUTH_GOOGLE` and configured in Supabase (SETUP.md).
 - **Cleanup.** `public.purge_stale_guests()` deletes guests inactive for 30 days (schedule it). Their uploaded files remain in storage until a storage sweep is added.
+
+## 10e. App structure (2026-10-21)
+
+- **Routes.** All route paths and the shared navigation live in `lib/routes.ts`. Links use `ROUTES.*` instead of literals.
+- **Who gets in.** The app (`/dashboard`) is open to everyone:
+  - signed-out visitors are sent to `/start`, which opens a guest session in the browser and returns them where they were going
+  - pages call `requireAppUser()` (`lib/auth/session.ts`) as the page-level guarantee
+  - `/admin` still requires a real login
+- **One header.** `AppHeader` is shared by the marketing layout and the app shell:
+  - in the app, the server passes the account (no flash)
+  - on marketing pages, `useAccount()` resolves it in the browser, so those pages stay static instead of reading cookies on every request
+- **Logo.** It always links to the landing page. "My invitations" in the navigation is the way into the app.
 
 ## 11. Risks and mitigations
 

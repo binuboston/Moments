@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
-import { isFocusedFlow } from "@/components/dashboard/bottom-nav";
+import { isFocusedFlow } from "@/lib/routes";
 import { gsap, MQ, useGSAP } from "@/lib/motion/gsap";
 import { EASE } from "@/lib/motion/tokens";
 

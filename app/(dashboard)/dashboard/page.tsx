@@ -1,20 +1,19 @@
 import { ArrowRightIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { EmptyInvitations } from "@/features/dashboard/empty-invitations";
 import { OverviewHero } from "@/features/dashboard/overview-hero";
 import { StatTiles } from "@/features/dashboard/stat-tiles";
 import { InvitationGrid } from "@/features/invitations/components/invitation-grid";
 import { getOverviewSummary, listOwnedInvitations } from "@/features/invitations/queries";
-import { createClient, getCurrentProfile, getCurrentUser } from "@/lib/supabase/server";
+import { requireAppUser } from "@/lib/auth/session";
+import { createClient, getCurrentProfile } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Dashboard", robots: { index: false } };
 
 export default async function DashboardPage() {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  const user = await requireAppUser("/dashboard");
   const [supabase, profile] = await Promise.all([createClient(), getCurrentProfile()]);
   const [list, summary] = await Promise.all([
     listOwnedInvitations(supabase, user.id, { status: "all", q: "", page: 1, pageSize: 6 }),
