@@ -37,6 +37,13 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  // The app moved from /dashboard to the root; keep old links (and bookmarks) working.
+  async redirects() {
+    return [
+      { source: "/dashboard", destination: "/", permanent: true },
+      { source: "/dashboard/:path*", destination: "/:path*", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

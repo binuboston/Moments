@@ -2,16 +2,16 @@
 
 Invite has two visual layers that share one brand:
 
-- **App** (dashboard, editor, admin): calm, floating, borderless surfaces on a cool grey canvas. Described here.
+- **App** (home, invitations, editor, templates, support pages, admin): a Pinterest-inspired language. White canvas, near-black ink, soft grey pills, one bold raspberry red for the main action, and image-first "pins" with 16px corners in masonry. Described here.
 - **Invitations** (templates): each design has its own palette and fonts through `--inv-*` variables. See [TEMPLATES.md](TEMPLATES.md).
 
 They meet in the brand motifs (`components/brand/`): the six-petal blossom, corner blooms, celebration bursts, and the serif used for emphasis.
 
 ## Principles
 
-1. **Elevation, not borders.** App surfaces are white and separated from the canvas by soft shadows. Borders appear only inside a surface (a divider, a form field) or on overlays.
-2. **One radius per role.** Cards use `rounded-card` (24px); icon tiles use `rounded-tile` (14px); buttons, chips and segmented controls are full pills.
-3. **Colour means something.** Garnet (`primary`) marks the main action and the current state. Pastel tones identify things (an occasion, a stat), never actions.
+1. **Content is the colour.** The canvas is white. Panels are flat, with a hairline; menus float with a soft glow; pins have no chrome at all.
+2. **One radius per role.** Cards and pins use `rounded-card` (16px); icon tiles use `rounded-tile` (12px); buttons, chips, search and segmented controls are full pills.
+3. **Colour means something.** Raspberry (`primary`, #e11d48) marks the one main action on a screen; the current navigation item is near-black. Pastel tones identify things (an occasion, a stat), never actions.
 4. **Soft secondary actions.** Inside a card, secondary actions use the `soft` button: a grey fill and no border.
 5. **Tokens only.** Use the tokens and utilities below, never raw hex values or one-off shadows in components.
 
@@ -19,7 +19,7 @@ They meet in the brand motifs (`components/brand/`): the six-petal blossom, corn
 
 | Token | Utility | Use |
 | --- | --- | --- |
-| `--canvas`, `--canvas-edge` | `app-canvas` | Background of every app shell (dashboard, admin) |
+| `--canvas`, `--canvas-edge` | `app-canvas` | Page background (white) |
 | `--surface` + `--elevation-card` + `--card-radius` | `surface-card` | Every card or panel on the canvas; `Card` uses it |
 | `--elevation-card-hover` | `surface-hover` | Lift and deeper shadow for interactive cards |
 | `--elevation-float` | `surface-float` | Sticky or floating chrome: top bar, tab bar, admin header (translucent and blurred) |
@@ -57,7 +57,11 @@ An invitation card follows the same anatomy, with the design thumbnail inset at 
 
 ## Layout
 
-- **Header.** One header (`components/layout/app-header.tsx`) serves the whole product, both the marketing site and the app. It is a floating `surface-float` bar, aligned to the `max-w-6xl` column. The logo always goes to the landing page. Next to it is the shared `PrimaryNav` (Templates, How it works, Pricing, My invitations) with a gliding highlight, then a global "New invitation" button and the account menu, which holds the plan, Settings, Admin and Log out. On phones the navigation moves into a menu sheet. In the app, the header paints a canvas backing so content never shows through. There is no sidebar and no tab bar.
+- **Shell** (`components/layout/app-shell.tsx`, used by every app and marketing page):
+  - **Desktop:** a 72px icon rail (logo mark, Home, Templates, Create, Invitations, plus "Settings & support" at the foot, which holds How it works, Pricing, Help, About, Terms and Privacy).
+  - **Top bar:** a 48px grey search pill and the account menu (or Log in / Sign up).
+  - **Phones:** a top bar with the wordmark, account and search, plus a bottom tab bar (Home, Templates, Create, Invitations, Menu). The tab bar steps aside in the wizard and editor.
+- **Pins.** Templates and invitations are shown as pins: the preview or thumbnail first, no card chrome, a darkening scrim on hover with a red action pill (Use / Edit), the title underneath. Feeds use CSS-column masonry (`columns-2 … xl:columns-5`).
 - **Grids.** Use `gap-4` on phones and `gap-5` from `sm` up. Cards stretch to equal height (`h-full`).
 - **Toolbars on the canvas.** Search is a white pill input (`border-0 bg-surface shadow-card`); filters are a white segmented pill with a dark active segment.
 

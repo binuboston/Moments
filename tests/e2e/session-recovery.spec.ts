@@ -13,13 +13,13 @@ async function currentUserId(context: BrowserContext): Promise<string> {
 }
 
 test("a deleted guest session is replaced by a fresh guest, without a loop", async ({ page, context }) => {
-  await page.goto("/dashboard");
-  await expect(page).toHaveURL(/\/dashboard$/, { timeout: 30_000 });
+  await page.goto("/invitations");
+  await expect(page).toHaveURL(/\/invitations$/, { timeout: 30_000 });
   const first = await currentUserId(context);
   await admin.auth.admin.deleteUser(first);
 
-  await page.goto("/dashboard");
-  await expect(page).toHaveURL(/\/dashboard$/, { timeout: 30_000 });
+  await page.goto("/invitations");
+  await expect(page).toHaveURL(/\/invitations$/, { timeout: 30_000 });
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   expect(await currentUserId(context)).not.toBe(first);
 });
@@ -29,7 +29,7 @@ test("a revoked account session asks the person to log in again", async ({ page,
   const id = await currentUserId(context);
   await admin.auth.admin.deleteUser(id);
 
-  await page.goto("/dashboard");
-  await expect(page).toHaveURL(/\/login\?next=%2Fdashboard&error=expired/, { timeout: 30_000 });
+  await page.goto("/invitations");
+  await expect(page).toHaveURL(/\/login\?next=%2Finvitations&error=expired/, { timeout: 30_000 });
   await expect(page.getByText(/your session has expired/i)).toBeVisible();
 });

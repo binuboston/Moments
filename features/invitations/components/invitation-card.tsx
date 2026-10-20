@@ -1,18 +1,14 @@
 "use client";
 
-import { ArrowUpRightIcon, CalendarIcon, PencilIcon, UsersIcon } from "lucide-react";
+import { ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { IconTile } from "@/components/ui/icon-tile";
-import { useTilt } from "@/components/motion/use-tilt";
 import { InvitationActions } from "@/features/invitations/components/invitation-actions";
 import { StatusBadge } from "@/features/invitations/components/status-badge";
 import type { InvitationListItem } from "@/features/invitations/types";
 import { getTemplateOrFallback } from "@/features/templates/registry";
 import { useClientNow } from "@/hooks/use-mounted";
-import { categoryStyle } from "@/lib/design/tones";
-import { formatShortDate } from "@/lib/utils/dates";
 import { routes } from "@/lib/routes";
+import { formatShortDate } from "@/lib/utils/dates";
 
 /** "Today", "Tomorrow", "In 12 days" or "Past" (computed in the browser after mount). */
 function daysLabel(startsAt: string, now: number): string {
@@ -24,89 +20,62 @@ function daysLabel(startsAt: string, now: number): string {
   return `In ${days} days`;
 }
 
+const overlayButton =
+  "flex size-9 items-center justify-center rounded-full bg-surface/95 text-foreground shadow-sm transition-colors hover:bg-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none";
+
 /**
- * Invitation card on the app canvas: a borderless white surface with the
- * design thumbnail inset at the top, the occasion's tone tile, a corner
- * actions button and a full-width soft primary action.
+ * An invitation as a "pin": the design thumbnail first (16px corners, no
+ * card chrome), a scrim with Edit / open / more actions on hover (always
+ * visible on touch screens), title and details underneath.
  */
 export function InvitationCard({ item }: { item: InvitationListItem }) {
   const def = getTemplateOrFallback(item.templateKey);
   const title = item.title || "Untitled invitation";
-  const style = categoryStyle(item.categorySlug);
-  const tilt = useTilt<HTMLDivElement>(3);
   const now = useClientNow();
   const when = now !== null && item.startsAt ? daysLabel(item.startsAt, now) : "";
+  const reveal = "opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity duration-(--duration-base)";
 
   return (
-    <div ref={tilt} className="h-full">
-      <article className="group surface-card surface-hover flex h-full flex-col p-2.5">
+    <article className="group relative">
+      <div className="relative aspect-[1200/630] overflow-hidden rounded-2xl" style={{ background: def.previewGradient }}>
+        {/* Real design thumbnail (owner-only route, versioned by updatedAt for caching). Plain <img>: the
+            image optimiser cannot forward the owner's session cookie. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={`/api/invitations/${item.id}/thumbnail?v=${encodeURIComponent(item.updatedAt)}`} alt="" loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" />
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-black/0 transition-colors duration-(--duration-base) md:group-hover:bg-black/25" />
+        <span className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5">
+          <StatusBadge status={item.status} className="bg-surface/95 shadow-sm max-sm:h-5 max-sm:px-1.5 max-sm:text-[0.65rem]" />
+        </span>
         <Link
           href={routes.editInvitation(item.id)}
-          className="relative block aspect-[1200/630] overflow-hidden rounded-[calc(var(--card-radius)-0.5rem)] outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          style={{ background: def.previewGradient }}
-          aria-label={`Edit ${title}`}
-          tabIndex={-1}
+          className="absolute top-2.5 right-2.5 z-10 hidden rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground opacity-0 transition-opacity duration-(--duration-base) group-focus-within:opacity-100 group-hover:opacity-100 hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none md:block"
         >
-          {/* Real design thumbnail (owner-only route, versioned by updatedAt for caching). Plain <img>: the
-              image optimiser cannot forward the owner's session cookie. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`/api/invitations/${item.id}/thumbnail?v=${encodeURIComponent(item.updatedAt)}`}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            className="absolute inset-0 size-full object-cover transition-transform duration-(--duration-slow) ease-(--ease-out-quart) group-hover:scale-[1.04]"
-          />
-          {/* Light sweep on hover. */}
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 transition-[translate,opacity] duration-700 ease-(--ease-out-quart) group-hover:translate-x-[420%] group-hover:opacity-100"
-          />
-          <span className="absolute top-2.5 left-2.5">
-            <StatusBadge status={item.status} className="bg-surface/90 shadow-sm backdrop-blur" />
-          </span>
+          Edit
         </Link>
-
-        <div className="flex flex-1 flex-col px-2.5 pt-4 pb-2">
-          <div className="flex items-start justify-between gap-3">
-            <IconTile icon={style.icon} tone={style.tone} />
-            <InvitationActions item={item} />
-          </div>
-          <h3 className="mt-3.5 line-clamp-2 text-lg leading-snug font-semibold tracking-tight">{title}</h3>
-          <p className="mt-1 truncate text-sm text-muted-foreground">
-            {item.categoryName} · {item.templateName}
-          </p>
-          <dl className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground">
-            {item.startsAt ? (
-              <div className="inline-flex items-center gap-1.5">
-                <CalendarIcon className="size-3.5" aria-hidden />
-                <dd>{formatShortDate(item.startsAt, item.timezone)}</dd>
-              </div>
-            ) : null}
-            {when ? <dd className={when === "Past" ? "" : "rounded-full bg-primary/8 px-2 py-0.5 font-medium text-primary"}>{when}</dd> : null}
-            {item.rsvpEnabled ? (
-              <div className="inline-flex items-center gap-1.5">
-                <UsersIcon className="size-3.5" aria-hidden />
-                <dd>RSVP on</dd>
-              </div>
-            ) : null}
-          </dl>
-          <div className="mt-auto flex items-center gap-2 pt-5">
-            <Button asChild variant="soft" className="flex-1">
-              <Link href={routes.editInvitation(item.id)}>
-                <PencilIcon aria-hidden /> Edit invitation
-              </Link>
-            </Button>
-            {item.status === "published" ? (
-              <Button asChild variant="soft" size="icon">
-                <a href={item.publicUrl} target="_blank" rel="noopener noreferrer" aria-label={`Open ${title}`}>
-                  <ArrowUpRightIcon aria-hidden />
-                </a>
-              </Button>
-            ) : null}
-          </div>
+        <div className={`absolute right-2 bottom-2 z-10 flex gap-1.5 sm:right-2.5 sm:bottom-2.5 ${reveal}`}>
+          {item.status === "published" ? (
+            <a href={item.publicUrl} target="_blank" rel="noopener noreferrer" className={overlayButton} aria-label={`Open ${title}`}>
+              <ArrowUpRightIcon className="size-4" aria-hidden />
+            </a>
+          ) : null}
+          <InvitationActions item={item} triggerClassName={overlayButton} />
         </div>
-      </article>
-    </div>
+      </div>
+      <div className="mt-2 px-1">
+        <h3 className="truncate text-sm font-semibold">
+          {/* Stretched link: the whole pin opens the editor. */}
+          <Link href={routes.editInvitation(item.id)} className="outline-none after:absolute after:inset-0 after:rounded-2xl focus-visible:after:ring-2 focus-visible:after:ring-ring" aria-label={`Edit invitation: ${title}`}>
+            {title}
+          </Link>
+        </h3>
+        <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
+          <span className="truncate">
+            {item.categoryName}
+            {item.startsAt ? ` · ${formatShortDate(item.startsAt, item.timezone)}` : ""}
+          </span>
+          {when && when !== "Past" ? <span className="shrink-0 rounded-full bg-primary/10 px-1.5 font-semibold text-primary">{when}</span> : null}
+        </p>
+      </div>
+    </article>
   );
 }

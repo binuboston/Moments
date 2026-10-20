@@ -23,7 +23,7 @@ import { useInvitationMutations } from "@/features/invitations/hooks";
 import type { InvitationListItem } from "@/features/invitations/types";
 import { routes } from "@/lib/routes";
 
-export function InvitationActions({ item }: { item: InvitationListItem }) {
+export function InvitationActions({ item, triggerClassName }: { item: InvitationListItem; triggerClassName?: string }) {
   const router = useRouter();
   const { publish, unpublish, duplicate, remove } = useInvitationMutations();
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -42,7 +42,7 @@ export function InvitationActions({ item }: { item: InvitationListItem }) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="soft" size="icon-sm" aria-label={`More actions for ${item.title || "invitation"}`}>
+          <Button variant="soft" size="icon-sm" className={triggerClassName} aria-label={`More actions for ${item.title || "invitation"}`}>
             <MoreHorizontalIcon className="size-4" />
           </Button>
         </DropdownMenuTrigger>

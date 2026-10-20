@@ -212,9 +212,9 @@ Each of these has exactly one home. A lint rule (`eslint.config.mjs`, `no-restri
 | Who is using the app (browser) | `features/auth/account-context.tsx`: `AccountProvider` and `useAccount()` | Header, menus, auth UI. The root provider resolves lazily; the app shell seeds it from the server |
 | What each account state can do | `lib/auth/account-actions.ts`: `accountView(account)` gives identity, primary action and actions for signed out, guest and account holder | Desktop account dropdown and phone menu (they cannot disagree) |
 | Entering the app | `components/layout/app-link.tsx`: `AppLink` | Every link into `/dashboard`. Signed-out visitors go straight to `/start` with a full page load, so the client router never caches the proxy's redirect |
-| Who may enter | `lib/supabase/proxy.ts` sends visitors without a session to `/start`; `requireAppUser()` is the page-level guarantee; `/admin` needs a real login | App layout and pages |
+| Who may enter | Home (`/`) is open to everyone. Pages under `SESSION_PREFIXES` (`/invitations`, `/settings`) need a session: the proxy sends visitors without one to `/start`, and `requireAppUser()` is the page-level guarantee. `/admin` needs a real login | App layout and pages |
 
-- **Header.** `AppHeader` is shared by the marketing layout and the app. The logo always goes to the landing page; "My invitations" in the navigation is the way into the app.
+- **Structure.** The app is the index: `/` is home (your invitations, then designs to start from). The marketing landing page lives at `/about`, and it, How it works, Pricing, Help and the legal pages are reached from the Settings & support menu. `AppShell` (rail, top bar with search, phone tab bar) wraps both the `(app)` and `(marketing)` route groups. Old `/dashboard/*` URLs redirect permanently (`next.config.ts`).
 - **Static marketing.** Marketing pages are statically rendered: they never read cookies on the server.
 - **Tests.** `tests/e2e/navigation.spec.ts` checks every account state on desktop and phone, entering the app by clicking. `tests/unit/account-and-routes.test.ts` covers the account model and the route builders.
 

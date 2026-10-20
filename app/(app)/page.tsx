@@ -1,54 +1,72 @@
-import { ArrowRightIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { EmptyInvitations } from "@/features/dashboard/empty-invitations";
-import { OverviewHero } from "@/features/dashboard/overview-hero";
-import { StatTiles } from "@/features/dashboard/stat-tiles";
+import { DesignFeed } from "@/features/home/design-feed";
+import { NextUp } from "@/features/home/next-up";
+import { OccasionChips } from "@/features/home/occasion-chips";
 import { InvitationGrid } from "@/features/invitations/components/invitation-grid";
 import { getOverviewSummary, listOwnedInvitations } from "@/features/invitations/queries";
-import { requireAppUser } from "@/lib/auth/session";
-import { createClient, getCurrentProfile } from "@/lib/supabase/server";
-import { ROUTES, routes } from "@/lib/routes";
+import { getActiveCategories, getPublishedTemplates } from "@/features/templates/queries";
+import { BRAND } from "@/lib/brand";
+import { ROUTES } from "@/lib/routes";
+import { createClient, getCurrentProfile, getCurrentUser } from "@/lib/supabase/server";
 
-export const metadata: Metadata = { title: "Dashboard", robots: { index: false } };
+export const metadata: Metadata = { title: { absolute: BRAND.title }, description: BRAND.description, alternates: { canonical: ROUTES.home } };
 
-export default async function DashboardPage() {
-  const user = await requireAppUser(ROUTES.app);
-  const [supabase, profile] = await Promise.all([createClient(), getCurrentProfile()]);
-  const [list, summary] = await Promise.all([
-    listOwnedInvitations(supabase, user.id, { status: "all", q: "", page: 1, pageSize: 6 }),
-    getOverviewSummary(supabase, user.id),
+/**
+ * Home, the index of the product. Everyone sees designs to start from;
+ * people with invitations see them first. No session is needed to browse:
+ * a guest session starts only when someone creates.
+ */
+export default async function HomePage() {
+  const user = await getCurrentUser();
+  const supabase = user ? await createClient() : null;
+  const [templates, categories, list, summary, profile] = await Promise.all([
+    getPublishedTemplates(),
+    getActiveCategories(),
+    user && supabase ? listOwnedInvitations(supabase, user.id, { status: "all", q: "", page: 1, pageSize: 4 }) : null,
+    user && supabase ? getOverviewSummary(supabase, user.id) : null,
+    user ? getCurrentProfile() : null,
   ]);
+  const hasInvitations = Boolean(list && list.counts.all > 0);
   const firstName = (profile?.full_name || "").split(" ")[0];
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:gap-8">
-      <OverviewHero firstName={firstName} next={summary.next} />
+    <div className="grid gap-8 px-4 pt-2 pb-10 sm:px-6">
+      <OccasionChips categories={categories} />
 
-      <StatTiles
-        stats={[
-          { key: "invitations", label: "Invitations", value: list.counts.all, href: ROUTES.invitations },
-          { key: "published", label: "Published", value: list.counts.published, href: routes.invitationsWithStatus("published") },
-          { key: "drafts", label: "Drafts", value: list.counts.draft, href: routes.invitationsWithStatus("draft") },
-          { key: "upcoming", label: "Upcoming events", value: summary.upcoming, href: ROUTES.invitations },
-        ]}
-      />
+      {hasInvitations && list ? (
+        <section aria-labelledby="home-title" className="grid gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div className="min-w-0">
+              <h1 id="home-title" className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                {firstName ? `Welcome back, ${firstName}` : "Your invitations"}
+              </h1>
+              {summary?.next ? (
+                <div className="mt-3">
+                  <NextUp next={summary.next} />
+                </div>
+              ) : null}
+            </div>
+            <Link href={ROUTES.invitations} className="rounded-full bg-fill px-4 py-2 text-sm font-semibold transition-colors hover:bg-fill-hover focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
+              See all {list.counts.all}
+            </Link>
+          </div>
+          <InvitationGrid items={list.items} />
+        </section>
+      ) : (
+        <header className="max-w-2xl">
+          <h1 id="home-title" className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+            Invitations, <span className="text-primary">beautifully yours</span>
+          </h1>
+          <p className="mt-2 text-muted-foreground text-pretty">Pick a design, add your details and share a link guests actually open. Start now, no account needed.</p>
+        </header>
+      )}
 
-      <section aria-labelledby="recent-title">
-        <div className="mb-3 flex items-center justify-between sm:mb-4">
-          <h2 id="recent-title" className="text-lg font-semibold">
-            Recent invitations
-          </h2>
-          {list.counts.all > 0 ? (
-            <Button asChild variant="link" size="sm" className="group">
-              <Link href={ROUTES.invitations}>
-                View all <ArrowRightIcon aria-hidden className="transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            </Button>
-          ) : null}
-        </div>
-        {list.items.length === 0 ? <EmptyInvitations /> : <InvitationGrid items={list.items} />}
+      <section aria-labelledby="designs-title" className="grid gap-4">
+        <h2 id="designs-title" className="text-xl font-semibold tracking-tight">
+          {hasInvitations ? "Start something new" : "Start from a design"}
+        </h2>
+        <DesignFeed templates={templates} categories={categories} showCreate={!hasInvitations} />
       </section>
     </div>
   );

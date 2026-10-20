@@ -2,54 +2,55 @@
 
 /* ------------------------------------------------------------------
    Design tokens
-   Brand: "Invite" — warm paper, ink text, garnet primary, champagne accent.
-   Semantic tokens live on :root so they can be re-themed later; Tailwind
-   utilities are generated from them through @theme inline.
+   Brand: "Invite". Visual language inspired by Pinterest: white canvas,
+   near-black ink, soft grey pills, one bold red for the main action,
+   image-first cards with 16px corners and no borders.
+   Semantic tokens live on :root; Tailwind utilities come from @theme inline.
    ------------------------------------------------------------------ */
 
 :root {
-  /* Surfaces: clean white paper with near-black ink; dark "stage" for feature sections. */
+  /* Surfaces: plain white with near-black ink; dark "stage" for feature sections. */
   --background: #ffffff;
-  --foreground: #121317;
+  --foreground: #111111;
   --surface: #ffffff;
-  --surface-foreground: #121317;
-  --muted: #f3f3f1;
-  --muted-foreground: #5f666d;
-  --subtle: #f7f7f5;
-  --border: #e7e7e3;
-  --input: #d6d6d1;
-  --stage: #0b0c0f;
-  --stage-foreground: #f4f4f2;
-  --stage-muted: #8d939b;
-  --stage-border: #24262b;
-  /* Brand: Invite garnet with a champagne accent, used sparingly. */
-  --ring: #8b2e3f;
-  --primary: #8b2e3f;
-  --primary-hover: #74253a;
+  --surface-foreground: #111111;
+  --muted: #efefef;
+  --muted-foreground: #5f5f5f;
+  --subtle: #f7f7f7;
+  --border: #e9e9e9;
+  --input: #cdcdcd;
+  --stage: #111111;
+  --stage-foreground: #f5f5f5;
+  --stage-muted: #9a9a9a;
+  --stage-border: #2a2a2a;
+  /* Brand: Invite raspberry for the one main action per screen; a warm accent used sparingly. */
+  --ring: #435ee5;
+  --primary: #e11d48;
+  --primary-hover: #be123c;
   --primary-foreground: #ffffff;
   --accent: #d4b483;
   --accent-foreground: #23190f;
   --destructive: #b42318;
   --destructive-foreground: #ffffff;
-  --success: #1f7a4d;
-  --success-foreground: #f0fbf4;
+  --success: #0f7a3f;
+  --success-foreground: #effbf3;
   --warning: #9a6512;
   --warning-foreground: #fff8e6;
   --info: #2b5c8a;
-  --radius: 0.875rem;
+  --radius: 1rem;
 
-  /* App canvas: a cool paper grey that borderless white surfaces float on. */
-  --canvas: #eef1f5;
-  --canvas-edge: #e3e8ee;
-  /* Soft fills for controls on white surfaces (pill buttons, icon buttons, chips). */
-  --fill: #eff2f5;
-  --fill-hover: #e5e9ee;
-  /* Elevation: surfaces are separated by shadow, never by borders. */
-  --elevation-card: 0 1px 2px rgb(16 24 40 / 0.04), 0 6px 20px -8px rgb(16 24 40 / 0.08);
-  --elevation-card-hover: 0 2px 6px rgb(16 24 40 / 0.05), 0 24px 44px -18px rgb(16 24 40 / 0.18);
-  --elevation-float: 0 1px 2px rgb(16 24 40 / 0.05), 0 12px 32px -12px rgb(16 24 40 / 0.14);
-  --card-radius: 1.5rem;
-  --tile-radius: 0.875rem;
+  /* App canvas: plain white (content is the colour). */
+  --canvas: #ffffff;
+  --canvas-edge: #ffffff;
+  /* Soft grey fill for secondary controls (pills, icon buttons, chips, search). */
+  --fill: #efefef;
+  --fill-hover: #e2e2e2;
+  /* Elevation: cards are flat with a hairline; floating menus get a soft glow. */
+  --elevation-card: 0 0 0 1px rgb(0 0 0 / 0.06);
+  --elevation-card-hover: 0 0 0 1px rgb(0 0 0 / 0.06), 0 8px 24px rgb(0 0 0 / 0.12);
+  --elevation-float: 0 0 8px rgb(0 0 0 / 0.1);
+  --card-radius: 1rem;
+  --tile-radius: 0.75rem;
   /* Tones: pastel tile + deeper ink, one per category/stat. Same lightness so no hue dominates. */
   --tone-rose: #fde7ec;    --tone-rose-ink: #b4234b;
   --tone-violet: #ece9fe;  --tone-violet-ink: #5b3fd1;
@@ -123,16 +124,16 @@
   --shadow-float: var(--elevation-float);
 
   /* Brand scale for marketing accents */
-  --color-brand-50: #fbf1f3;
-  --color-brand-100: #f5dee3;
-  --color-brand-200: #ebbfc9;
-  --color-brand-300: #db94a5;
-  --color-brand-400: #c4647c;
-  --color-brand-500: #a9435d;
-  --color-brand-600: #8b2e3f;
-  --color-brand-700: #722636;
-  --color-brand-800: #5e2230;
-  --color-brand-900: #4f1f2b;
+  --color-brand-50: #fff1f3;
+  --color-brand-100: #ffe4e8;
+  --color-brand-200: #fecdd6;
+  --color-brand-300: #fda4b4;
+  --color-brand-400: #fb7189;
+  --color-brand-500: #f43f5e;
+  --color-brand-600: #e11d48;
+  --color-brand-700: #be123c;
+  --color-brand-800: #9f1239;
+  --color-brand-900: #881337;
   --color-gold-200: #f0e4c8;
   --color-gold-300: #e6d3a8;
   --color-gold-400: #d4b483;
@@ -420,6 +421,6 @@
 
 /* Editor: fields scrolled into view (focus, validation) clear the header and the bottom editor bar. */
 .editor-scope :is(input, textarea, select, button, [tabindex]) {
-  scroll-margin-top: 7rem; /* the floating header */
+  scroll-margin-top: 9rem; /* the top bar (with the search row on phones) */
   scroll-margin-bottom: 10rem; /* the floating editor bar */
 }

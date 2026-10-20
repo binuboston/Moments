@@ -7,9 +7,10 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: [ROUTES.home, ROUTES.templates, ROUTES.pricing, ROUTES.howItWorks, ROUTES.help],
-        // Invitations are for guests, not search engines. Dashboards are private.
-        disallow: [ROUTES.demos, ROUTES.app, ROUTES.admin, "/api", ROUTES.publicInvitations, ROUTES.login, ROUTES.signup, ROUTES.forgotPassword, ROUTES.resetPassword, ROUTES.authCallback, ROUTES.signOut],
+        allow: [ROUTES.home, ROUTES.about, ROUTES.templates, ROUTES.pricing, ROUTES.howItWorks, ROUTES.help],
+        // Invitations are for guests, not search engines. Personal pages are private.
+        // (Never list ROUTES.app here: the app is the index, "/".)
+        disallow: [ROUTES.demos, ROUTES.invitations, ROUTES.settings, ROUTES.start, ROUTES.admin, "/api", ROUTES.publicInvitations, ROUTES.login, ROUTES.signup, ROUTES.forgotPassword, ROUTES.resetPassword, ROUTES.authCallback, ROUTES.signOut],
       },
     ],
     sitemap: siteUrl("/sitemap.xml"),

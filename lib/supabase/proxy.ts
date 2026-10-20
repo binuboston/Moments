@@ -1,10 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/database";
-import { ROUTES } from "@/lib/routes";
+import { isAppPath, ROUTES } from "@/lib/routes";
 
-/** The app is open to everyone (guests get a session first); admin needs a real login. */
-const APP_PREFIX = ROUTES.app;
+/** App pages that need a session open to everyone (guests get one first); admin needs a real login. */
 const ADMIN_PREFIX = ROUTES.admin;
 const AUTH_PAGES: readonly string[] = [ROUTES.login, ROUTES.signup, ROUTES.forgotPassword];
 
@@ -44,9 +43,10 @@ export async function updateSession(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
   const under = (prefix: string) => pathname === prefix || pathname.startsWith(`${prefix}/`);
-  if (!isAuthenticated && (under(APP_PREFIX) || under(ADMIN_PREFIX))) {
+  const needsSession = isAppPath(pathname);
+  if (!isAuthenticated && (needsSession || under(ADMIN_PREFIX))) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = under(APP_PREFIX) ? ROUTES.start : ROUTES.login;
+    redirectUrl.pathname = needsSession ? ROUTES.start : ROUTES.login;
     redirectUrl.search = "";
     redirectUrl.searchParams.set("next", `${pathname}${search}`);
     return NextResponse.redirect(redirectUrl);

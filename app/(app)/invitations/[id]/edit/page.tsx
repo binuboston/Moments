@@ -9,7 +9,7 @@ import { createClient, getCurrentProfile } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Edit invitation", robots: { index: false } };
 
-export default async function EditInvitationPage({ params }: PageProps<"/dashboard/invitations/[id]/edit">) {
+export default async function EditInvitationPage({ params }: PageProps<"/invitations/[id]/edit">) {
   const { id } = await params;
   if (!uuid.safeParse(id).success) notFound();
   const user = await requireAppUser();

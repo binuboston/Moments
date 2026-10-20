@@ -11,7 +11,7 @@ import { ROUTES } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "New invitation", robots: { index: false } };
 
-export default async function NewInvitationPage({ searchParams }: PageProps<"/dashboard/invitations/new">) {
+export default async function NewInvitationPage({ searchParams }: PageProps<"/invitations/new">) {
   const sp = await searchParams;
   const [categories, templates, profile] = await Promise.all([getActiveCategories(), getPublishedTemplates(), getCurrentProfile()]);
   const preselectedTemplate = typeof sp.template === "string" ? sp.template : undefined;

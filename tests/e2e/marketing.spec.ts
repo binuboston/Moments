@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test.describe("marketing site", () => {
   test("landing page renders hero, live preview and key sections", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/about");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Invitations,");
     await expect(page.getByRole("link", { name: /create an invitation/i }).first()).toBeVisible();
     await expect(page.locator('[data-preview-label="Live invitation preview"]')).toBeVisible();
@@ -11,7 +11,7 @@ test.describe("marketing site", () => {
   });
 
   test("scroll-driven content becomes visible and nothing stays hidden", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/about");
     // Re-measure each step: pinned sections add spacer height after ScrollTrigger refreshes.
     const height = () => page.evaluate(() => document.documentElement.scrollHeight);
     for (let y = 0; y < (await height()); y += 600) {
@@ -28,13 +28,13 @@ test.describe("marketing site", () => {
   test("template catalogue filters and detail page work", async ({ page }) => {
     await page.goto("/templates?category=wedding");
     await expect(page.getByRole("heading", { name: /find the design/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /eternal grace/i })).toBeVisible();
-    await page.getByRole("link", { name: /eternal grace/i }).click();
+    await expect(page.getByRole("link", { name: "Eternal Grace", exact: true })).toBeVisible();
+    await page.getByRole("link", { name: "Eternal Grace", exact: true }).click();
     await expect(page).toHaveURL(/\/templates\/eternal-grace/);
     await expect(page.getByRole("heading", { level: 1, name: "Eternal Grace" })).toBeVisible();
     // No account needed: signed-out visitors go straight to guest setup, which continues to the wizard.
     const cta = await page.getByRole("link", { name: /use this template/i }).getAttribute("href");
-    expect(decodeURIComponent(cta ?? "")).toMatch(/\/dashboard\/invitations\/new\?template=eternal-grace/);
+    expect(decodeURIComponent(cta ?? "")).toMatch(/\/invitations\/new\?template=eternal-grace/);
   });
 
   test("pricing, how it works and help pages respond", async ({ page }) => {
@@ -56,7 +56,8 @@ test.describe("marketing site", () => {
   test("robots blocks private areas and sitemap lists templates", async ({ request }) => {
     const robots = await request.get("/robots.txt");
     const body = await robots.text();
-    expect(body).toContain("Disallow: /dashboard");
+    expect(body).toContain("Disallow: /invitations");
+    expect(body).not.toMatch(/Disallow: \/\s*$/m);
     expect(body).toContain("Disallow: /e/");
     const sitemap = await request.get("/sitemap.xml");
     expect(await sitemap.text()).toContain("/templates/eternal-grace");

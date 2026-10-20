@@ -14,7 +14,8 @@ export async function signUp(page: Page, label: string) {
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
   await page.getByRole("button", { name: "Create account" }).click();
-  await page.waitForURL(/\/dashboard/, { timeout: 30_000 });
+  // Signing up lands on home (the app's index).
+  await page.waitForURL((url) => url.pathname === "/", { timeout: 30_000 });
   return { email, password: PASSWORD };
 }
 
@@ -23,22 +24,22 @@ export async function logIn(page: Page, email: string, password = PASSWORD) {
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Log in" }).click();
-  await page.waitForURL(/\/dashboard/, { timeout: 30_000 });
+  await page.waitForURL((url) => url.pathname === "/", { timeout: 30_000 });
 }
 
 export async function logOut(page: Page) {
-  await page.goto("/dashboard/settings");
+  await page.goto("/settings");
   await page.getByRole("button", { name: "Log out" }).click();
-  await page.waitForURL((url) => !url.pathname.startsWith("/dashboard"), { timeout: 30_000 });
+  await page.waitForURL((url) => url.pathname === "/", { timeout: 30_000 });
 }
 
 /** Creates a draft through the wizard and returns its id. */
 export async function createInvitation(page: Page, category: string, templateSlug: string) {
-  await page.goto("/dashboard/invitations/new");
+  await page.goto("/invitations/new");
   await page.getByTestId(`category-${category}`).click();
   await page.getByTestId(`template-${templateSlug}`).click();
   await page.getByTestId("create-invitation").click();
-  await page.waitForURL(/\/dashboard\/invitations\/[0-9a-f-]{36}\/edit/, { timeout: 30_000 });
+  await page.waitForURL(/\/invitations\/[0-9a-f-]{36}\/edit/, { timeout: 30_000 });
   const id = page.url().match(/invitations\/([0-9a-f-]{36})\/edit/)![1];
   return id;
 }

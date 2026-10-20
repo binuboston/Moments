@@ -12,7 +12,7 @@ import { routes } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "RSVPs", robots: { index: false } };
 
-export default async function RsvpsPage({ params }: PageProps<"/dashboard/invitations/[id]/rsvps">) {
+export default async function RsvpsPage({ params }: PageProps<"/invitations/[id]/rsvps">) {
   const { id } = await params;
   if (!uuid.safeParse(id).success) notFound();
   const user = await requireAppUser();

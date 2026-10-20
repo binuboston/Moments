@@ -117,7 +117,7 @@ export function InvitationEditor({ initialDraft, templates, isGuest = false }: {
   return (
     <div className="editor-scope">
       {/* Editor controls as a floating bottom bar (thumb-reachable on phones, out of the way of the content). */}
-      <div className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 mx-auto max-w-3xl" data-testid="editor-bar">
+      <div className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 mx-auto max-w-3xl md:left-[calc(4.5rem+0.75rem)]" data-testid="editor-bar">
         <div className="surface-float grid grid-cols-[1fr_auto] items-center gap-2 rounded-3xl p-2 sm:grid-cols-[1fr_auto_1fr]">
           <ViewToggle className="col-span-2 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:w-56" />
           <div className="flex min-w-0 items-center gap-1.5 sm:col-start-1 sm:row-start-1 sm:gap-2">

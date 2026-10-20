@@ -3,8 +3,8 @@ import { logIn, logOut, signUp } from "./helpers";
 
 test.describe("authentication", () => {
   test("signed-out visitors open the app as guests; admin and the API still need a session", async ({ page, playwright, baseURL }) => {
-    await page.goto("/dashboard/invitations");
-    await expect(page).toHaveURL(/\/dashboard\/invitations$/, { timeout: 30_000 });
+    await page.goto("/invitations");
+    await expect(page).toHaveURL(/\/invitations$/, { timeout: 30_000 });
 
     // The logo always goes to the landing page.
     await page.getByRole("link", { name: "Invite home" }).first().click();
@@ -21,14 +21,14 @@ test.describe("authentication", () => {
 
   test("sign up, log out and log back in", async ({ page }) => {
     const { email } = await signUp(page, "auth");
-    await expect(page.getByRole("heading", { name: /welcome back/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Account menu" })).toBeVisible();
     await logOut(page);
     await expect(page).toHaveURL(/\/$/);
     await logIn(page, email);
-    await expect(page.getByRole("heading", { name: /welcome back/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Account menu" })).toBeVisible();
     // Logged-in users are bounced away from auth pages.
     await page.goto("/login");
-    await expect(page).toHaveURL(/\/dashboard/);
+    await expect(page).toHaveURL((url) => url.pathname === "/");
   });
 
   test("invalid credentials show a friendly error", async ({ page }) => {
@@ -41,14 +41,15 @@ test.describe("authentication", () => {
 });
 
 test.describe("account menu", () => {
-  test("logs out from the dashboard account dropdown", async ({ page }) => {
+  test("logs out from the account dropdown", async ({ page }) => {
     await signUp(page, "menu-logout");
     await page.getByRole("button", { name: "Account menu" }).click();
     await page.getByRole("menuitem", { name: /log out/i }).click();
     await page.waitForURL((url) => url.pathname === "/", { timeout: 15_000 });
-    // The account session is really gone: the app opens as a fresh guest.
-    await page.goto("/dashboard");
-    await expect(page).toHaveURL(/\/dashboard$/, { timeout: 30_000 });
+    // The account session is really gone: home shows Log in, and creating starts a fresh guest.
+    await expect(page.getByRole("link", { name: "Log in" })).toBeVisible();
+    await page.goto("/invitations");
+    await expect(page).toHaveURL(/\/invitations$/, { timeout: 30_000 });
     await page.getByRole("button", { name: "Account menu" }).click();
     await expect(page.getByRole("menu").getByText("Guest", { exact: true })).toBeVisible();
   });

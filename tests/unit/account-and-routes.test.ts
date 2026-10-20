@@ -29,16 +29,20 @@ describe("account model (one source for desktop and phone menus)", () => {
 
 describe("routes", () => {
   it("builds paths with parameters", () => {
-    expect(routes.editInvitation("abc")).toBe("/dashboard/invitations/abc/edit");
-    expect(routes.newInvitation({ template: "eternal-grace" })).toBe("/dashboard/invitations/new?template=eternal-grace");
+    expect(routes.editInvitation("abc")).toBe("/invitations/abc/edit");
+    expect(routes.newInvitation({ template: "eternal-grace" })).toBe("/invitations/new?template=eternal-grace");
     expect(routes.newInvitation()).toBe(ROUTES.newInvitation);
-    expect(routes.login("/dashboard/settings")).toBe("/login?next=%2Fdashboard%2Fsettings");
-    expect(routes.start()).toBe("/start?next=%2Fdashboard");
+    expect(routes.login("/settings")).toBe("/login?next=%2Fsettings");
+    expect(routes.start()).toBe("/start?next=%2F");
     expect(routes.invitation("aisha-rohan")).toBe("/e/aisha-rohan");
   });
 
   it("classifies app paths and focused flows", () => {
-    expect(isAppPath(ROUTES.app)).toBe(true);
+    // Home is the index and needs no session; invitations and settings do.
+    expect(ROUTES.app).toBe(ROUTES.home);
+    expect(isAppPath(ROUTES.home)).toBe(false);
+    expect(isAppPath(ROUTES.invitations)).toBe(true);
+    expect(isAppPath(ROUTES.settings)).toBe(true);
     expect(isAppPath(`${ROUTES.newInvitation}?template=x`)).toBe(true);
     expect(isAppPath(ROUTES.templates)).toBe(false);
     expect(isFocusedFlow(routes.editInvitation("abc"))).toBe(true);

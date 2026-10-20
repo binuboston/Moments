@@ -9,7 +9,7 @@ import { ROUTES } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "Invitations", robots: { index: false } };
 
-export default async function InvitationsPage({ searchParams }: PageProps<"/dashboard/invitations">) {
+export default async function InvitationsPage({ searchParams }: PageProps<"/invitations">) {
   const user = await requireAppUser(ROUTES.invitations);
   const sp = await searchParams;
   const params = invitationListQuerySchema.parse({

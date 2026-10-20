@@ -4,7 +4,10 @@
  * literals elsewhere, so the structure can change in this file alone.
  */
 export const ROUTES = {
+  /** The app home: your invitations and designs to start from. Works without an account. */
   home: "/",
+  /** The marketing landing page (linked from the Settings & support menu). */
+  about: "/about",
   templates: "/templates",
   howItWorks: "/how-it-works",
   pricing: "/pricing",
@@ -12,12 +15,13 @@ export const ROUTES = {
   privacy: "/help#privacy",
   terms: "/help#terms",
 
-  /** The app. Open to everyone: signed-out visitors get a guest session first. */
-  app: "/dashboard",
-  invitations: "/dashboard/invitations",
-  newInvitation: "/dashboard/invitations/new",
-  settings: "/dashboard/settings",
-  security: "/dashboard/settings#security",
+  /** Alias of home (the app is the index). */
+  app: "/",
+  /** Pages below here need a session: signed-out visitors get a guest session first. */
+  invitations: "/invitations",
+  newInvitation: "/invitations/new",
+  settings: "/settings",
+  security: "/settings#security",
 
   login: "/login",
   signup: "/signup",
@@ -63,22 +67,34 @@ export const routes = {
   authCallback: (next: string) => withNext(ROUTES.authCallback, next),
 };
 
-/** The one navigation shared by the marketing site and the app header. */
+/** Main navigation (rail on desktop, tab bar on phones). */
 export const PRIMARY_NAV = [
-  { href: ROUTES.templates, label: "Templates" },
+  { key: "home", href: ROUTES.home, label: "Home" },
+  { key: "templates", href: ROUTES.templates, label: "Templates" },
+  { key: "create", href: ROUTES.newInvitation, label: "Create" },
+  { key: "invitations", href: ROUTES.invitations, label: "Invitations" },
+] as const;
+
+/** The Settings & support menu: product, help and legal pages. */
+export const SUPPORT_NAV = [
   { href: ROUTES.howItWorks, label: "How it works" },
   { href: ROUTES.pricing, label: "Pricing" },
-  { href: ROUTES.app, label: "My invitations" },
+  { href: ROUTES.help, label: "Help centre" },
+  { href: ROUTES.about, label: "About Invite" },
+  { href: ROUTES.terms, label: "Terms of service" },
+  { href: ROUTES.privacy, label: "Privacy" },
 ] as const;
 
 export function isActivePath(pathname: string, href: string): boolean {
   return href === ROUTES.home ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** Paths inside the app (where signed-out visitors need a guest session first). */
+/** App pages that need a session (signed-out visitors get a guest session first). Home does not. */
+export const SESSION_PREFIXES = [ROUTES.invitations, ROUTES.settings] as const;
+
 export function isAppPath(path: string): boolean {
   const pathname = path.split(/[?#]/)[0];
-  return pathname === ROUTES.app || pathname.startsWith(`${ROUTES.app}/`);
+  return SESSION_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
 /** Full-screen task flows (wizard, editor) with their own fixed action bars. */

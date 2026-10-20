@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Container } from "@/components/layout/container";
-import { SectionHeading } from "@/components/marketing/section-heading";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TemplateCard } from "@/features/templates/components/template-card";
 import { getActiveCategories, getPublishedTemplates } from "@/features/templates/queries";
@@ -26,9 +24,16 @@ export default async function TemplatesPage({ searchParams }: PageProps<"/templa
   const rawTier = Array.isArray(params.tier) ? params.tier[0] : params.tier;
   const category = isCategory(rawCategory) ? rawCategory : undefined;
   const tier = rawTier === "free" || rawTier === "premium" ? rawTier : undefined;
+  const rawQ = Array.isArray(params.q) ? params.q[0] : params.q;
+  const q = (rawQ ?? "").trim().toLowerCase().slice(0, 80);
 
   const [templates, categories] = await Promise.all([getPublishedTemplates(), getActiveCategories()]);
-  const filtered = templates.filter((t) => (!category || t.def.categories.includes(category)) && (!tier || t.row.tier === tier));
+  const filtered = templates.filter(
+    (t) =>
+      (!category || t.def.categories.includes(category)) &&
+      (!tier || t.row.tier === tier) &&
+      (!q || `${t.def.name} ${t.row.description ?? t.def.description}`.toLowerCase().includes(q)),
+  );
 
   const buildHref = (next: { category?: string; tier?: string }) => {
     const sp = new URLSearchParams();
@@ -36,22 +41,26 @@ export default async function TemplatesPage({ searchParams }: PageProps<"/templa
     const tr = next.tier === undefined ? tier : next.tier;
     if (c) sp.set("category", c);
     if (tr) sp.set("tier", tr);
+    if (q) sp.set("q", q);
     const qs = sp.toString();
     return qs ? `${ROUTES.templates}?${qs}` : ROUTES.templates;
   };
 
   const chip = (active: boolean) =>
     cn(
-      "inline-flex h-9 items-center rounded-full border px-4 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring",
-      active ? "border-foreground bg-foreground text-background" : "border-border bg-surface text-muted-foreground hover:border-foreground/40 hover:text-foreground",
+      "inline-flex h-10 shrink-0 items-center rounded-full px-4 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+      active ? "bg-foreground text-background" : "bg-fill text-foreground hover:bg-fill-hover",
     );
 
   return (
-    <Container className="py-14 sm:py-20">
-      <SectionHeading as="h1" align="left" eyebrow="Template catalogue" title="Find the design for your occasion" description="Live previews rendered with sample content. Every template adapts to your names, dates, photos and colours." />
+    <div className="px-4 pt-2 pb-10 sm:px-6">
+      <header className="max-w-2xl">
+        <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{q ? `Designs for “${q}”` : "Find the design for your occasion"}</h1>
+        <p className="mt-2 text-muted-foreground">Live previews with sample content. Every design adapts to your names, dates, photos and colours.</p>
+      </header>
 
-      <nav aria-label="Filter templates" className="mt-10 flex flex-col gap-4">
-        <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+      <nav aria-label="Filter templates" className="mt-6 flex flex-col gap-3">
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 no-scrollbar sm:-mx-6 sm:px-6">
           <Link href={buildHref({ category: "" })} className={chip(!category)} aria-current={!category ? "page" : undefined}>
             All occasions
           </Link>
@@ -76,7 +85,7 @@ export default async function TemplatesPage({ searchParams }: PageProps<"/templa
 
       {filtered.length === 0 ? (
         <EmptyState
-          className="mt-12"
+          className="mt-8"
           icon={LayoutTemplateIcon}
           title="No templates match these filters"
           description="Try another occasion or clear the filters to see the full collection."
@@ -87,7 +96,7 @@ export default async function TemplatesPage({ searchParams }: PageProps<"/templa
           }
         />
       ) : (
-        <ul className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-8 columns-2 gap-4 sm:columns-3 lg:columns-4 xl:columns-5 [&>li]:mb-5 [&>li]:break-inside-avoid">
           {filtered.map((t) => (
             <li key={t.row.id}>
               <TemplateCard template={t} category={category} />
@@ -95,6 +104,6 @@ export default async function TemplatesPage({ searchParams }: PageProps<"/templa
           ))}
         </ul>
       )}
-    </Container>
+    </div>
   );
 }

@@ -9,26 +9,25 @@ test("starting from the site navigation (client-side) lands in the wizard as a g
     await page.getByRole("button", { name: "Open menu" }).click();
     await page.getByTestId("mobile-account-start").click();
   } else {
-    await page.getByTestId("header-new-invitation").click();
+    await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Create" }).click();
   }
-  await expect(page).toHaveURL(/\/dashboard\/invitations\/new$/, { timeout: 30_000 });
+  await expect(page).toHaveURL(/\/invitations\/new$/, { timeout: 30_000 });
   await expect(page.getByRole("heading", { name: /create an invitation/i })).toBeVisible();
-  if (isMobile) {
-    await page.getByRole("button", { name: "Open menu" }).click();
-    await expect(page.getByTestId("mobile-guest")).toBeVisible();
-  }
+  // In the wizard the phone tab bar steps aside; the account is in the top bar on every size.
+  await page.getByRole("button", { name: "Account menu" }).click();
+  await expect(page.getByRole("menu").getByText("Guest", { exact: true })).toBeVisible();
 });
 
 test("a visitor designs without an account and signs up only to publish", async ({ page }) => {
   // Starting from a template CTA: no login wall, a guest session is created on the way.
-  await page.goto("/dashboard/invitations/new");
-  await expect(page).toHaveURL(/\/dashboard\/invitations\/new/, { timeout: 30_000 });
+  await page.goto("/invitations/new");
+  await expect(page).toHaveURL(/\/invitations\/new/, { timeout: 30_000 });
   await expect(page.getByRole("heading", { name: /create an invitation/i })).toBeVisible();
 
   await page.getByTestId("category-birthday").click();
   await page.getByTestId("template-confetti-pop").click();
   await page.getByTestId("create-invitation").click();
-  await page.waitForURL(/\/dashboard\/invitations\/[0-9a-f-]{36}\/edit/, { timeout: 30_000 });
+  await page.waitForURL(/\/invitations\/[0-9a-f-]{36}\/edit/, { timeout: 30_000 });
   const id = page.url().match(/invitations\/([0-9a-f-]{36})\/edit/)![1];
 
   await page.getByLabel("Who's celebrating?").fill("Maya");
@@ -52,7 +51,7 @@ test("a visitor designs without an account and signs up only to publish", async 
 
   // The same draft, now owned by the account; the publish sheet reopens.
   await expect(page.getByTestId("publish")).toBeEnabled({ timeout: 30_000 });
-  await expect(page).toHaveURL(new RegExp(`/dashboard/invitations/${id}/edit`));
+  await expect(page).toHaveURL(new RegExp(`/invitations/${id}/edit`));
   await page.getByTestId("publish").click();
   await expect(page.getByTestId("public-url")).toBeVisible({ timeout: 20_000 });
 });

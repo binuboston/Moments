@@ -36,7 +36,7 @@ test("owner creates a draft through the wizard and edits it", async ({ page }) =
 
 test("owner personalises the design and enables RSVP", async ({ page }) => {
   await logIn(page, ownerEmail);
-  await page.goto(`/dashboard/invitations/${invitationId}/edit`);
+  await page.goto(`/invitations/${invitationId}/edit`);
 
   // Sections are collapsible cards; open "Look & feel".
   await page.getByTestId("editor-section-design").click();
@@ -62,7 +62,7 @@ test("owner personalises the design and enables RSVP", async ({ page }) => {
 
 test("owner publishes and gets a WhatsApp-ready link", async ({ page }) => {
   await logIn(page, ownerEmail);
-  await page.goto(`/dashboard/invitations/${invitationId}/edit`);
+  await page.goto(`/invitations/${invitationId}/edit`);
   await page.getByTestId("go-to-publish").click();
   await expect(page.getByTestId("publish")).toBeEnabled();
   await page.getByTestId("publish").click();
@@ -116,7 +116,7 @@ test("guests open the invitation and RSVP without an account", async ({ browser,
 
 test("owner sees the response and can export it", async ({ page }) => {
   await logIn(page, ownerEmail);
-  await page.goto(`/dashboard/invitations/${invitationId}/rsvps`);
+  await page.goto(`/invitations/${invitationId}/rsvps`);
   // Table from md up, one card per guest on phones; either way the name must be visible.
   await expect(page.getByText("Priya Sharma", { exact: true }).filter({ visible: true }).first()).toBeVisible({ timeout: 15_000 });
   const csv = await page.request.get(`/api/invitations/${invitationId}/rsvps?format=csv`);
@@ -126,7 +126,7 @@ test("owner sees the response and can export it", async ({ page }) => {
 
 test("another user cannot open or change the owner's invitation", async ({ page, baseURL }) => {
   await signUp(page, "intruder");
-  await page.goto(`${baseURL}/dashboard/invitations/${invitationId}/edit`);
+  await page.goto(`${baseURL}/invitations/${invitationId}/edit`);
   await expect(page.getByText(/invitation not found/i)).toBeVisible();
   await expect(page.getByTestId("field-headline")).toHaveCount(0);
 
@@ -141,7 +141,7 @@ test("duplicate slugs are rejected and unpublishing takes the page offline", asy
   const availability = await page.request.get(`/api/slug-availability?slug=${slug}`);
   expect((await availability.json()).available).toBe(false);
 
-  await page.goto(`/dashboard/invitations/${invitationId}/edit`);
+  await page.goto(`/invitations/${invitationId}/edit`);
   await page.getByTestId("go-to-publish").click();
   await page.getByTestId("unpublish").click();
   await page.keyboard.press("Escape");
@@ -157,7 +157,7 @@ test("duplicate slugs are rejected and unpublishing takes the page offline", asy
 
 test("owner can delete the invitation from the dashboard", async ({ page }) => {
   await logIn(page, ownerEmail);
-  await page.goto("/dashboard/invitations");
+  await page.goto("/invitations");
   await page.getByRole("button", { name: /more actions/i }).first().click();
   await page.getByRole("menuitem", { name: /delete/i }).click();
   await page.getByRole("button", { name: /delete permanently/i }).click();

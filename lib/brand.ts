@@ -14,4 +14,6 @@ export const BRAND = {
   badge: "Invite badge",
   /** PRODID for .ics calendar files. */
   icsProdId: "-//Invite//Invitations//EN",
+  /** Raw colours for places that cannot read CSS variables (favicon, social images, global error). Mirror app/globals.css. */
+  colors: { primary: "#e11d48", ink: "#111111", paper: "#ffffff", fill: "#efefef" },
 } as const;
