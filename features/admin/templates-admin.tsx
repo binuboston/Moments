@@ -26,8 +26,78 @@ export function TemplatesAdmin({ rows }: { rows: Row[] }) {
     onError: (err) => toast.error(errorMessage(err)),
   });
 
+  const statusSelect = (row: Row) => (
+    <Select value={row.status} onValueChange={(v) => update.mutate({ id: row.id, patch: { status: v as TemplateRow["status"] } })}>
+      <SelectTrigger className="h-10 w-full md:h-9 md:w-36" aria-label={`Status for ${row.name}`}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="draft">Draft</SelectItem>
+        <SelectItem value="published">Published</SelectItem>
+        <SelectItem value="archived">Archived</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+  const tierSelect = (row: Row) => (
+    <Select value={row.tier} onValueChange={(v) => update.mutate({ id: row.id, patch: { tier: v as TemplateRow["tier"] } })}>
+      <SelectTrigger className="h-10 w-full md:h-9 md:w-32" aria-label={`Tier for ${row.name}`}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="free">Free</SelectItem>
+        <SelectItem value="premium">Premium</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+  const orderInput = (row: Row) => (
+    <Input
+      type="number"
+      inputMode="numeric"
+      defaultValue={row.sort_order}
+      className="h-10 w-20 md:h-9"
+      aria-label={`Sort order for ${row.name}`}
+      onBlur={(e) => {
+        const v = Number(e.target.value);
+        if (Number.isFinite(v) && v !== row.sort_order) update.mutate({ id: row.id, patch: { sort_order: v } });
+      }}
+    />
+  );
+
   return (
-    <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
+    <>
+    <ul className="grid gap-2.5 md:hidden" aria-label="Templates">
+      {rows.map((row) => (
+        <li key={row.id} className="rounded-xl border border-border bg-surface p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="font-medium">{row.name}</p>
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                <code>{row.renderer_key}</code> · {row.category_slugs.join(", ")}
+              </p>
+            </div>
+            {!row.hasRenderer ? (
+              <Badge variant="destructive">
+                <AlertTriangleIcon aria-hidden /> No renderer
+              </Badge>
+            ) : null}
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {statusSelect(row)}
+            {tierSelect(row)}
+          </div>
+          <div className="mt-3 flex items-center justify-between gap-3">
+            <label className="flex items-center gap-2 text-sm">
+              <Switch checked={row.is_featured} onCheckedChange={(v) => update.mutate({ id: row.id, patch: { is_featured: v } })} aria-label={`Featured ${row.name}`} />
+              Featured
+            </label>
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              Order {orderInput(row)}
+            </label>
+          </div>
+        </li>
+      ))}
+    </ul>
+    <div className="relative hidden overflow-x-auto rounded-2xl border border-border bg-surface md:block">
       <table className="w-full text-sm">
         <thead className="bg-subtle text-left text-xs text-muted-foreground">
           <tr>
@@ -55,47 +125,22 @@ export function TemplatesAdmin({ rows }: { rows: Row[] }) {
               </td>
               <td className="px-4 py-3 text-xs text-muted-foreground">{row.category_slugs.join(", ")}</td>
               <td className="px-4 py-3">
-                <Select value={row.status} onValueChange={(v) => update.mutate({ id: row.id, patch: { status: v as TemplateRow["status"] } })}>
-                  <SelectTrigger className="h-9 w-36" aria-label={`Status for ${row.name}`}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="published">Published</SelectItem>
-                    <SelectItem value="archived">Archived</SelectItem>
-                  </SelectContent>
-                </Select>
+                {statusSelect(row)}
               </td>
               <td className="px-4 py-3">
-                <Select value={row.tier} onValueChange={(v) => update.mutate({ id: row.id, patch: { tier: v as TemplateRow["tier"] } })}>
-                  <SelectTrigger className="h-9 w-32" aria-label={`Tier for ${row.name}`}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="free">Free</SelectItem>
-                    <SelectItem value="premium">Premium</SelectItem>
-                  </SelectContent>
-                </Select>
+                {tierSelect(row)}
               </td>
               <td className="px-4 py-3">
                 <Switch checked={row.is_featured} onCheckedChange={(v) => update.mutate({ id: row.id, patch: { is_featured: v } })} aria-label={`Featured ${row.name}`} />
               </td>
               <td className="px-4 py-3">
-                <Input
-                  type="number"
-                  defaultValue={row.sort_order}
-                  className="h-9 w-20"
-                  aria-label={`Sort order for ${row.name}`}
-                  onBlur={(e) => {
-                    const v = Number(e.target.value);
-                    if (Number.isFinite(v) && v !== row.sort_order) update.mutate({ id: row.id, patch: { sort_order: v } });
-                  }}
-                />
+                {orderInput(row)}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
+    </>
   );
 }

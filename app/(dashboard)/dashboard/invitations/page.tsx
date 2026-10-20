@@ -24,10 +24,11 @@ export default async function InvitationsPage({ searchParams }: PageProps<"/dash
   const initial = await listOwnedInvitations(supabase, user.id, params);
 
   return (
-    <div className="grid gap-8">
+    <div className="grid grid-cols-1 gap-5 sm:gap-8">
       <PageHeader
         title="Invitations"
         description="Everything you've created, in one place."
+        hideActionsOnMobile
         actions={
           <Button asChild>
             <Link href="/dashboard/invitations/new">

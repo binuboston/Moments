@@ -1,9 +1,9 @@
 "use client";
 
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { ArrowLeftIcon, CalendarIcon, CheckIcon, CloudOffIcon, EyeIcon, ImageIcon, Loader2Icon, PaletteIcon, PencilLineIcon, SendIcon, SettingsIcon, XIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, CalendarIcon, CheckIcon, CloudOffIcon, EyeIcon, ImageIcon, Loader2Icon, PaletteIcon, PencilLineIcon, SendIcon, SettingsIcon, XIcon } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/features/invitations/components/status-badge";
 import { DetailsPanel } from "@/features/invitations/editor/panels/details-panel";
@@ -55,16 +55,26 @@ export function InvitationEditor({ initialDraft, templates }: { initialDraft: In
 
   useAutosave();
 
+  // Keep the active step visible in the horizontally scrolling step bar (phones).
+  const stepsRef = useRef<HTMLOListElement>(null);
+  useEffect(() => {
+    const list = stepsRef.current;
+    const active = list?.querySelector<HTMLElement>(`[data-testid="step-${step}"]`);
+    if (!list || !active || list.scrollWidth <= list.clientWidth) return;
+    list.scrollTo({ left: active.offsetLeft - (list.clientWidth - active.offsetWidth) / 2, behavior: "smooth" });
+    window.scrollTo({ top: 0 });
+  }, [step]);
+
   if (!draft || draft.id !== initialDraft.id) return null;
 
   const title = draft.title || (draft.content as { headline?: string }).headline || "Untitled invitation";
   const stepIndex = STEPS.findIndex((s) => s.key === step);
 
   return (
-    <div className="-mx-4 -my-8 flex min-h-[calc(100vh-4rem)] flex-col sm:-mx-6 lg:-mx-10">
+    <div className="-mx-4 -my-6 flex min-h-[calc(100dvh-3.5rem)] flex-col sm:-mx-6 sm:-my-8 sm:min-h-[calc(100dvh-4rem)] lg:-mx-10">
       {/* Fixed-height toolbar so the step nav below can be sticky at a known offset on small screens. */}
-      <div className="sticky top-16 z-20 flex h-14 items-center justify-between gap-3 border-b border-border bg-background/90 px-4 backdrop-blur-md sm:px-6 lg:px-10">
-        <div className="flex min-w-0 items-center gap-3">
+      <div className="sticky top-14 z-20 flex h-14 items-center justify-between gap-2 border-b border-border bg-background/90 px-3 backdrop-blur-md sm:top-16 sm:gap-3 sm:px-6 lg:px-10">
+        <div className="flex min-w-0 items-center gap-1.5 sm:gap-3">
           <Button asChild variant="ghost" size="icon-sm" aria-label="Back to invitations">
             <Link href="/dashboard/invitations">
               <ArrowLeftIcon />
@@ -78,10 +88,7 @@ export function InvitationEditor({ initialDraft, templates }: { initialDraft: In
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="lg:hidden" onClick={() => setMobilePreviewOpen(true)}>
-            <EyeIcon aria-hidden /> Preview
-          </Button>
+        <div className="flex shrink-0 items-center gap-2">
           {step !== "publish" ? (
             <Button size="sm" onClick={() => setStep("publish")} data-testid="go-to-publish">
               <SendIcon aria-hidden /> Publish
@@ -92,12 +99,12 @@ export function InvitationEditor({ initialDraft, templates }: { initialDraft: In
 
       <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)] lg:grid-cols-[14rem_minmax(0,1fr)_minmax(22rem,30rem)]">
         {/* Sticky under the toolbar (4rem header + 3.5rem toolbar) on small screens; a static sidebar column on large screens. */}
-        <nav aria-label="Editor steps" className="sticky top-[7.5rem] z-10 min-w-0 max-w-full border-b border-border bg-surface lg:static lg:border-r lg:border-b-0">
+        <nav aria-label="Editor steps" className="sticky top-28 z-10 min-w-0 max-w-full border-b border-border bg-surface sm:top-30 lg:static lg:border-r lg:border-b-0">
           <div className="flex items-center gap-2 px-3 pt-2 sm:hidden">
             <StatusBadge status={draft.status} />
             <SaveIndicator testId="save-indicator-mobile" />
           </div>
-          <ol className="flex overflow-x-auto p-2 no-scrollbar lg:flex-col lg:p-3">
+          <ol ref={stepsRef} className="flex overflow-x-auto scroll-px-2 p-2 no-scrollbar lg:flex-col lg:p-3">
             {STEPS.map((s, i) => {
               const active = s.key === step;
               return (
@@ -124,7 +131,7 @@ export function InvitationEditor({ initialDraft, templates }: { initialDraft: In
           </ol>
         </nav>
 
-        <section className="min-w-0 px-4 py-6 sm:px-6 lg:px-8" aria-labelledby={`step-heading-${step}`}>
+        <section className="min-w-0 px-4 pt-5 pb-28 sm:px-6 sm:pt-6 lg:px-8 lg:pb-6" aria-labelledby={`step-heading-${step}`}>
           <h2 id={`step-heading-${step}`} className="sr-only">
             {STEPS[stepIndex]?.label}
           </h2>
@@ -136,7 +143,7 @@ export function InvitationEditor({ initialDraft, templates }: { initialDraft: In
             {step === "settings" ? <SettingsPanel /> : null}
             {step === "publish" ? <PublishPanel /> : null}
 
-            <div className="mt-10 flex items-center justify-between border-t border-border pt-6">
+            <div className="mt-10 hidden items-center justify-between border-t border-border pt-6 lg:flex">
               <Button variant="ghost" disabled={stepIndex === 0} onClick={() => setStep(STEPS[stepIndex - 1].key)}>
                 Back
               </Button>
@@ -154,6 +161,23 @@ export function InvitationEditor({ initialDraft, templates }: { initialDraft: In
             <PreviewPane />
           </div>
         </aside>
+      </div>
+
+      {/* Phones and tablets: thumb-reachable step controls with the preview one tap away. */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-3 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] backdrop-blur-md lg:hidden">
+        <div className="mx-auto flex max-w-2xl items-center gap-2">
+          <Button variant="ghost" size="icon" disabled={stepIndex === 0} onClick={() => setStep(STEPS[stepIndex - 1].key)} aria-label="Previous step">
+            <ArrowLeftIcon />
+          </Button>
+          <Button variant="outline" className="flex-1" onClick={() => setMobilePreviewOpen(true)}>
+            <EyeIcon aria-hidden /> Preview
+          </Button>
+          {stepIndex < STEPS.length - 1 ? (
+            <Button className="flex-1" onClick={() => setStep(STEPS[stepIndex + 1].key)} data-testid="next-step-mobile">
+              {STEPS[stepIndex + 1].label.split(" ")[0]} <ArrowRightIcon aria-hidden />
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       <DialogPrimitive.Root open={mobilePreviewOpen} onOpenChange={setMobilePreviewOpen}>

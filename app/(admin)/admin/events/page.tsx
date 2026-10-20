@@ -20,7 +20,7 @@ export default async function AdminEventsPage({ searchParams }: PageProps<"/admi
   const { data, count } = await query;
 
   return (
-    <div className="grid gap-8">
+    <div className="grid min-w-0 grid-cols-1 gap-5 sm:gap-8">
       <PageHeader title="Events" description="All invitations across the platform. Unpublish or remove content that breaks the terms." />
       <EventsAdmin
         rows={(data ?? []).map((r) => ({

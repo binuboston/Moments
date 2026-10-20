@@ -65,13 +65,40 @@ export function CategoriesAdmin({ rows }: { rows: EventCategory[] }) {
   const availableSlugs = CATEGORY_SLUGS.filter((s) => !usedSlugs.has(s));
 
   return (
-    <div className="grid gap-4">
-      <div className="flex justify-end">
+    <div className="grid min-w-0 grid-cols-1 gap-4">
+      <div className="flex justify-end [&>button]:w-full sm:[&>button]:w-auto">
         <Button onClick={() => setOpen(true)} disabled={availableSlugs.length === 0}>
           <PlusIcon aria-hidden /> Add category
         </Button>
       </div>
-      <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
+      <ul className="grid gap-2.5 md:hidden" aria-label="Categories">
+        {rows.map((row) => {
+          const Icon = categoryIcon(row.icon);
+          return (
+            <li key={row.id} className="grid gap-3 rounded-xl border border-border bg-surface p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-2">
+                  <Icon className="size-4 shrink-0 text-primary" aria-hidden />
+                  <code className="truncate text-xs text-muted-foreground">{row.slug}</code>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Switch checked={row.is_active} onCheckedChange={(v) => update.mutate({ id: row.id, patch: { is_active: v } })} aria-label={`Active ${row.slug}`} />
+                  <Button variant="ghost" size="icon-sm" onClick={() => remove.mutate(row.id)} aria-label={`Delete ${row.name}`}>
+                    <Trash2Icon className="text-destructive" />
+                  </Button>
+                </div>
+              </div>
+              <Input defaultValue={row.name} aria-label={`Name for ${row.slug}`} onBlur={(e) => e.target.value.trim() !== row.name && update.mutate({ id: row.id, patch: { name: e.target.value.trim() } })} />
+              <Input defaultValue={row.description ?? ""} placeholder="Description" aria-label={`Description for ${row.slug}`} onBlur={(e) => (e.target.value.trim() || null) !== row.description && update.mutate({ id: row.id, patch: { description: e.target.value.trim() || null } })} />
+              <div className="grid grid-cols-[1fr_6rem] gap-2">
+                <Input defaultValue={row.icon ?? ""} placeholder="Lucide icon" aria-label={`Icon for ${row.slug}`} onBlur={(e) => (e.target.value.trim() || null) !== row.icon && update.mutate({ id: row.id, patch: { icon: e.target.value.trim() || null } })} />
+                <Input type="number" inputMode="numeric" defaultValue={row.sort_order} aria-label={`Order for ${row.slug}`} onBlur={(e) => Number(e.target.value) !== row.sort_order && update.mutate({ id: row.id, patch: { sort_order: Number(e.target.value) } })} />
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="relative hidden overflow-x-auto rounded-2xl border border-border bg-surface md:block">
         <table className="w-full text-sm">
           <thead className="bg-subtle text-left text-xs text-muted-foreground">
             <tr>
@@ -129,7 +156,7 @@ export function CategoriesAdmin({ rows }: { rows: EventCategory[] }) {
           </DialogHeader>
           <form className="grid gap-4" noValidate onSubmit={form.handleSubmit((v) => create.mutate(v))}>
             <Field id="cat-slug" label="Content schema" error={errors.slug?.message}>
-              <select id="cat-slug" className="h-10 w-full rounded-lg border border-input bg-surface px-3 text-sm" {...form.register("slug")}>
+              <select id="cat-slug" className="h-11 w-full rounded-lg border border-input bg-surface px-3 text-base sm:h-10 sm:text-sm" {...form.register("slug")}>
                 <option value="">Choose…</option>
                 {availableSlugs.map((s) => (
                   <option key={s} value={s}>

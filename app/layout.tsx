@@ -41,6 +41,8 @@ export const viewport: Viewport = {
   themeColor: "#faf7f2",
   width: "device-width",
   initialScale: 1,
+  // Lets layouts pad for the iPhone home indicator via env(safe-area-inset-*).
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

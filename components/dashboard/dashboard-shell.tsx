@@ -1,4 +1,5 @@
 import { Logo } from "@/components/layout/logo";
+import { BottomNav, BottomNavSpacer } from "@/components/dashboard/bottom-nav";
 import { DashboardNav } from "@/components/dashboard/dashboard-nav";
 import { UserMenu } from "@/components/dashboard/user-menu";
 import { Badge } from "@/components/ui/badge";
@@ -10,10 +11,14 @@ export interface ShellUser {
   plan: "free" | "pro";
 }
 
+/**
+ * Mobile-first app shell. Phones get a compact top bar plus a bottom tab bar;
+ * from lg up a persistent sidebar replaces the tab bar.
+ */
 export function DashboardShell({ user, children }: { user: ShellUser; children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col lg:flex-row">
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-surface lg:flex">
+    <div className="flex min-h-dvh flex-col lg:flex-row">
+      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-border bg-surface lg:flex">
         <div className="flex h-16 items-center px-6">
           <Logo href="/dashboard" />
         </div>
@@ -32,17 +37,16 @@ export function DashboardShell({ user, children }: { user: ShellUser; children: 
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-border bg-background/85 px-4 backdrop-blur-md sm:px-6 lg:justify-end">
-          <div className="flex items-center gap-3 lg:hidden">
-            <DashboardNav role={user.role} variant="mobile" />
-            <Logo href="/dashboard" />
-          </div>
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b border-border bg-background/90 px-4 backdrop-blur-md sm:h-16 sm:px-6 lg:justify-end">
+          <Logo href="/dashboard" className="lg:hidden" />
           <UserMenu user={user} />
         </header>
-        <main id="main" className="flex-1 px-4 py-8 sm:px-6 lg:px-10">
-          <div className="mx-auto w-full max-w-6xl">{children}</div>
+        <main id="main" className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
+          <div className="mx-auto w-full max-w-6xl min-w-0">{children}</div>
+          <BottomNavSpacer />
         </main>
       </div>
+      <BottomNav />
     </div>
   );
 }

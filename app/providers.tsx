@@ -27,6 +27,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <Tooltip.Provider delayDuration={200}>{children}</Tooltip.Provider>
       <Toaster
         position="bottom-center"
+        // Keep toasts clear of the mobile bottom navigation and the home indicator.
+        mobileOffset={{ bottom: "calc(5.5rem + env(safe-area-inset-bottom))" }}
         toastOptions={{
           classNames: {
             toast: "!rounded-xl !border-border !bg-surface !text-foreground !shadow-lift",

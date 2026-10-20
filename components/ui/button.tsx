@@ -19,12 +19,13 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        sm: "h-8 px-3 text-xs",
-        md: "h-10 px-4 text-sm",
+        // Mobile-first: touch-sized on phones, compact from the sm breakpoint.
+        sm: "h-10 px-3.5 text-sm sm:h-8 sm:px-3 sm:text-xs",
+        md: "h-11 px-4 text-[0.95rem] sm:h-10 sm:text-sm",
         lg: "h-12 px-6 text-base",
         xl: "h-14 px-8 text-base",
-        icon: "size-10",
-        "icon-sm": "size-8",
+        icon: "size-11 sm:size-10",
+        "icon-sm": "size-10 sm:size-8",
       },
     },
     defaultVariants: { variant: "primary", size: "md" },

@@ -87,13 +87,13 @@ export function RsvpManager({ invitationId }: { invitationId: string }) {
   ];
 
   return (
-    <div className="grid gap-6">
-      <div className="grid gap-4 sm:grid-cols-4">
+    <div className="grid min-w-0 grid-cols-1 gap-5 sm:gap-6">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-4">
         {stats.map((s) => (
-          <Card key={s.label}>
-            <CardContent className="p-5">
+          <Card key={s.label} className="rounded-xl sm:rounded-2xl">
+            <CardContent className="p-4 sm:p-5">
               <p className="text-2xl font-semibold tabular-nums">{s.value}</p>
-              <p className="text-sm text-muted-foreground">{s.label}</p>
+              <p className="text-xs text-muted-foreground sm:text-sm">{s.label}</p>
             </CardContent>
           </Card>
         ))}
@@ -102,15 +102,60 @@ export function RsvpManager({ invitationId }: { invitationId: string }) {
       {items.length === 0 ? (
         <EmptyState icon={UsersIcon} title="No responses yet" description="Responses appear here as soon as guests reply on your invitation." />
       ) : (
-        <div className="grid gap-3">
-          <div className="flex justify-end">
+        <div className="grid min-w-0 grid-cols-1 gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">{items.length === 1 ? "1 response" : `${items.length} responses`}</p>
             <Button asChild variant="outline" size="sm">
               <a href={`/api/invitations/${invitationId}/rsvps?format=csv`} download>
                 <DownloadIcon aria-hidden /> Export CSV
               </a>
             </Button>
           </div>
-          <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
+          {/* Phones: one card per guest. Tables need room, so they start at md. */}
+          <ul className="grid gap-2.5 md:hidden" aria-label="Guest responses">
+            {table.getRowModel().rows.map((row) => {
+              const r = row.original;
+              const b = attendanceBadge[r.attendance];
+              return (
+                <li key={r.id} className="rounded-xl border border-border bg-surface p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium break-words">{r.guestName}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {r.attendance === "no" ? "Not attending" : `${r.guestCount} ${r.guestCount === 1 ? "guest" : "guests"}`} · {formatShortDate(r.updatedAt, "UTC")}
+                      </p>
+                    </div>
+                    <Badge variant={b.variant} className="shrink-0">
+                      {b.label}
+                    </Badge>
+                  </div>
+                  {r.contact || r.dietaryNotes || r.message ? (
+                    <dl className="mt-3 grid gap-1.5 border-t border-border pt-3 text-sm">
+                      {r.contact ? (
+                        <div className="flex gap-2">
+                          <dt className="w-16 shrink-0 text-muted-foreground">Contact</dt>
+                          <dd className="min-w-0 break-words">{r.contact}</dd>
+                        </div>
+                      ) : null}
+                      {r.dietaryNotes ? (
+                        <div className="flex gap-2">
+                          <dt className="w-16 shrink-0 text-muted-foreground">Dietary</dt>
+                          <dd className="min-w-0 break-words">{r.dietaryNotes}</dd>
+                        </div>
+                      ) : null}
+                      {r.message ? <dd className="text-muted-foreground italic break-words">“{r.message}”</dd> : null}
+                    </dl>
+                  ) : null}
+                  <div className="mt-2 flex justify-end">
+                    <Button variant="ghost" size="sm" className="-mr-2 text-destructive" onClick={() => remove.mutate(r.id)} aria-label={`Remove response from ${r.guestName}`}>
+                      <Trash2Icon aria-hidden /> Remove
+                    </Button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="relative hidden overflow-x-auto rounded-2xl border border-border bg-surface md:block">
             <table className="w-full text-sm">
               <thead className="bg-subtle text-left text-xs text-muted-foreground">
                 {table.getHeaderGroups().map((hg) => (

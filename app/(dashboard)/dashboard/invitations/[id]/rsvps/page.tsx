@@ -21,7 +21,7 @@ export default async function RsvpsPage({ params }: PageProps<"/dashboard/invita
   const headline = (inv.content as { headline?: string } | null)?.headline;
 
   return (
-    <div className="grid gap-8">
+    <div className="grid min-w-0 grid-cols-1 gap-5 sm:gap-8">
       <div>
         <Button asChild variant="ghost" size="sm" className="-ml-2 mb-2">
           <Link href={`/dashboard/invitations/${id}/edit`}>

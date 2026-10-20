@@ -32,10 +32,11 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="grid gap-8">
+    <div className="grid grid-cols-1 gap-6 sm:gap-8">
       <PageHeader
         title={firstName ? `Welcome back, ${firstName}` : "Welcome back"}
         description="Create, edit and share your invitations."
+        hideActionsOnMobile
         actions={
           <Button asChild>
             <Link href="/dashboard/invitations/new">
@@ -45,16 +46,17 @@ export default async function DashboardPage() {
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      {/* Three compact tiles on phones; icon + label rows from sm up. */}
+      <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
         {stats.map((s) => (
-          <Card key={s.label}>
-            <CardContent className="flex items-center gap-4 p-5">
-              <span className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <s.icon className="size-5" aria-hidden />
+          <Card key={s.label} className="rounded-xl sm:rounded-2xl">
+            <CardContent className="flex flex-col gap-2 p-3.5 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary sm:size-11 sm:rounded-xl">
+                <s.icon className="size-4 sm:size-5" aria-hidden />
               </span>
-              <div>
-                <p className="text-2xl font-semibold tabular-nums">{s.value}</p>
-                <p className="text-sm text-muted-foreground">{s.label}</p>
+              <div className="min-w-0">
+                <p className="text-xl font-semibold tabular-nums sm:text-2xl">{s.value}</p>
+                <p className="text-xs leading-tight text-muted-foreground sm:text-sm">{s.label}</p>
               </div>
             </CardContent>
           </Card>
@@ -62,7 +64,7 @@ export default async function DashboardPage() {
       </div>
 
       <section>
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-3 flex items-center justify-between sm:mb-4">
           <h2 className="text-lg font-semibold">Recent invitations</h2>
           {list.counts.all > 0 ? (
             <Button asChild variant="link" size="sm">
@@ -86,7 +88,7 @@ export default async function DashboardPage() {
             }
           />
         ) : (
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
             {list.items.map((item) => (
               <li key={item.id}>
                 <InvitationCard item={item} />

@@ -100,7 +100,8 @@ test("guests open the invitation and RSVP without an account", async ({ browser,
 test("owner sees the response and can export it", async ({ page }) => {
   await logIn(page, ownerEmail);
   await page.goto(`/dashboard/invitations/${invitationId}/rsvps`);
-  await expect(page.getByRole("cell", { name: "Priya Sharma", exact: true })).toBeVisible({ timeout: 15_000 });
+  // Table from md up, one card per guest on phones; either way the name must be visible.
+  await expect(page.getByText("Priya Sharma", { exact: true }).filter({ visible: true }).first()).toBeVisible({ timeout: 15_000 });
   const csv = await page.request.get(`/api/invitations/${invitationId}/rsvps?format=csv`);
   expect(csv.ok()).toBe(true);
   expect(await csv.text()).toContain("Priya Sharma");

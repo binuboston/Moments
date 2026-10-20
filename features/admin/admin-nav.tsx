@@ -22,7 +22,7 @@ export function AdminNav() {
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
-            className={cn("rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors", active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground")}
+            className={cn("inline-flex h-10 items-center rounded-md px-3 text-sm font-medium whitespace-nowrap transition-colors md:h-9", active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground")}
           >
             {item.label}
           </Link>

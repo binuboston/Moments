@@ -17,9 +17,9 @@ export default async function SettingsPage() {
   const limits = PLAN_LIMITS[plan];
 
   return (
-    <div className="grid gap-8">
+    <div className="grid min-w-0 grid-cols-1 gap-5 sm:gap-8">
       <PageHeader title="Settings" description="Your profile, plan and account security." />
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="grid gap-6">
           <Card>
             <CardHeader>

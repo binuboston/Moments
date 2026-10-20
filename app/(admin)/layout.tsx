@@ -17,20 +17,23 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (profile?.role !== "admin") notFound();
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur-md">
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-          <div className="flex items-center gap-3">
+        {/* Phones: brand row, then a scrolling nav row. Desktop: one row. */}
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-4 px-4 sm:px-6 md:h-16 md:flex-nowrap">
+          <div className="flex h-14 items-center gap-3 md:h-auto">
             <Logo href="/admin" />
             <Badge variant="dark">Admin</Badge>
           </div>
-          <AdminNav />
-          <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+          <Link href="/dashboard" className="inline-flex h-11 items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground md:order-last">
             <ArrowLeftIcon className="size-4" aria-hidden /> Dashboard
           </Link>
+          <div className="-mx-4 w-[calc(100%+2rem)] border-t border-border px-2 py-1.5 md:mx-0 md:w-auto md:border-0 md:p-0">
+            <AdminNav />
+          </div>
         </div>
       </header>
-      <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
+      <main id="main" className="mx-auto w-full max-w-6xl min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8">
         {children}
       </main>
     </div>

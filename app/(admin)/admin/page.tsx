@@ -34,13 +34,13 @@ export default async function AdminOverviewPage() {
   ];
 
   return (
-    <div className="grid gap-8">
+    <div className="grid min-w-0 grid-cols-1 gap-5 sm:gap-8">
       <PageHeader title="Platform overview" description="Live counts across all tenants." />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
         {stats.map((s) => (
           <Card key={s.label}>
             <CardContent className="p-5">
-              <p className="text-3xl font-semibold tabular-nums">{s.value}</p>
+              <p className="text-2xl font-semibold tabular-nums sm:text-3xl">{s.value}</p>
               <p className="text-sm text-muted-foreground">{s.label}</p>
             </CardContent>
           </Card>

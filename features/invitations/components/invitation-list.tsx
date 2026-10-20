@@ -72,9 +72,14 @@ export function InvitationList({ initialParams, initialData }: Props) {
   const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
 
   return (
-    <div className="grid gap-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div role="tablist" aria-label="Filter by status" className="flex gap-1 overflow-x-auto rounded-xl bg-muted p-1 no-scrollbar">
+    <div className="grid min-w-0 grid-cols-1 gap-5 sm:gap-6">
+      <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* Phones: search first, then status chips that scroll edge to edge. */}
+        <div className="relative order-first sm:order-last sm:w-64">
+          <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <Input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by title" className="pl-9" aria-label="Search invitations" />
+        </div>
+        <div role="tablist" aria-label="Filter by status" className="-mx-4 flex min-w-0 gap-2 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:gap-1 sm:rounded-xl sm:bg-muted sm:p-1">
           {tabs.map((t) => (
             <button
               key={t.value}
@@ -83,25 +88,23 @@ export function InvitationList({ initialParams, initialData }: Props) {
               aria-selected={status === t.value}
               onClick={() => setStatus(t.value)}
               className={cn(
-                "inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-sm font-medium whitespace-nowrap transition-colors",
-                status === t.value ? "bg-surface text-foreground shadow-soft" : "text-muted-foreground hover:text-foreground",
+                "inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-medium whitespace-nowrap transition-colors sm:h-8 sm:rounded-lg sm:border-0 sm:px-3",
+                status === t.value
+                  ? "border-foreground bg-foreground text-background sm:bg-surface sm:text-foreground sm:shadow-soft"
+                  : "border-border bg-surface text-muted-foreground hover:text-foreground sm:bg-transparent",
               )}
             >
               {t.label}
-              <span className="rounded-full bg-border/70 px-1.5 text-xs tabular-nums">{t.count}</span>
+              <span className={cn("rounded-full px-1.5 text-xs tabular-nums", status === t.value ? "bg-background/20 sm:bg-border/70" : "bg-border/70")}>{t.count}</span>
             </button>
           ))}
-        </div>
-        <div className="relative sm:w-64">
-          <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by title" className="pl-9" aria-label="Search invitations" />
         </div>
       </div>
 
       {isError ? (
         <EmptyState title="Couldn't load your invitations" description="Please check your connection and try again." action={<Button onClick={() => refetch()}>Retry</Button>} />
       ) : !data ? (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy>
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3" aria-busy>
           {Array.from({ length: 6 }).map((_, i) => (
             <li key={i}>
               <Skeleton className="h-56 w-full rounded-2xl" />
@@ -127,7 +130,7 @@ export function InvitationList({ initialParams, initialData }: Props) {
         )
       ) : (
         <>
-          <ul className={cn("grid gap-4 sm:grid-cols-2 lg:grid-cols-3 transition-opacity", isFetching && "opacity-70")} aria-busy={isFetching}>
+          <ul className={cn("grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 transition-opacity", isFetching && "opacity-70")} aria-busy={isFetching}>
             {data.items.map((item) => (
               <li key={item.id}>
                 <InvitationCard item={item} />

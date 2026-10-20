@@ -60,8 +60,19 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
   const selected = available.find((t) => t.slug === templateSlug);
 
   return (
-    <div className="grid gap-8">
-      <ol className="flex items-center gap-3 text-sm" aria-label="Progress">
+    <div className="grid min-w-0 grid-cols-1 gap-6 pb-24 sm:gap-8 sm:pb-0">
+      {/* Phones: one-line progress with a segmented bar. */}
+      <div className="sm:hidden" aria-hidden>
+        <p className="text-xs font-medium text-muted-foreground">
+          Step {step} of 3 · <span className="text-foreground">{step === 1 ? "Event type" : "Template"}</span>
+        </p>
+        <div className="mt-2 grid grid-cols-3 gap-1.5">
+          {[1, 2, 3].map((n) => (
+            <span key={n} className={cn("h-1 rounded-full", n <= step ? "bg-primary" : "bg-border")} />
+          ))}
+        </div>
+      </div>
+      <ol className="hidden items-center gap-3 text-sm sm:flex" aria-label="Progress">
         {[
           { n: 1, label: "Event type" },
           { n: 2, label: "Template" },
@@ -98,7 +109,7 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
                     }}
                     aria-pressed={active}
                     className={cn(
-                      "flex h-full w-full flex-col gap-3 rounded-2xl border bg-surface p-5 text-left transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-soft focus-visible:ring-2 focus-visible:ring-ring",
+                      "flex h-full w-full flex-col gap-2.5 rounded-2xl border bg-surface p-4 text-left sm:gap-3 sm:p-5 transition-[border-color,box-shadow] hover:border-primary/50 hover:shadow-soft focus-visible:ring-2 focus-visible:ring-ring",
                       active ? "border-primary ring-1 ring-primary" : "border-border",
                     )}
                   >
@@ -106,7 +117,7 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
                       <Icon className="size-5" aria-hidden />
                     </span>
                     <span className="font-medium">{c.name}</span>
-                    {c.description ? <span className="text-xs text-muted-foreground">{c.description}</span> : null}
+                    {c.description ? <span className="line-clamp-2 text-xs text-muted-foreground">{c.description}</span> : null}
                   </button>
                 </li>
               );
@@ -114,7 +125,7 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
           </ul>
         </section>
       ) : (
-        <section aria-labelledby="step-template" className="grid gap-6">
+        <section aria-labelledby="step-template" className="grid min-w-0 grid-cols-1 gap-5 sm:gap-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 id="step-template" className="text-lg font-semibold">
@@ -129,7 +140,7 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
             </Button>
           </div>
 
-          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
             {available.map((t) => {
               const allowed = canUseTemplate(plan, t.tier);
               const active = templateSlug === t.slug;
@@ -144,11 +155,11 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
                       "group block w-full rounded-3xl text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background",
                     )}
                   >
-                    <div className={cn("relative rounded-3xl p-3 transition-shadow", active ? "ring-2 ring-primary shadow-lift" : "ring-1 ring-border")} style={{ background: t.gradient }}>
+                    <div className={cn("relative rounded-2xl p-1.5 transition-shadow sm:rounded-3xl sm:p-3", active ? "ring-2 ring-primary shadow-lift" : "ring-1 ring-border")} style={{ background: t.gradient }}>
                       <DeviceFrame variant="card" scrollable={false} className="pointer-events-none" label={`${t.name} preview`}>
                         <InvitationRenderer view={sampleView(category!, { key: t.key, name: t.name, tier: t.tier })} mode="preview" />
                       </DeviceFrame>
-                      <div className="absolute top-5 left-5">
+                      <div className="absolute top-3 left-3 origin-top-left scale-90 sm:top-5 sm:left-5 sm:scale-100">
                         {t.tier === "premium" ? (
                           <Badge variant="dark">
                             <LockIcon aria-hidden /> Premium
@@ -160,14 +171,14 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
                         )}
                       </div>
                       {active ? (
-                        <span className="absolute top-5 right-5 flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                        <span className="absolute top-3 right-3 flex size-6 sm:top-5 sm:right-5 sm:size-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
                           <CheckIcon className="size-4" />
                         </span>
                       ) : null}
                     </div>
-                    <div className="mt-3 px-1">
-                      <h3 className="font-semibold">{t.name}</h3>
-                      <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{t.description}</p>
+                    <div className="mt-2 px-1 sm:mt-3">
+                      <h3 className="text-sm font-semibold sm:text-base">{t.name}</h3>
+                      <p className="mt-0.5 hidden line-clamp-2 text-xs text-muted-foreground sm:block">{t.description}</p>
                       {!allowed ? <p className="mt-1 text-xs text-warning">Pro plan needed to publish with this design.</p> : null}
                     </div>
                   </button>
@@ -176,7 +187,7 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
             })}
           </ul>
 
-          <div className="sticky bottom-4 flex justify-end">
+          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:sticky sm:bottom-4 sm:flex sm:justify-end sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none [&>button]:w-full sm:[&>button]:w-auto">
             <Button
               size="lg"
               disabled={!selected}

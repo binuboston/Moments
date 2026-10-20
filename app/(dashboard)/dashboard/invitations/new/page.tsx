@@ -1,4 +1,7 @@
+import { ArrowLeftIcon } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { NewInvitationWizard } from "@/features/invitations/components/new-invitation-wizard";
 import { getActiveCategories, getPublishedTemplates } from "@/features/templates/queries";
@@ -14,8 +17,15 @@ export default async function NewInvitationPage({ searchParams }: PageProps<"/da
   const preselectedCategory = typeof sp.category === "string" ? (sp.category as CategorySlug) : undefined;
 
   return (
-    <div className="grid gap-8">
-      <PageHeader title="Create an invitation" description="Choose the occasion, pick a design, and we'll set up your draft." />
+    <div className="grid min-w-0 grid-cols-1 gap-5 sm:gap-8">
+      <div>
+        <Button asChild variant="ghost" size="sm" className="-ml-2 mb-1">
+          <Link href="/dashboard/invitations">
+            <ArrowLeftIcon aria-hidden /> Invitations
+          </Link>
+        </Button>
+        <PageHeader title="Create an invitation" description="Choose the occasion, pick a design, and we'll set up your draft." />
+      </div>
       <NewInvitationWizard
         categories={categories.map((c) => ({ slug: c.slug as CategorySlug, name: c.name, description: c.description, icon: c.icon }))}
         templates={templates.map((t) => ({ slug: t.row.slug, key: t.def.key, name: t.def.name, description: t.row.description ?? t.def.description, tier: t.row.tier, categories: t.def.categories, gradient: t.def.previewGradient }))}

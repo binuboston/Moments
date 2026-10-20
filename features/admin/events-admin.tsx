@@ -49,11 +49,11 @@ export function EventsAdmin({ rows, total, page, pageSize, status }: { rows: Row
   });
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const href = (p: number, s?: string) => `/admin/events?${new URLSearchParams({ ...(s ? { status: s } : {}), ...(p > 1 ? { page: String(p) } : {}) }).toString()}`;
-  const chip = (active: boolean) => cn("rounded-full border px-3 py-1 text-sm", active ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hover:text-foreground");
+  const chip = (active: boolean) => cn("inline-flex h-10 shrink-0 items-center rounded-full border px-4 text-sm sm:h-8 sm:px-3", active ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hover:text-foreground");
 
   return (
-    <div className="grid gap-4">
-      <div className="flex gap-2">
+    <div className="grid min-w-0 grid-cols-1 gap-4">
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:px-0">
         <Link href={href(1)} className={chip(!status)}>
           All
         </Link>
@@ -63,7 +63,43 @@ export function EventsAdmin({ rows, total, page, pageSize, status }: { rows: Row
           </Link>
         ))}
       </div>
-      <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
+      <ul className="grid gap-2.5 md:hidden" aria-label="Invitations">
+        {rows.map((r) => (
+          <li key={r.id} className="rounded-xl border border-border bg-surface p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-medium break-words">{r.title || "Untitled"}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {r.categoryName} · {r.templateName}
+                </p>
+              </div>
+              <StatusBadge status={r.status} />
+            </div>
+            <p className="mt-2 truncate text-xs text-muted-foreground">
+              {r.ownerName || "Unknown owner"} · updated {formatShortDate(r.updatedAt, "UTC")} · <code>/e/{r.slug}</code>
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {r.status === "published" ? (
+                <>
+                  <Button asChild variant="outline" size="sm">
+                    <a href={`/e/${r.slug}`} target="_blank" rel="noopener noreferrer">
+                      <ExternalLinkIcon aria-hidden /> Open
+                    </a>
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => unpublish.mutate(r.id)}>
+                    Unpublish
+                  </Button>
+                </>
+              ) : null}
+              <Button variant="ghost" size="sm" className="ml-auto text-destructive" onClick={() => setConfirm(r)}>
+                Delete
+              </Button>
+            </div>
+          </li>
+        ))}
+        {rows.length === 0 ? <li className="py-10 text-center text-sm text-muted-foreground">No invitations match.</li> : null}
+      </ul>
+      <div className="relative hidden overflow-x-auto rounded-2xl border border-border bg-surface md:block">
         <table className="w-full text-sm">
           <thead className="bg-subtle text-left text-xs text-muted-foreground">
             <tr>
