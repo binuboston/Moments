@@ -21,11 +21,11 @@ const eslintConfig = defineConfig([
         "error",
         {
           selector:
-            "Literal[value=/^\\/(dashboard|login|signup|start|templates|pricing|how-it-works|help|admin|demo|e|forgot-password|reset-password|auth)(\\/|\\?|#|$)/]:not(TSLiteralType > Literal)",
+            "Literal[value=/^\\/(dashboard|login|signup|start|templates|pricing|how-it-works|help|admin|demo|e|forgot-password|reset-password|auth|search)(\\/|\\?|#|$)/]:not(TSLiteralType > Literal)",
           message: "Use ROUTES / routes from @/lib/routes instead of a path literal.",
         },
         {
-          selector: "TemplateElement[value.raw=/^\\/(dashboard|login|signup|start|templates|pricing|how-it-works|help|admin|demo|e|forgot-password|reset-password|auth)(\\/|\\?|#|$)/]",
+          selector: "TemplateElement[value.raw=/^\\/(dashboard|login|signup|start|templates|pricing|how-it-works|help|admin|demo|e|forgot-password|reset-password|auth|search)(\\/|\\?|#|$)/]",
           message: "Use routes.* from @/lib/routes instead of building a path by hand.",
         },
         {

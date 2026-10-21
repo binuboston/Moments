@@ -24,15 +24,10 @@ export default async function TemplatesPage({ searchParams }: PageProps<"/templa
   const rawTier = Array.isArray(params.tier) ? params.tier[0] : params.tier;
   const category = isCategory(rawCategory) ? rawCategory : undefined;
   const tier = rawTier === "free" || rawTier === "premium" ? rawTier : undefined;
-  const rawQ = Array.isArray(params.q) ? params.q[0] : params.q;
-  const q = (rawQ ?? "").trim().toLowerCase().slice(0, 80);
 
   const [templates, categories] = await Promise.all([getPublishedTemplates(), getActiveCategories()]);
   const filtered = templates.filter(
-    (t) =>
-      (!category || t.def.categories.includes(category)) &&
-      (!tier || t.row.tier === tier) &&
-      (!q || `${t.def.name} ${t.row.description ?? t.def.description}`.toLowerCase().includes(q)),
+    (t) => (!category || t.def.categories.includes(category)) && (!tier || t.row.tier === tier),
   );
 
   const buildHref = (next: { category?: string; tier?: string }) => {
@@ -41,7 +36,6 @@ export default async function TemplatesPage({ searchParams }: PageProps<"/templa
     const tr = next.tier === undefined ? tier : next.tier;
     if (c) sp.set("category", c);
     if (tr) sp.set("tier", tr);
-    if (q) sp.set("q", q);
     const qs = sp.toString();
     return qs ? `${ROUTES.templates}?${qs}` : ROUTES.templates;
   };
@@ -55,7 +49,7 @@ export default async function TemplatesPage({ searchParams }: PageProps<"/templa
   return (
     <div className="px-4 pt-2 pb-10 sm:px-6">
       <header className="max-w-2xl">
-        <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{q ? `Designs for “${q}”` : "Find the design for your occasion"}</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">Find the design for your occasion</h1>
         <p className="mt-2 text-muted-foreground">Live previews with sample content. Every design adapts to your names, dates, photos and colours.</p>
       </header>
 

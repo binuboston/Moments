@@ -4,12 +4,12 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { AccountMenu } from "@/components/layout/account-menu";
 import { Logo } from "@/components/layout/logo";
-import { SearchBar } from "@/components/layout/search-bar";
 import { Button } from "@/components/ui/button";
 import { useAccount } from "@/features/auth/account-context";
+import { GlobalSearch } from "@/features/search/components/global-search";
 import { ROUTES } from "@/lib/routes";
 
-/** Top of every page: the search pill and the account (or Log in / Sign up). */
+/** Top of every page: the global search and the account (or Log in / Sign up). */
 export function TopBar() {
   const account = useAccount();
   return (
@@ -17,7 +17,7 @@ export function TopBar() {
       <div className="flex h-16 items-center gap-3 px-4 sm:h-20 sm:gap-4 sm:px-6">
         <Logo className="md:hidden" />
         <Suspense fallback={<div className="h-12 flex-1 rounded-full bg-fill" />}>
-          <SearchBar className="hidden min-w-0 flex-1 sm:block" />
+          <GlobalSearch variant="inline" className="hidden min-w-0 flex-1 sm:block" />
         </Suspense>
         <div className="ml-auto flex shrink-0 items-center gap-2">
           {account === undefined ? (
@@ -38,7 +38,7 @@ export function TopBar() {
       </div>
       <div className="px-4 pb-3 sm:hidden">
         <Suspense fallback={<div className="h-12 rounded-full bg-fill" />}>
-          <SearchBar />
+          <GlobalSearch variant="sheet" />
         </Suspense>
       </div>
     </header>

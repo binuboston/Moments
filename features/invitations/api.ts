@@ -7,7 +7,6 @@ import type { InvitationDraft, InvitationListResponse, RsvpItem, RsvpSummary } f
 
 export interface ListParams {
   status?: "all" | "draft" | "published" | "unpublished";
-  q?: string;
   page?: number;
   pageSize?: number;
 }
@@ -23,7 +22,6 @@ export const invitationsApi = {
   list: (params: ListParams) => {
     const sp = new URLSearchParams();
     if (params.status && params.status !== "all") sp.set("status", params.status);
-    if (params.q) sp.set("q", params.q);
     if (params.page) sp.set("page", String(params.page));
     if (params.pageSize) sp.set("pageSize", String(params.pageSize));
     const qs = sp.toString();

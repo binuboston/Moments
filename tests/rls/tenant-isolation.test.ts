@@ -197,6 +197,22 @@ describe("rsvps", () => {
   });
 });
 
+describe("global search columns", () => {
+  it("search_text is maintained from the content and matched case-insensitively", async () => {
+    const { data } = await alice.client.from("invitations").select("id").eq("id", aliceDraftId).ilike("search_text", "%rls test party%");
+    expect(data).toHaveLength(1);
+  });
+
+  it("another user cannot find someone else's invitations or guests by searching", async () => {
+    const { data: invitations } = await bob.client.from("invitations").select("id").ilike("search_text", "%rls test party%");
+    expect((invitations ?? []).map((r) => r.id)).not.toContain(aliceDraftId);
+    const { data: guests } = await bob.client.from("rsvps").select("id").ilike("guest_name", "%priya%");
+    expect(guests ?? []).toHaveLength(0);
+    const { data: own } = await alice.client.from("rsvps").select("guest_name").ilike("guest_name", "%priya%");
+    expect((own ?? []).length).toBeGreaterThan(0);
+  });
+});
+
 describe("profiles and admin", () => {
   it("users cannot read other profiles or escalate their own role", async () => {
     const { data } = await bob.client.from("profiles").select("id").eq("id", alice.id).maybeSingle();

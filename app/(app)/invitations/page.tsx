@@ -14,7 +14,6 @@ export default async function InvitationsPage({ searchParams }: PageProps<"/invi
   const sp = await searchParams;
   const params = invitationListQuerySchema.parse({
     status: typeof sp.status === "string" ? sp.status : undefined,
-    q: typeof sp.q === "string" ? sp.q : undefined,
     page: typeof sp.page === "string" ? sp.page : undefined,
   });
   const supabase = await createClient();

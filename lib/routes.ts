@@ -14,6 +14,8 @@ export const ROUTES = {
   help: "/help",
   privacy: "/help#privacy",
   terms: "/help#terms",
+  /** Full results for the header search (works with or without an account). */
+  search: "/search",
 
   /** Alias of home (the app is the index). */
   app: "/",
@@ -65,6 +67,8 @@ export const routes = {
   /** Guest-session entry that returns to `next`. */
   start: (next: string = ROUTES.app) => withNext(ROUTES.start, next),
   authCallback: (next: string) => withNext(ROUTES.authCallback, next),
+  search: (q: string) => (q.trim() ? `${ROUTES.search}?q=${encodeURIComponent(q.trim())}` : ROUTES.search),
+  helpSection: (id: string) => `${ROUTES.help}#${id}`,
 };
 
 /** Main navigation (rail on desktop, tab bar on phones). */

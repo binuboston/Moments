@@ -36,7 +36,6 @@ export const publishableSchema = z.object({
 
 export const invitationListQuerySchema = z.object({
   status: z.enum(["all", "draft", "published", "unpublished"]).default("all"),
-  q: z.string().trim().max(80).default(""),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(50).default(12),
 });

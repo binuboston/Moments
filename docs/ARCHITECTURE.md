@@ -218,6 +218,19 @@ Each of these has exactly one home. A lint rule (`eslint.config.mjs`, `no-restri
 - **Static marketing.** Marketing pages are statically rendered: they never read cookies on the server.
 - **Tests.** `tests/e2e/navigation.spec.ts` checks every account state on desktop and phone, entering the app by clicking. `tests/unit/account-and-routes.test.ts` covers the account model and the route builders.
 
+## 10f. Global search (2026-10-22)
+
+One search for the whole product, in the top bar. There is no other search UI: inner screens (the Invitations list, the templates catalogue) have filters, not search boxes.
+
+- **UI** (`features/search/components/global-search.tsx`): a WAI-ARIA combobox. On tablet and desktop it is a field with a results dropdown. On phones it is a search-looking button that opens a full-screen sheet. ⌘K, Ctrl+K or `/` opens it from anywhere. Arrows move, Enter opens the highlighted result (or, with none, the full results page), Escape clears and then closes. When empty, it shows recent searches (this browser only, `localStorage`) and suggestions. Requests are debounced (150 ms), aborted when superseded, cached briefly, and previous results stay visible while typing.
+- **Full results**: `/search?q=` (server-rendered, not indexed) lists more per group. Enter and "See all results" go there.
+- **API**: `GET /api/search?q=&limit=` (Zod-validated, `Cache-Control: private, no-store`).
+- **Providers** (`features/search/providers/*`, registered in `registry.ts`): invitations, guests, templates, occasions, quick actions, help and pages. Each returns scored results for its group. `server.ts` runs the ones that apply in parallel. Providers marked `requiresSession` skip visitors without a session, and search never creates one. A provider that fails or takes more than 2.5 s is logged and left out, so the others still answer. Results are sorted by score within a group; groups appear in registry order.
+- **Ranking** (`score.ts`, shared): exact > prefix > word start > substring > all words in any order, times a per-field weight. Accents and case are ignored. `synonyms.ts` maps the words people use (shaadi, griha pravesh, conference) to occasions.
+- **Data**: invitations are matched on `invitations.search_text`. This is a generated column (title, headline, names, venue, slug; maintained by Postgres) so untitled drafts are found by the names typed into them. Guests are matched on `rsvps.guest_name`. Both columns have `pg_trgm` GIN indexes, so `ILIKE '%…%'` stays fast as tables grow. Every word must match. Row-level security limits rows to the user's own; the providers also filter by owner.
+- **Single sources**: help answers come from `features/help/content.ts` (also rendered by the help page), pages from `PRIMARY_NAV` / `SUPPORT_NAV`, occasion names from the database and `lib/categories.ts`.
+- **Adding a source**: write a provider (return `SearchResult`s with a score from `scoreFields`), register it, add its group to `SEARCH_GROUPS`, and an icon key if needed. Database-backed providers need an index for their match column.
+
 ## 11. Risks and mitigations
 
 | Risk | Mitigation |

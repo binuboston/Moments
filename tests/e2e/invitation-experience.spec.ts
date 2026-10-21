@@ -113,6 +113,8 @@ test.describe("gallery carousel", () => {
     await expect(counter(carousel)).toContainText("03");
     await page.keyboard.press("Home");
     await expect(counter(carousel)).toContainText("01");
+    // Let the carousel settle before tapping: mid-move, the tapped photo may already be in front.
+    await expect(carousel.getByLabel(/Use the arrow keys/)).not.toHaveAttribute("data-moving", /.*/);
 
     // A side photo comes to the front first; the front photo opens.
     await carousel.getByRole("button", { name: /Bring to the front/ }).first().click();

@@ -1,6 +1,7 @@
 "use client";
 
 import { MonitorIcon, SmartphoneIcon } from "lucide-react";
+import { CATEGORY_LABELS } from "@/lib/categories";
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DeviceFrame } from "@/features/templates/components/device-frame";
@@ -19,17 +20,6 @@ interface TemplateShowcaseProps {
   fontPairings: FontPairing[];
   defaults: { paletteId: string; fontPairingId: string };
 }
-
-const CATEGORY_LABELS: Record<CategorySlug, string> = {
-  wedding: "Wedding",
-  engagement: "Engagement",
-  birthday: "Birthday",
-  anniversary: "Anniversary",
-  "baby-shower": "Baby shower",
-  housewarming: "Housewarming",
-  party: "Party",
-  corporate: "Corporate",
-};
 
 /** Interactive live preview: switch occasion, palette, fonts and device. */
 export function TemplateShowcase({ templateKey, templateName, tier, categories, palettes, fontPairings, defaults }: TemplateShowcaseProps) {

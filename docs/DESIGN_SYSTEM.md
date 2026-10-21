@@ -59,11 +59,11 @@ An invitation card follows the same anatomy, with the design thumbnail inset at 
 
 - **Shell** (`components/layout/app-shell.tsx`, used by every app and marketing page):
   - **Desktop:** a 72px icon rail (logo mark, Home, Templates, Create, Invitations, plus "Settings & support" at the foot, which holds How it works, Pricing, Help, About, Terms and Privacy).
-  - **Top bar:** a 48px grey search pill and the account menu (or Log in / Sign up).
-  - **Phones:** a top bar with the wordmark, account and search, plus a bottom tab bar (Home, Templates, Create, Invitations, Menu). The tab bar steps aside in the wizard and editor.
+  - **Top bar:** the global search (a 48px grey pill with a results dropdown, ⌘K) and the account menu (or Log in / Sign up). It is the only search in the product: inner screens use filters, not search boxes.
+  - **Phones:** a top bar with the wordmark, account and a search button that opens full-screen search, plus a bottom tab bar (Home, Templates, Create, Invitations, Menu). The tab bar steps aside in the wizard and editor.
 - **Pins.** Templates and invitations are shown as pins: the preview or thumbnail first, no card chrome, a darkening scrim on hover with a red action pill (Use / Edit), the title underneath. Feeds use CSS-column masonry (`columns-2 … xl:columns-5`).
 - **Grids.** Use `gap-4` on phones and `gap-5` from `sm` up. Cards stretch to equal height (`h-full`).
-- **Toolbars on the canvas.** Search is a white pill input (`border-0 bg-surface shadow-card`); filters are a white segmented pill with a dark active segment.
+- **Toolbars on the canvas.** Filters are a white segmented pill with a dark active segment. Lists never get their own search box (search is global).
 
 ## Motion
 

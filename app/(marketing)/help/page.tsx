@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/layout/container";
 import { Faq } from "@/components/marketing/faq";
+import { HELP_SECTIONS } from "@/features/help/content";
 import { SectionHeading } from "@/components/marketing/section-heading";
 import { BRAND } from "@/lib/brand";
 import { ROUTES } from "@/lib/routes";
@@ -12,49 +13,19 @@ export const metadata: Metadata = {
   alternates: { canonical: ROUTES.help },
 };
 
-const gettingStarted = [
-  { question: "How do I create my first invitation?", answer: "Sign up, go to your dashboard and choose New invitation. Pick the occasion and a template, fill in your details and publish when you're ready. Drafts save automatically." },
-  { question: "Can I change the template later?", answer: "Yes. In the editor, open the Template step and choose another design that supports your occasion. Your content carries over." },
-  { question: "Which time zone is used?", answer: "You choose the event's time zone when entering the date. Guests see the time exactly as you set it, with the zone shown next to it." },
-];
-
-const sharing = [
-  { question: "How do I share on WhatsApp?", answer: "After publishing, use Share on WhatsApp from your dashboard or the publish screen. WhatsApp opens with your invitation link and a short message ready to send." },
-  { question: "Why does the link preview look different in some apps?", answer: "Messaging apps cache previews. If you edit your invitation after sharing, the preview may take time to refresh. The page itself always shows the latest version." },
-  { question: "Can I stop people from viewing the invitation?", answer: "Yes. Unpublish from your dashboard and the link stops working immediately. You can republish later." },
-];
-
-const rsvp = [
-  { question: "Where do I see responses?", answer: "Open the invitation in your dashboard and select RSVPs. You'll see totals, individual responses and can export a CSV." },
-  { question: "Can guests change their answer?", answer: "Yes. If a guest submits again with the same name, their earlier response is updated rather than duplicated." },
-  { question: "Is guest information public?", answer: "Never. Responses are visible only to the invitation owner." },
-];
-
 export default function HelpPage() {
   return (
     <Container size="narrow" className="py-14 sm:py-20">
       <SectionHeading as="h1" eyebrow="Help centre" title="How can we help?" description="Quick answers to common questions. Can't find what you need? Email support@mirth.example and we'll get back to you." />
 
-      <section className="mt-14" aria-labelledby="getting-started">
-        <h2 id="getting-started" className="mb-4 text-lg font-semibold">
-          Getting started
-        </h2>
-        <Faq items={gettingStarted} />
-      </section>
-
-      <section className="mt-12" aria-labelledby="sharing">
-        <h2 id="sharing" className="mb-4 text-lg font-semibold">
-          Publishing and sharing
-        </h2>
-        <Faq items={sharing} />
-      </section>
-
-      <section className="mt-12" aria-labelledby="rsvp">
-        <h2 id="rsvp" className="mb-4 text-lg font-semibold">
-          RSVPs and guests
-        </h2>
-        <Faq items={rsvp} />
-      </section>
+      {HELP_SECTIONS.map((section, i) => (
+        <section key={section.id} className={i === 0 ? "mt-14" : "mt-12"} aria-labelledby={section.id}>
+          <h2 id={section.id} className="mb-4 scroll-mt-24 text-lg font-semibold">
+            {section.title}
+          </h2>
+          <Faq items={section.items} />
+        </section>
+      ))}
 
       <section id="privacy" className="mt-16 scroll-mt-24 rounded-2xl border border-border bg-surface p-6">
         <h2 className="text-lg font-semibold">Privacy summary</h2>

@@ -1,12 +1,9 @@
 "use client";
 
-import { SearchIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { EmptyInvitations } from "@/features/dashboard/empty-invitations";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InvitationGrid } from "@/features/invitations/components/invitation-grid";
 import { useInvitationList } from "@/features/invitations/hooks";
@@ -16,7 +13,7 @@ import { cn } from "@/lib/utils/cn";
 type Status = "all" | "draft" | "published" | "unpublished";
 
 interface Props {
-  initialParams: { status: Status; q: string; page: number; pageSize: number };
+  initialParams: { status: Status; page: number; pageSize: number };
   initialData: InvitationListResponse;
 }
 
@@ -24,28 +21,13 @@ export function InvitationList({ initialParams, initialData }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [q, setQ] = useState(initialParams.q);
 
   const status = (searchParams.get("status") as Status | null) ?? initialParams.status;
   const page = Number(searchParams.get("page") ?? initialParams.page) || 1;
-  const activeQ = searchParams.get("q") ?? initialParams.q;
-  const params = { status, q: activeQ, page, pageSize: initialParams.pageSize };
-  const isInitial = status === initialParams.status && activeQ === initialParams.q && page === initialParams.page;
+  const params = { status, page, pageSize: initialParams.pageSize };
+  const isInitial = status === initialParams.status && page === initialParams.page;
 
   const { data, isFetching, isError, refetch } = useInvitationList(params, isInitial ? initialData : undefined);
-
-  // Debounced search → URL (so the list is shareable and survives refresh).
-  useEffect(() => {
-    if (q === activeQ) return;
-    const t = setTimeout(() => {
-      const sp = new URLSearchParams(searchParams.toString());
-      if (q) sp.set("q", q);
-      else sp.delete("q");
-      sp.delete("page");
-      router.replace(`${pathname}?${sp.toString()}`);
-    }, 350);
-    return () => clearTimeout(t);
-  }, [q, activeQ, pathname, router, searchParams]);
 
   const setStatus = (next: Status) => {
     const sp = new URLSearchParams(searchParams.toString());
@@ -74,18 +56,6 @@ export function InvitationList({ initialParams, initialData }: Props) {
   return (
     <div className="grid min-w-0 grid-cols-1 gap-5 sm:gap-6">
       <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {/* Phones: search first, then status chips that scroll edge to edge. */}
-        <div className="relative order-first sm:order-last sm:w-64">
-          <SearchIcon className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <Input
-            type="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search by title"
-            className="h-11 rounded-full border-0 bg-surface pl-10 shadow-card focus-visible:ring-2 sm:h-11"
-            aria-label="Search invitations"
-          />
-        </div>
         <div role="tablist" aria-label="Filter by status" className="surface-card flex min-w-0 gap-1 overflow-x-auto rounded-full p-1 no-scrollbar sm:w-fit">
           {tabs.map((t) => (
             <button
@@ -120,7 +90,7 @@ export function InvitationList({ initialParams, initialData }: Props) {
         counts.all === 0 ? (
           <EmptyInvitations />
         ) : (
-          <EmptyState title="Nothing matches" description="Try a different status or search term." />
+          <EmptyState title="Nothing here yet" description="No invitations with this status. Try another filter." />
         )
       ) : (
         <>

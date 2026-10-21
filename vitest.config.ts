@@ -8,6 +8,7 @@ export default defineConfig({
     alias: {
       // next/font/google is a build-time transform; stub it for component and unit tests.
       "next/font/google": path.resolve(__dirname, "tests/mocks/next-font-google.ts"),
+      "server-only": path.resolve(__dirname, "tests/mocks/server-only.ts"),
       "@": path.resolve(__dirname, "."),
     },
   },

@@ -88,7 +88,6 @@ export async function getOwnedInvitationDraft(client: Client, id: string, ownerI
 
 export interface ListParams {
   status: "all" | InvitationStatus;
-  q: string;
   page: number;
   pageSize: number;
 }
@@ -102,7 +101,6 @@ export async function listOwnedInvitations(client: Client, ownerId: string, para
     .order("updated_at", { ascending: false })
     .range(from, from + params.pageSize - 1);
   if (params.status !== "all") query = query.eq("status", params.status);
-  if (params.q) query = query.ilike("title", `%${params.q.replace(/[%_]/g, "")}%`);
 
   const [{ data, error, count }, countsResult] = await Promise.all([
     query,

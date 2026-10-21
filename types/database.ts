@@ -67,14 +67,14 @@ isOneToOne: false
                   ]
                 },"invitations": {
                   Row: {
-                    "category_id": string,"content": NonNullable<Json>,"created_at": string,"expires_at": string | null,"id": string,"owner_id": string,"published_at": string | null,"settings": NonNullable<Json>,"slug": string,"status": Database["public"]['Enums']["invitation_status"],"template_id": string,"theme": NonNullable<Json>,"title": string,"updated_at": string
+                    "category_id": string,"content": NonNullable<Json>,"created_at": string,"expires_at": string | null,"id": string,"owner_id": string,"published_at": string | null,"search_text": string | null,"settings": NonNullable<Json>,"slug": string,"status": Database["public"]['Enums']["invitation_status"],"template_id": string,"theme": NonNullable<Json>,"title": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "category_id": string,"content"?: NonNullable<Json>,"created_at"?: string,"expires_at"?: string | null,"id"?: string,"owner_id": string,"published_at"?: string | null,"settings"?: NonNullable<Json>,"slug": string,"status"?: Database["public"]['Enums']["invitation_status"],"template_id": string,"theme"?: NonNullable<Json>,"title"?: string,"updated_at"?: string
+                    "category_id": string,"content"?: NonNullable<Json>,"created_at"?: string,"expires_at"?: string | null,"id"?: string,"owner_id": string,"published_at"?: string | null,"search_text"?: never,"settings"?: NonNullable<Json>,"slug": string,"status"?: Database["public"]['Enums']["invitation_status"],"template_id": string,"theme"?: NonNullable<Json>,"title"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "category_id"?: string,"content"?: NonNullable<Json>,"created_at"?: string,"expires_at"?: string | null,"id"?: string,"owner_id"?: string,"published_at"?: string | null,"settings"?: NonNullable<Json>,"slug"?: string,"status"?: Database["public"]['Enums']["invitation_status"],"template_id"?: string,"theme"?: NonNullable<Json>,"title"?: string,"updated_at"?: string
+                    "category_id"?: string,"content"?: NonNullable<Json>,"created_at"?: string,"expires_at"?: string | null,"id"?: string,"owner_id"?: string,"published_at"?: string | null,"search_text"?: never,"settings"?: NonNullable<Json>,"slug"?: string,"status"?: Database["public"]['Enums']["invitation_status"],"template_id"?: string,"theme"?: NonNullable<Json>,"title"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -157,8 +157,14 @@ isOneToOne: false
 "is_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
+"is_guest":
+{ Args: Record<PropertyKey, never>; Returns: boolean
+                           },
 "owns_invitation":
 { Args: { "p_invitation_id": string }; Returns: boolean
+                           },
+"purge_stale_guests":
+{ Args: { "p_older_than"?: string }; Returns: number
                            },
 "rsvp_summary":
 { Args: { "p_invitation_id": string }; Returns: {

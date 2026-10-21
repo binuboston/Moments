@@ -23,7 +23,7 @@ export default async function HomePage() {
   const [templates, categories, list, summary, profile] = await Promise.all([
     getPublishedTemplates(),
     getActiveCategories(),
-    user && supabase ? listOwnedInvitations(supabase, user.id, { status: "all", q: "", page: 1, pageSize: 4 }) : null,
+    user && supabase ? listOwnedInvitations(supabase, user.id, { status: "all", page: 1, pageSize: 4 }) : null,
     user && supabase ? getOverviewSummary(supabase, user.id) : null,
     user ? getCurrentProfile() : null,
   ]);
