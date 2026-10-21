@@ -1,6 +1,7 @@
 import type { CategorySlug } from "@/types/domain";
 import { contentSchema, type InvitationContent, type InvitationContentInput } from "@/lib/validation/content";
 import { defaultSettings } from "@/lib/validation/settings";
+import { SUGGESTED_TRACKS } from "@/features/music/library";
 import type { InvitationView } from "@/features/templates/types";
 
 
@@ -151,7 +152,7 @@ export function sampleView(category: CategorySlug, template: { key: string; name
     content: sampleContent(category),
     functions: sampleFunctions(category),
     media: { cover: null, gallery: [] },
-    settings: { ...defaultSettings, rsvp: { ...defaultSettings.rsvp, enabled: true } },
+    settings: { ...defaultSettings, rsvp: { ...defaultSettings.rsvp, enabled: true }, musicTrack: SUGGESTED_TRACKS[category][0] ?? "" },
     theme: { paletteId: "", fontPairingId: "", sections: {} },
     template,
     publicUrl: "https://mirth.example/e/sample",

@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils/cn";
 import { formatEventDate } from "@/lib/utils/dates";
 import { googleCalendarUrl } from "@/lib/utils/share";
+import { findTrack, musicSrc } from "@/features/music/library";
 import { shareData } from "@/features/templates/designs/shared";
 import { InvitationExperience } from "@/features/templates/motion/invitation-experience";
 import type { CoverData } from "@/features/templates/motion/opening-cover";
@@ -46,7 +47,7 @@ export function InvitationRenderer({ view, mode, className }: InvitationRenderer
       data-mode={mode}
     >
       {mode === "public" || mode === "demo" ? (
-        <InvitationExperience cover={view.settings.openingCover ? coverData(view) : null} dock={dockData(view, theme)} particles={def.particles ?? "petals"}>
+        <InvitationExperience cover={view.settings.openingCover ? coverData(view) : null} dock={dockData(view, theme)} music={musicData(view)} particles={def.particles ?? "petals"}>
           {body}
         </InvitationExperience>
       ) : (
@@ -65,6 +66,11 @@ function coverData(view: InvitationView): CoverData {
     invocation: content.invocation,
     icon: ["wedding", "engagement", "anniversary", "baby-shower"].includes(content.kind) ? "heart" : "sparkle",
   };
+}
+
+function musicData(view: InvitationView) {
+  const track = findTrack(view.settings.musicTrack);
+  return track ? { src: musicSrc(track), title: track.title, credit: `${track.composer} · ${track.performer}` } : null;
 }
 
 function dockData(view: InvitationView, theme: ResolvedTheme) {

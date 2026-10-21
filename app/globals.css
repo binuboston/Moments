@@ -411,6 +411,11 @@
 @media (prefers-reduced-motion: no-preference) {
   .animate-blossom-drift { animation: blossom-drift 5s ease-in-out infinite; }
 }
+/* Background music button: equaliser bars. */
+@keyframes music-bar {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
 @keyframes inv-tick {
   from { opacity: 0; transform: translateY(-0.45em); }
   to { opacity: 1; transform: none; }

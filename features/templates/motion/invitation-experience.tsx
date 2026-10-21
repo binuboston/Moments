@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { SmoothScroll, useLenis } from "@/components/motion/smooth-scroll";
 import { ActionDock, type DockData } from "@/features/templates/motion/action-dock";
+import { MusicButton, useBackgroundMusic, type MusicData } from "@/features/templates/motion/background-music";
 import { burst, type ParticleKind } from "@/features/templates/motion/burst";
 import { OpeningCover, type CoverData } from "@/features/templates/motion/opening-cover";
 import { useInvitationMotion } from "@/features/templates/motion/use-invitation-motion";
@@ -11,6 +12,8 @@ interface InvitationExperienceProps {
   /** null when the owner turned the opening card off. */
   cover: CoverData | null;
   dock: DockData;
+  /** null when the owner chose no music. */
+  music: MusicData | null;
   particles: ParticleKind;
   children: React.ReactNode;
 }
@@ -31,11 +34,12 @@ export function InvitationExperience(props: InvitationExperienceProps) {
   );
 }
 
-function Experience({ cover, dock, particles, children }: InvitationExperienceProps) {
+function Experience({ cover, dock, music, particles, children }: InvitationExperienceProps) {
   const lenis = useLenis();
   const [phase, setPhase] = useState<Phase>(cover ? "closed" : "open");
   const content = useRef<HTMLDivElement>(null);
   const layer = useRef<HTMLDivElement>(null);
+  const sound = useBackgroundMusic(music);
 
   useInvitationMotion(content, phase !== "closed");
 
@@ -71,6 +75,7 @@ function Experience({ cover, dock, particles, children }: InvitationExperiencePr
           {...cover}
           particles={particles}
           onBurst={(x, y) => layer.current && burst(layer.current, particles, x, y)}
+          onOpen={sound.play}
           onReveal={() => setPhase("revealing")}
           onDone={() => {
             setPhase("open");
@@ -83,6 +88,7 @@ function Experience({ cover, dock, particles, children }: InvitationExperiencePr
       </div>
       <div ref={layer} aria-hidden className="pointer-events-none fixed inset-0 z-[72] overflow-hidden" />
       {phase !== "closed" ? <ActionDock {...dock} /> : null}
+      {music && phase !== "closed" ? <MusicButton music={music} playing={sound.playing} onToggle={sound.toggle} /> : null}
     </>
   );
 }

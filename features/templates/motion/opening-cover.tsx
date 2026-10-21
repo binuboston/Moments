@@ -23,6 +23,8 @@ interface OpeningCoverProps extends CoverData {
   onDone: () => void;
   /** Viewport point the blossom burst starts from (the card's centre). */
   onBurst: (x: number, y: number) => void;
+  /** Called synchronously inside the Open gesture (browsers only allow sound to start there). */
+  onOpen?: () => void;
 }
 
 /** Small drifting blossoms in the backdrop (positions in %, size in rem). */
@@ -58,7 +60,7 @@ function useGuestName() {
  * nothing else has focus, or Escape. Without JavaScript a <noscript> rule
  * hides it (see InvitationExperience).
  */
-export function OpeningCover({ names, date, invocation, icon, particles, onReveal, onDone, onBurst }: OpeningCoverProps) {
+export function OpeningCover({ names, date, invocation, icon, particles, onReveal, onDone, onBurst, onOpen }: OpeningCoverProps) {
   const root = useRef<HTMLDivElement>(null);
   const opening = useRef(false);
   const timeline = useRef<gsap.core.Timeline | null>(null);
@@ -91,6 +93,7 @@ export function OpeningCover({ names, date, invocation, icon, particles, onRevea
   function open() {
     if (opening.current) return;
     opening.current = true;
+    onOpen?.();
     const el = root.current!;
     const q = gsap.utils.selector(el);
 

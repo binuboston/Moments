@@ -22,6 +22,11 @@ export const settingsSchema = z.object({
   showCalendarActions: z.boolean().default(true),
   /** Guests tap Open on a welcome card to reveal the invitation (public page and live demo only). */
   openingCover: z.boolean().default(true),
+  /**
+   * Background music track id from the music library ("" for none). Kept
+   * lenient: an unknown id plays nothing instead of invalidating settings.
+   */
+  musicTrack: z.string().max(60).catch(""),
 });
 
 export type InvitationSettings = z.infer<typeof settingsSchema>;

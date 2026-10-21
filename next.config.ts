@@ -60,6 +60,11 @@ const nextConfig: NextConfig = {
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         ],
       },
+      {
+        // Background music (public/music). Files are replaced under a new name, never edited in place.
+        source: "/music/:file*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=2592000, stale-while-revalidate=86400" }],
+      },
     ];
   },
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeftIcon, CalendarClockIcon, CheckIcon, CloudOffIcon, ImageIcon, Loader2Icon, PaletteIcon, SendIcon, Settings2Icon } from "lucide-react";
+import { ArrowLeftIcon, CalendarClockIcon, CheckIcon, CloudOffIcon, ImageIcon, Loader2Icon, MusicIcon, PaletteIcon, SendIcon, Settings2Icon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
@@ -11,6 +11,7 @@ import { StatusBadge } from "@/features/invitations/components/status-badge";
 import { EditorSection } from "@/features/invitations/editor/editor-section";
 import { DesignPanel, type TemplateOption } from "@/features/invitations/editor/panels/design-panel";
 import { DetailsPanel } from "@/features/invitations/editor/panels/details-panel";
+import { MusicPanel } from "@/features/invitations/editor/panels/music-panel";
 import { PhotosPanel } from "@/features/invitations/editor/panels/photos-panel";
 import { PublishPanel } from "@/features/invitations/editor/panels/publish-panel";
 import { SchedulePanel } from "@/features/invitations/editor/panels/schedule-panel";
@@ -20,6 +21,7 @@ import { TemplateSwitcher } from "@/features/invitations/editor/template-switche
 import { useAutosave } from "@/features/invitations/editor/use-autosave";
 import { ViewToggle } from "@/features/invitations/editor/view-toggle";
 import type { InvitationDraft } from "@/features/invitations/types";
+import { findTrack } from "@/features/music/library";
 import { getTemplateOrFallback } from "@/features/templates/registry";
 import { categoryStyle } from "@/lib/design/tones";
 import { cn } from "@/lib/utils/cn";
@@ -112,6 +114,7 @@ export function InvitationEditor({ initialDraft, templates, isGuest = false }: {
     schedule: draft.functions.length ? plural(draft.functions.length, "event") : "Add ceremonies, receptions or a running order",
     photos: cover || gallery ? [cover ? "Cover photo" : "", gallery ? plural(gallery, "gallery photo") : ""].filter(Boolean).join(" · ") : "Cover and gallery",
     design: [palette?.name, fonts?.name].filter(Boolean).join(" · "),
+    music: findTrack(draft.settings.musicTrack)?.title ?? "No music",
   };
 
   return (
@@ -161,6 +164,9 @@ export function InvitationEditor({ initialDraft, templates, isGuest = false }: {
             </EditorSection>
             <EditorSection id="design" title="Look & feel" summary={summaries.design} icon={PaletteIcon} tone="violet">
               <DesignPanel />
+            </EditorSection>
+            <EditorSection id="music" title="Music" summary={summaries.music} icon={MusicIcon} tone="blue">
+              <MusicPanel />
             </EditorSection>
           </div>
         ) : (

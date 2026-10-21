@@ -8,7 +8,7 @@ import type { ThemeInput } from "@/lib/validation/theme";
 import type { InvitationDraft, MediaRecord } from "@/features/invitations/types";
 
 /** Collapsible sections of the Edit view. */
-export type EditorSection = "details" | "schedule" | "photos" | "design";
+export type EditorSection = "details" | "schedule" | "photos" | "design" | "music";
 /** Anything the editor can navigate to: a section, or the settings sheet. */
 export type EditorTarget = EditorSection | "settings";
 export type EditorView = "edit" | "preview";

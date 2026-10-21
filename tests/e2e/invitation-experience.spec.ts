@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { createInvitation, waitForDraft } from "./helpers";
 
 const DEMO = "/demo/eternal-grace";
 const hiddenCount = (page: import("@playwright/test").Page) =>
@@ -55,5 +56,36 @@ test.describe("invitation experience", () => {
     await expect(page.locator("[data-inv-cover]")).toHaveCount(0, { timeout: 3000 });
     expect(await hiddenCount(page)).toBe(0);
     await context.close();
+  });
+});
+
+test.describe("background music", () => {
+  test("starts when the guest opens the invitation and can be muted", async ({ page }) => {
+    await page.goto(DEMO);
+    const music = page.getByRole("button", { name: "Background music" });
+    await expect(music).toHaveCount(0);
+    await page.getByRole("button", { name: "Open", exact: true }).click();
+    await expect(music).toBeVisible({ timeout: 6000 });
+    await expect(music).toHaveAttribute("aria-pressed", "true", { timeout: 10_000 });
+    await music.click();
+    await expect(music).toHaveAttribute("aria-pressed", "false");
+    await music.click();
+    await expect(music).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("the owner picks a track in the editor", async ({ page }) => {
+    const id = await createInvitation(page, "wedding", "eternal-grace");
+    await page.getByTestId("editor-section-music").click();
+    const preview = page.getByTestId("music-preview-clair-de-lune");
+    await preview.click();
+    await expect(preview).toHaveAttribute("aria-pressed", "true");
+    await preview.click();
+    await expect(preview).toHaveAttribute("aria-pressed", "false");
+    await page.locator("label", { hasText: "Clair de Lune" }).click();
+    await expect(page.getByRole("radio", { name: /Clair de Lune/ })).toBeChecked();
+    await waitForDraft(page, id, (d) => (d.settings as { musicTrack?: string }).musicTrack, "clair-de-lune");
+    await expect(page.getByTestId("editor-section-music")).toContainText("Clair de Lune");
+    await page.locator("label", { hasText: "No music" }).click();
+    await waitForDraft(page, id, (d) => (d.settings as { musicTrack?: string }).musicTrack, "");
   });
 });
