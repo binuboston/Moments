@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon } from "lucide-react";
+import { CheckIcon, GalleryHorizontalIcon, LayoutGridIcon } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { getTemplateOrFallback } from "@/features/templates/registry";
@@ -17,6 +17,11 @@ export interface TemplateOption {
   tier: "free" | "premium";
   gradient: string;
 }
+
+const GALLERY_OPTIONS = [
+  { value: "carousel", label: "Carousel", hint: "Swipe through photos like a stack of prints", icon: GalleryHorizontalIcon },
+  { value: "grid", label: "Grid", hint: "See every photo at a glance", icon: LayoutGridIcon },
+] as const;
 
 const SECTION_LABELS: Record<SectionKey, { label: string; hint: string }> = {
   hero: { label: "Hero", hint: "Always shown" },
@@ -39,6 +44,7 @@ export function DesignPanel() {
   const def = getTemplateOrFallback(draft.templateKey);
   const paletteId = draft.theme.paletteId || def.defaults.paletteId;
   const fontId = draft.theme.fontPairingId || def.defaults.fontPairingId;
+  const gallery = draft.theme.gallery || def.defaults.gallery || "carousel";
 
   return (
     <div className="grid gap-8">
@@ -108,6 +114,40 @@ export function DesignPanel() {
           })}
         </ul>
       </section>
+
+      {def.sections.includes("gallery") ? (
+        <section className="grid gap-3">
+          <div>
+            <h3 className="text-sm font-semibold">Gallery style</h3>
+            <p className="mt-0.5 text-sm text-muted-foreground">How guests browse your photos. Either way, tapping a photo opens it full screen.</p>
+          </div>
+          <div role="radiogroup" aria-label="Gallery style" className="grid grid-cols-2 gap-2.5">
+            {GALLERY_OPTIONS.map((o) => {
+              const active = o.value === gallery;
+              return (
+                <button
+                  key={o.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => setTheme({ gallery: o.value })}
+                  data-testid={`gallery-${o.value}`}
+                  className={cn(
+                    "flex items-start gap-3 rounded-2xl bg-fill p-3 text-left transition-[background-color,box-shadow] duration-(--duration-base) hover:bg-fill-hover focus-visible:ring-2 focus-visible:ring-ring",
+                    active && "bg-surface shadow-card ring-2 ring-primary",
+                  )}
+                >
+                  <o.icon className="mt-0.5 size-4 shrink-0" aria-hidden />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium">{o.label}</span>
+                    <span className="block text-xs text-muted-foreground">{o.hint}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
 
       <section className="grid gap-3">
         <div>

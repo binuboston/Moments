@@ -3,8 +3,9 @@ import type { CategorySlug, SectionKey, TemplateTier } from "@/types/domain";
 import type { InvitationContent } from "@/lib/validation/content";
 import type { InvitationFunction } from "@/lib/validation/functions";
 import type { InvitationSettings } from "@/lib/validation/settings";
-import type { ThemeInput } from "@/lib/validation/theme";
+import type { GalleryLayout, ThemeInput } from "@/lib/validation/theme";
 import type { FontKey } from "@/features/templates/fonts";
+import type { MotionPresetKey } from "@/features/templates/motion/engine/presets";
 
 export interface Palette {
   id: string;
@@ -59,6 +60,7 @@ export interface ResolvedTheme {
   fonts: FontPairing;
   /** Final visibility after applying template defaults, user overrides and content availability. */
   sections: Record<SectionKey, boolean>;
+  gallery: GalleryLayout;
 }
 
 /**
@@ -87,10 +89,13 @@ export interface TemplateDefinition {
   defaultSections: SectionKey[];
   palettes: Palette[];
   fontPairings: FontPairing[];
-  defaults: { paletteId: string; fontPairingId: string };
+  /** `gallery` defaults to "carousel". */
+  defaults: { paletteId: string; fontPairingId: string; gallery?: GalleryLayout };
   /** Small CSS gradient used for cards before the live preview mounts. */
   previewGradient: string;
   /** Celebration burst when the guest opens the invitation. Defaults to petals. */
   particles?: "petals" | "confetti" | "sparkles";
+  /** Motion character on the guest page (see features/templates/motion/engine/presets.ts). Defaults to "gentle". */
+  motion?: MotionPresetKey;
   component: ComponentType<TemplateProps>;
 }

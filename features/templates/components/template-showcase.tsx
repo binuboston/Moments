@@ -39,7 +39,7 @@ export function TemplateShowcase({ templateKey, templateName, tier, categories, 
   const [device, setDevice] = useState<"phone" | "desktop">("phone");
 
   const base = sampleView(category, { key: templateKey, name: templateName, tier });
-  const view = { ...base, theme: { paletteId, fontPairingId, sections: {} } };
+  const view = { ...base, theme: { ...base.theme, paletteId, fontPairingId } };
 
   return (
     <div className="grid gap-6">

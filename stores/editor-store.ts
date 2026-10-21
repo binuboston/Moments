@@ -118,7 +118,7 @@ export const useEditorStore = create<EditorState>()((set) => ({
       templateSlug: template.slug,
       templateTier: template.tier,
       // Palette/font ids are template-specific; fall back to the new template's defaults.
-      theme: { paletteId: "", fontPairingId: "", sections: {} },
+      theme: { paletteId: "", fontPairingId: "", sections: {}, gallery: "" },
     })),
 
   markSaving: () => set({ saveState: "saving" }),

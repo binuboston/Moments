@@ -14,3 +14,6 @@ export const DM_Sans = make("DM_Sans");
 export const Fraunces = make("Fraunces");
 export const Geist = make("Geist");
 export const Geist_Mono = make("Geist_Mono");
+export const Marcellus = make("Marcellus");
+export const Fredoka = make("Fredoka");
+export const Archivo = make("Archivo");

@@ -7,6 +7,8 @@ import { MusicButton, useBackgroundMusic, type MusicData } from "@/features/temp
 import { burst, type ParticleKind } from "@/features/templates/motion/burst";
 import { OpeningCover, type CoverData } from "@/features/templates/motion/opening-cover";
 import { useInvitationMotion } from "@/features/templates/motion/use-invitation-motion";
+import type { MotionPresetKey } from "@/features/templates/motion/engine/presets";
+import { ScrollProgress } from "@/features/templates/motion/scroll-progress";
 
 interface InvitationExperienceProps {
   /** null when the owner turned the opening card off. */
@@ -15,6 +17,7 @@ interface InvitationExperienceProps {
   /** null when the owner chose no music. */
   music: MusicData | null;
   particles: ParticleKind;
+  motion: MotionPresetKey;
   children: React.ReactNode;
 }
 
@@ -34,14 +37,14 @@ export function InvitationExperience(props: InvitationExperienceProps) {
   );
 }
 
-function Experience({ cover, dock, music, particles, children }: InvitationExperienceProps) {
+function Experience({ cover, dock, music, particles, motion, children }: InvitationExperienceProps) {
   const lenis = useLenis();
   const [phase, setPhase] = useState<Phase>(cover ? "closed" : "open");
   const content = useRef<HTMLDivElement>(null);
   const layer = useRef<HTMLDivElement>(null);
   const sound = useBackgroundMusic(music);
 
-  useInvitationMotion(content, phase !== "closed");
+  useInvitationMotion(content, phase !== "closed", motion);
 
   // Deep links (e.g. /e/slug#rsvp) go straight to the content.
   useEffect(() => {
@@ -87,6 +90,7 @@ function Experience({ cover, dock, music, particles, children }: InvitationExper
         {children}
       </div>
       <div ref={layer} aria-hidden className="pointer-events-none fixed inset-0 z-[72] overflow-hidden" />
+      {phase !== "closed" ? <ScrollProgress /> : null}
       {phase !== "closed" ? <ActionDock {...dock} /> : null}
       {music && phase !== "closed" ? <MusicButton music={music} playing={sound.playing} onToggle={sound.toggle} /> : null}
     </>

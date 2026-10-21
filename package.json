@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:visual": "playwright test -c playwright.visual.config.ts",
     "test:rls": "vitest run --config vitest.rls.config.ts",
     "db:start": "supabase start -x studio,realtime,edge-runtime,logflare,vector,imgproxy,supavisor,postgres-meta",
     "db:stop": "supabase stop",

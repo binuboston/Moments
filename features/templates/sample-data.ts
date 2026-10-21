@@ -153,7 +153,7 @@ export function sampleView(category: CategorySlug, template: { key: string; name
     functions: sampleFunctions(category),
     media: { cover: null, gallery: [] },
     settings: { ...defaultSettings, rsvp: { ...defaultSettings.rsvp, enabled: true }, musicTrack: SUGGESTED_TRACKS[category][0] ?? "" },
-    theme: { paletteId: "", fontPairingId: "", sections: {} },
+    theme: { paletteId: "", fontPairingId: "", sections: {}, gallery: "" },
     template,
     publicUrl: "https://mirth.example/e/sample",
     showBranding: false,

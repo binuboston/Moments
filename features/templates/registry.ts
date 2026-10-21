@@ -1,12 +1,15 @@
 import type { CategorySlug } from "@/types/domain";
 import { botanicalNoir } from "@/features/templates/designs/botanical-noir";
+import { balloonBash } from "@/features/templates/designs/balloon-bash";
 import { confettiPop } from "@/features/templates/designs/confetti-pop";
 import { eternalGrace } from "@/features/templates/designs/eternal-grace";
 import { goldenGala } from "@/features/templates/designs/golden-gala";
+import { kalyanam } from "@/features/templates/designs/kalyanam";
 import { modernMinimal } from "@/features/templates/designs/modern-minimal";
+import { monochrome } from "@/features/templates/designs/monochrome";
 import { softPastel } from "@/features/templates/designs/soft-pastel";
+import { summit } from "@/features/templates/designs/summit";
 import type { TemplateDefinition } from "@/features/templates/types";
-
 
 /**
  * Explicit mapping between approved renderer keys and their components.
@@ -20,6 +23,10 @@ export const TEMPLATE_REGISTRY: Readonly<Record<string, TemplateDefinition>> = O
   [confettiPop.key]: confettiPop,
   [goldenGala.key]: goldenGala,
   [softPastel.key]: softPastel,
+  [kalyanam.key]: kalyanam,
+  [monochrome.key]: monochrome,
+  [balloonBash.key]: balloonBash,
+  [summit.key]: summit,
 });
 
 export const FALLBACK_TEMPLATE_KEY = modernMinimal.key;

@@ -11,7 +11,7 @@ describe("resolveTheme", () => {
 
   it("falls back to defaults for unknown palette and font ids", () => {
     const view = sampleView("wedding", { key: def.key, name: def.name, tier: "free" });
-    const theme = resolveTheme(def, { paletteId: "nope", fontPairingId: "nope", sections: {} }, view);
+    const theme = resolveTheme(def, { paletteId: "nope", fontPairingId: "nope", sections: {}, gallery: "" }, view);
     expect(theme.palette.id).toBe(def.defaults.paletteId);
     expect(theme.fonts.id).toBe(def.defaults.fontPairingId);
   });
@@ -20,7 +20,7 @@ describe("resolveTheme", () => {
     const view = sampleView("engagement", { key: def.key, name: def.name, tier: "free" });
     view.functions = [];
     view.media = { cover: null, gallery: [] };
-    const theme = resolveTheme(def, { paletteId: "", fontPairingId: "", sections: { hero: false, details: false, intro: false } }, view);
+    const theme = resolveTheme(def, { paletteId: "", fontPairingId: "", sections: { hero: false, details: false, intro: false }, gallery: "" }, view);
     expect(theme.sections.hero).toBe(true);
     expect(theme.sections.details).toBe(true);
     expect(theme.sections.intro).toBe(false);

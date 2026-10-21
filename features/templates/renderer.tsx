@@ -47,7 +47,7 @@ export function InvitationRenderer({ view, mode, className }: InvitationRenderer
       data-mode={mode}
     >
       {mode === "public" || mode === "demo" ? (
-        <InvitationExperience cover={view.settings.openingCover ? coverData(view) : null} dock={dockData(view, theme)} music={musicData(view)} particles={def.particles ?? "petals"}>
+        <InvitationExperience cover={view.settings.openingCover ? coverData(view) : null} dock={dockData(view, theme)} music={musicData(view)} particles={def.particles ?? "petals"} motion={def.motion ?? "gentle"}>
           {body}
         </InvitationExperience>
       ) : (

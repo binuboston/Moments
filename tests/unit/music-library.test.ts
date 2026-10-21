@@ -44,3 +44,27 @@ describe("settings.musicTrack", () => {
     expect(parsed.openingCover).toBe(false);
   });
 });
+
+describe("sample gallery", () => {
+  it("only references bundled photos with real dimensions", async () => {
+    const { sampleGallery } = await import("@/features/templates/sample-media");
+    for (const slug of CATEGORY_SLUGS) {
+      for (const item of sampleGallery(slug)) {
+        expect(existsSync(path.join(process.cwd(), "public", item.url)), item.url).toBe(true);
+        expect(item.width! > 0 && item.height! > 0).toBe(true);
+        expect(item.alt).toMatch(/^Sample photo: /);
+      }
+    }
+    expect(sampleGallery("wedding").length).toBeGreaterThan(2);
+  });
+});
+
+describe("theme.gallery", () => {
+  it("defaults to the template's layout and never invalidates the theme", async () => {
+    const { themeSchema } = await import("@/lib/validation/theme");
+    expect(themeSchema.parse({}).gallery).toBe("");
+    const parsed = themeSchema.parse({ paletteId: "ivory", gallery: "slideshow" });
+    expect(parsed.gallery).toBe("");
+    expect(parsed.paletteId).toBe("ivory");
+  });
+});

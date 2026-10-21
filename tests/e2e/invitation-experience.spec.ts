@@ -89,3 +89,77 @@ test.describe("background music", () => {
     await waitForDraft(page, id, (d) => (d.settings as { musicTrack?: string }).musicTrack, "");
   });
 });
+
+test.describe("gallery carousel", () => {
+  const open = async (page: import("@playwright/test").Page) => {
+    await page.goto(DEMO);
+    await page.getByRole("button", { name: "Open", exact: true }).click();
+    await expect(page.locator("[data-inv-cover]")).toHaveCount(0, { timeout: 6000 });
+    const carousel = page.getByRole("region", { name: "Photo gallery" });
+    await carousel.scrollIntoViewIfNeeded();
+    await expect(carousel).toBeVisible();
+    return carousel;
+  };
+  const counter = (carousel: import("@playwright/test").Locator) => carousel.locator("[aria-live]");
+
+  test("moves with buttons, keys and taps, and opens the full-screen viewer", async ({ page }) => {
+    const carousel = await open(page);
+    await expect(counter(carousel)).toContainText("01");
+    await carousel.getByRole("button", { name: "Next photo" }).click();
+    await expect(counter(carousel)).toContainText("02");
+
+    await page.getByRole("region", { name: "Photo gallery" }).getByLabel(/Use the arrow keys/).focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(counter(carousel)).toContainText("03");
+    await page.keyboard.press("Home");
+    await expect(counter(carousel)).toContainText("01");
+
+    // A side photo comes to the front first; the front photo opens.
+    await carousel.getByRole("button", { name: /Bring to the front/ }).first().click();
+    await expect(counter(carousel)).toContainText("02");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await carousel.getByRole("button", { name: /Open full screen/ }).click();
+    const viewer = page.getByRole("dialog");
+    await expect(viewer).toBeVisible();
+    await expect(viewer).toContainText("Photo 2 of 5");
+    await page.keyboard.press("ArrowRight");
+    await expect(viewer).toContainText("Photo 3 of 5");
+    await page.keyboard.press("Escape");
+    await expect(viewer).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
+  });
+
+  test("a mouse drag throws to the next photos", async ({ page, isMobile }) => {
+    test.skip(isMobile, "Touch scrolling is native on phones");
+    const carousel = await open(page);
+    const track = carousel.getByLabel(/Use the arrow keys/);
+    const box = (await track.boundingBox())!;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(box.x + box.width * 0.75, y);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i++) await page.mouse.move(box.x + box.width * 0.75 - i * 40, y);
+    await page.mouse.up();
+    await expect(counter(carousel)).not.toContainText("01 /", { timeout: 3000 });
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+  });
+
+  test("the owner can switch the gallery to a grid", async ({ page }) => {
+    const id = await createInvitation(page, "wedding", "eternal-grace");
+    await page.getByTestId("editor-section-design").click();
+    await page.getByTestId("gallery-grid").click();
+    await expect(page.getByTestId("gallery-grid")).toHaveAttribute("aria-checked", "true");
+    await waitForDraft(page, id, (d) => (d.theme as { gallery?: string }).gallery, "grid");
+  });
+});
+
+test("scroll-linked effects run on the guest page", async ({ page, isMobile }) => {
+  test.skip(isMobile, "Covered on desktop; the same code runs on phones");
+  await page.goto(DEMO);
+  await page.getByRole("button", { name: "Open", exact: true }).click();
+  await expect(page.locator("[data-inv-cover]")).toHaveCount(0, { timeout: 6000 });
+  // Word-by-word passages are split into words; the progress bar fills as the guest scrolls.
+  await expect(page.locator("[data-inv-reveal='words'] .inv-word").first()).toBeAttached();
+  const progress = () => page.locator("[data-inv-progress]").evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).a);
+  await page.mouse.wheel(0, 2500);
+  await expect.poll(progress, { timeout: 4000 }).toBeGreaterThan(0.1);
+});

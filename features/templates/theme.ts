@@ -52,7 +52,7 @@ export function resolveTheme(def: TemplateDefinition, theme: ThemeInput, view: I
     sections[key] = supported && enabled && sectionHasContent(key, view);
   }
 
-  return { palette, fonts, sections };
+  return { palette, fonts, sections, gallery: theme.gallery || def.defaults.gallery || "carousel" };
 }
 
 /** CSS custom properties for the template root. */

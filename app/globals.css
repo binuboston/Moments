@@ -411,6 +411,16 @@
 @media (prefers-reduced-motion: no-preference) {
   .animate-blossom-drift { animation: blossom-drift 5s ease-in-out infinite; }
 }
+/* Balloon Bash: balloons bob on their strings. */
+@keyframes balloon-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(3deg); }
+}
+/* Kalyanam: the toran sways a little. */
+@keyframes toran-sway {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(0.6deg); }
+}
 /* Background music button: equaliser bars. */
 @keyframes music-bar {
   0%, 100% { transform: scaleY(0.35); }

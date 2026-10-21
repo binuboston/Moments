@@ -15,7 +15,7 @@ describe("template registry integrity", () => {
     // Templates deleted by a later migration no longer need a renderer.
     const removed = new Set([...sql.matchAll(/delete from public\.templates where slug in \(([^)]*)\)/g)].flatMap((m) => [...m[1].matchAll(/'([a-z0-9-]+)'/g)].map((x) => x[1])));
     const keys = [...sql.matchAll(/\('([a-z0-9-]+)', '([a-z0-9-]+)', '[^']+',/g)].map((m) => m[2]).filter((k) => !removed.has(k));
-    expect(keys.length).toBe(6);
+    expect(new Set(keys)).toEqual(new Set(Object.keys(TEMPLATE_REGISTRY)));
     for (const key of keys) expect(getTemplate(key), `missing renderer for ${key}`).toBeDefined();
   });
 

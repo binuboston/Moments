@@ -23,3 +23,25 @@ The bundled files are edited copies: leading silence removed, trimmed to about 2
 1. Check both the **composition** and the **recording** are free. Public domain or CC0 only: CC BY needs on-screen attribution, and CC BY-SA, NC or "royalty-free" licences add conditions guests' shares could break. Avoid uploads re-hosted from YouTube or commercial albums, even when labelled public domain.
 2. Process it the same way (`ffmpeg … -af "silenceremove=…,loudnorm=I=-19:TP=-2:LRA=11,afade…" -b:a 96k`), and save it as `public/music/<id>.mp3`.
 3. Add an entry to `MUSIC_LIBRARY` and a row here. Never rename or remove an id: published invitations store it (an unknown id just plays nothing).
+
+## Sample photography (`public/samples`)
+
+Shown only in live demos (`features/templates/sample-media.ts`), with "Sample photo" in the alt text. Real invitations show only the owner's uploads. Every photo is CC0 (free to use, no attribution needed), downloaded from Wikimedia Commons at 1200px wide. Most were published on Unsplash under its former CC0 licence.
+
+| File | Photographer | Source |
+| --- | --- | --- |
+| `love-couple.jpg` | Pablo Heimplatz | [Commons](https://commons.wikimedia.org/wiki/File:Indian_Wedding_Couple_(Unsplash).jpg) |
+| `love-mehndi.jpg` | DADEVAL | [Commons](https://commons.wikimedia.org/wiki/File:Mehndi_tatoo_for_wedding_in_India.jpg) |
+| `love-bouquet.jpg` | Sweet Ice Cream Photography | [Commons](https://commons.wikimedia.org/wiki/File:Bride_holding_a_large_bouquet_(Unsplash).jpg) |
+| `love-sunset.jpg` | Callie Morgan | [Commons](https://commons.wikimedia.org/wiki/File:Wedding_smile_at_sunset_(Unsplash).jpg) |
+| `love-guests.jpg` | Tamara Menzi | [Commons](https://commons.wikimedia.org/wiki/File:Wedding_guests_with_flowers_(Unsplash).jpg) |
+| `love-embrace.jpg` | Brooke Cagle | [Commons](https://commons.wikimedia.org/wiki/File:Bride_leans_into_husband_(Unsplash).jpg) |
+| `party-balloons.jpg` | Sofiya Levchenko | [Commons](https://commons.wikimedia.org/wiki/File:Party_balloons_(Unsplash).jpg) |
+| `party-candles.jpg` | Annie Spratt | [Commons](https://commons.wikimedia.org/wiki/File:Birthday_Cake_with_Candles_(Unsplash_M20ylqCzSZw).jpg) |
+| `party-balloon-walk.jpg` | Tatiana Niño | [Commons](https://commons.wikimedia.org/wiki/File:Woman_With_Balloons_(Unsplash).jpg) |
+| `party-cake.jpg` | Annie Spratt | [Commons](https://commons.wikimedia.org/wiki/File:Colorful_Cake_(Unsplash).jpg) |
+| `party-first-cake.jpg` | Annie Spratt | [Commons](https://commons.wikimedia.org/wiki/File:3rd_birthday_cake_(Unsplash_10b8Lvvc-4g).jpg) |
+
+## Colour palettes
+
+Palettes whose ids start with `daisy-` are converted from [daisyUI](https://daisyui.com) themes (MIT License, Copyright (c) 2020 Pouya Saadeghi) by `scripts/generate-daisy-palettes.mjs`, and adjusted for WCAG AA contrast. daisyUI is not a dependency.

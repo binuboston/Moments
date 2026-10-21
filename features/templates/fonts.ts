@@ -1,9 +1,12 @@
 import {
+  Archivo,
   Cormorant_Garamond,
+  Fredoka,
   Great_Vibes,
   Josefin_Sans,
   Lora,
   Manrope,
+  Marcellus,
   Montserrat,
   Playfair_Display,
   Poppins,
@@ -21,6 +24,9 @@ const manrope = Manrope({ subsets: ["latin"], weight: ["400", "500", "600", "700
 const montserrat = Montserrat({ subsets: ["latin"], weight: ["300", "400", "500", "600"], display: "swap", preload: false });
 const lora = Lora({ subsets: ["latin"], weight: ["400", "500", "600"], style: ["normal", "italic"], display: "swap", preload: false });
 const josefin = Josefin_Sans({ subsets: ["latin"], weight: ["300", "400", "600"], display: "swap", preload: false });
+const marcellus = Marcellus({ subsets: ["latin"], weight: "400", display: "swap", preload: false });
+const fredoka = Fredoka({ subsets: ["latin"], weight: ["400", "500", "600", "700"], display: "swap", preload: false });
+const archivo = Archivo({ subsets: ["latin"], weight: ["400", "500", "700", "900"], display: "swap", preload: false });
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700"], display: "swap", preload: false });
 
 export const FONT_FAMILIES = {
@@ -32,6 +38,9 @@ export const FONT_FAMILIES = {
   lora: { label: "Lora", family: lora.style.fontFamily },
   josefin: { label: "Josefin Sans", family: josefin.style.fontFamily },
   poppins: { label: "Poppins", family: poppins.style.fontFamily },
+  marcellus: { label: "Marcellus", family: marcellus.style.fontFamily },
+  fredoka: { label: "Fredoka", family: fredoka.style.fontFamily },
+  archivo: { label: "Archivo", family: archivo.style.fontFamily },
   fraunces: { label: "Fraunces", family: "var(--font-fraunces)" },
   "dm-sans": { label: "DM Sans", family: "var(--font-dm-sans)" },
 } as const;

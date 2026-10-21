@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublishedTemplateBySlug } from "@/features/templates/queries";
 import { InvitationRenderer } from "@/features/templates/renderer";
+import { sampleMedia } from "@/features/templates/sample-media";
 import { sampleView } from "@/features/templates/sample-data";
 import { CATEGORY_SLUGS, type CategorySlug } from "@/types/domain";
 import { routes } from "@/lib/routes";
@@ -30,7 +31,8 @@ export default async function TemplateDemoPage({ params, searchParams }: PagePro
   const category: CategorySlug = (CATEGORY_SLUGS as readonly string[]).includes(requested) && def.categories.includes(requested as CategorySlug) ? (requested as CategorySlug) : def.categories[0];
   const palette = typeof sp.palette === "string" && def.palettes.some((p) => p.id === sp.palette) ? sp.palette : "";
   const base = sampleView(category, { key: def.key, name: def.name, tier: row.tier });
-  const view = { ...base, theme: { ...base.theme, paletteId: palette } };
+  // Demos show sample photography so the gallery can be tried; real invitations use the owner's photos.
+  const view = { ...base, media: sampleMedia(category), theme: { ...base.theme, paletteId: palette } };
 
   return (
     <main className="min-h-screen">
