@@ -33,6 +33,10 @@
   --destructive: #b42318;
   --destructive-foreground: #ffffff;
   --success: #0f7a3f;
+  /* Status dots (shape-only signals, never text): bright enough to read at 10px. */
+  --status-draft: #f2a516;
+  --status-live: #19a35b;
+  --status-off: #a3a3a3;
   --success-foreground: #effbf3;
   --warning: #9a6512;
   --warning-foreground: #fff8e6;
@@ -88,6 +92,9 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
+  --color-status-draft: var(--status-draft);
+  --color-status-live: var(--status-live);
+  --color-status-off: var(--status-off);
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);

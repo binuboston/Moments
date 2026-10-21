@@ -8,9 +8,10 @@ import { createAnonClient } from "@/lib/supabase/server";
 import { showsBranding } from "@/lib/entitlements";
 import { getTemplate } from "@/features/templates/registry";
 import type { InvitationView } from "@/features/templates/types";
-import { draftToView, functionRowToInput, isCategorySlug, looseContent, parseSettings, parseTheme, rowStartsAt, rowTimezone } from "@/features/invitations/mappers";
+import { displayTitle, draftToView, functionRowToInput, isCategorySlug, looseContent, parseSettings, parseTheme, rowStartsAt, rowTimezone } from "@/features/invitations/mappers";
 import type { InvitationDraft, InvitationListItem, InvitationListResponse, MediaRecord } from "@/features/invitations/types";
 import { routes } from "@/lib/routes";
+import type { ContentKind } from "@/lib/validation/content";
 
 export const MEDIA_BUCKET = "invitation-media";
 /** Signed URLs outlive the page cache (5 min) by a wide margin. */
@@ -120,7 +121,7 @@ export async function listOwnedInvitations(client: Client, ownerId: string, para
     return {
       id: row.id,
       slug: row.slug,
-      title: row.title,
+      title: displayTitle(row, (isCategorySlug(categorySlug) ? categorySlug : "party") as ContentKind),
       status: row.status,
       categorySlug: (isCategorySlug(categorySlug) ? categorySlug : "party") as CategorySlug,
       categoryName: row.event_categories.name,
@@ -208,7 +209,7 @@ export async function getOverviewSummary(client: Client, ownerId: string, now = 
   return {
     upcoming: upcoming.length,
     next: first
-      ? { id: first.row.id, title: first.row.title || "Untitled invitation", status: first.row.status, startsAt: first.startsAt, timezone: rowTimezone(first.row), publicUrl: siteUrl(routes.invitation(first.row.slug)) }
+      ? { id: first.row.id, title: displayTitle(first.row, ((first.row.content as { kind?: ContentKind } | null)?.kind ?? "party")) || "Untitled invitation", status: first.row.status, startsAt: first.startsAt, timezone: rowTimezone(first.row), publicUrl: siteUrl(routes.invitation(first.row.slug)) }
       : null,
   };
 }

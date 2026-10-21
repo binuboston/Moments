@@ -20,6 +20,7 @@ They meet in the brand motifs (`components/brand/`): the six-petal blossom, corn
 | Token | Utility | Use |
 | --- | --- | --- |
 | `--canvas`, `--canvas-edge` | `app-canvas` | Page background (white) |
+| `--status-draft`, `--status-live`, `--status-off` | `bg-status-*` | Status dots in lists (`StatusDot`): a coloured dot instead of a text badge. Shape-only signals; the filter chips act as the legend, and the dot carries the label for screen readers and as a tooltip. Use `StatusBadge` (with text) where there is room. |
 | `--surface` + `--elevation-card` + `--card-radius` | `surface-card` | Every card or panel on the canvas; `Card` uses it |
 | `--elevation-card-hover` | `surface-hover` | Lift and deeper shadow for interactive cards |
 | `--elevation-float` | `surface-float` | Sticky or floating chrome: top bar, tab bar, admin header (translucent and blurred) |

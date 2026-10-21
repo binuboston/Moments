@@ -29,6 +29,17 @@ export function looseContent(kind: ContentKind, raw: unknown, timezone = "UTC"):
   return { ...base, ...obj, kind } as InvitationContentInput;
 }
 
+/**
+ * The name people see for an invitation in lists: its title, else the
+ * headline, else one built from the names typed in (drafts rarely have a
+ * title yet). "" when there is nothing to show.
+ */
+export function displayTitle(row: { title: string; content: unknown }, kind: ContentKind): string {
+  if (row.title.trim()) return row.title;
+  const content = row.content && typeof row.content === "object" ? (row.content as Record<string, unknown>) : {};
+  return withDerivedHeadline({ ...content, kind } as { kind: ContentKind; headline?: string }).headline?.trim() ?? "";
+}
+
 const REQUIRED_BY_KIND: Record<ContentKind, string[]> = {
   wedding: ["partnerOne", "partnerTwo"],
   engagement: ["partnerOne", "partnerTwo"],

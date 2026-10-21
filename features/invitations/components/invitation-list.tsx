@@ -7,6 +7,7 @@ import { EmptyInvitations } from "@/features/dashboard/empty-invitations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InvitationGrid } from "@/features/invitations/components/invitation-grid";
 import { useInvitationList } from "@/features/invitations/hooks";
+import { StatusDot } from "@/features/invitations/components/status-badge";
 import type { InvitationListResponse } from "@/features/invitations/types";
 import { cn } from "@/lib/utils/cn";
 
@@ -55,34 +56,40 @@ export function InvitationList({ initialParams, initialData }: Props) {
 
   return (
     <div className="grid min-w-0 grid-cols-1 gap-5 sm:gap-6">
-      <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div role="tablist" aria-label="Filter by status" className="surface-card flex min-w-0 gap-1 overflow-x-auto rounded-full p-1 no-scrollbar sm:w-fit">
-          {tabs.map((t) => (
+      {/* Filters as chips; the status dots double as the legend for the dots on each pin. */}
+      <div role="tablist" aria-label="Filter by status" className="-mx-4 flex min-w-0 gap-2 overflow-x-auto px-4 no-scrollbar sm:mx-0 sm:px-0">
+        {tabs.map((t) => {
+          const active = status === t.value;
+          return (
             <button
               key={t.value}
               role="tab"
               type="button"
-              aria-selected={status === t.value}
+              aria-selected={active}
               onClick={() => setStatus(t.value)}
+              data-testid={`filter-${t.value}`}
               className={cn(
-                "inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-medium whitespace-nowrap transition-colors duration-(--duration-base) sm:h-9",
-                status === t.value ? "bg-foreground text-background" : "text-muted-foreground hover:bg-fill hover:text-foreground",
+                "inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold whitespace-nowrap transition-[background-color,color,transform] duration-(--duration-base) active:scale-95 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+                active ? "bg-foreground text-background" : "bg-fill text-foreground hover:bg-fill-hover",
               )}
             >
+              {t.value !== "all" ? <StatusDot status={t.value} className={cn(active && "ring-2 ring-background/30")} /> : null}
               {t.label}
-              <span className={cn("rounded-full px-1.5 text-xs tabular-nums", status === t.value ? "bg-background/20" : "bg-fill")}>{t.count}</span>
+              <span className={cn("text-xs font-medium tabular-nums", active ? "text-background/70" : "text-muted-foreground")}>{t.count}</span>
             </button>
-          ))}
-        </div>
+          );
+        })}
       </div>
 
       {isError ? (
         <EmptyState title="Couldn't load your invitations" description="Please check your connection and try again." action={<Button onClick={() => refetch()}>Retry</Button>} />
       ) : !data ? (
-        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3" aria-busy>
-          {Array.from({ length: 6 }).map((_, i) => (
+        <ul className="grid grid-cols-2 gap-x-3 gap-y-6 sm:gap-x-5 sm:gap-y-8 lg:grid-cols-3 xl:grid-cols-4" aria-busy>
+          {Array.from({ length: 8 }).map((_, i) => (
             <li key={i}>
-              <Skeleton className="h-96 w-full rounded-card" />
+              <Skeleton className="aspect-[1200/630] w-full rounded-2xl" />
+              <Skeleton className="mt-3 h-3.5 w-3/4 rounded-full" />
+              <Skeleton className="mt-2 h-3 w-1/2 rounded-full" />
             </li>
           ))}
         </ul>
@@ -94,16 +101,16 @@ export function InvitationList({ initialParams, initialData }: Props) {
         )
       ) : (
         <>
-          <InvitationGrid items={data.items} busy={isFetching} />
+          <InvitationGrid items={data.items} busy={isFetching} createTile={page === 1 && status !== "published" && status !== "unpublished"} />
           {totalPages > 1 ? (
             <nav aria-label="Pagination" className="flex items-center justify-center gap-2">
-              <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
+              <Button variant="soft" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
                 Previous
               </Button>
               <span className="text-sm text-muted-foreground">
                 Page {page} of {totalPages}
               </span>
-              <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
+              <Button variant="soft" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
                 Next
               </Button>
             </nav>
