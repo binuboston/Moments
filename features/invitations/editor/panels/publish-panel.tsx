@@ -19,23 +19,24 @@ import { canUseTemplate } from "@/lib/entitlements";
 import { formatEventDate } from "@/lib/utils/dates";
 import { publishableSchema } from "@/lib/validation/invitation";
 import { withDerivedHeadline } from "@/lib/validation/content";
+import { stepForPath } from "@/features/invitations/editor/steps";
 import { useEditorStore, type EditorTarget } from "@/stores/editor-store";
 import { routes } from "@/lib/routes";
 
-const FIELD_LABELS: Record<string, { label: string; step: EditorTarget }> = {
-  "content.headline": { label: "Headline", step: "details" },
-  "content.partnerOne": { label: "Partner one", step: "details" },
-  "content.partnerTwo": { label: "Partner two", step: "details" },
-  "content.celebrantName": { label: "Who's celebrating", step: "details" },
-  "content.parentNames": { label: "Parents-to-be", step: "details" },
-  "content.hostNames": { label: "Hosts", step: "details" },
-  "content.organisation": { label: "Organisation", step: "details" },
-  "content.startsAt": { label: "Start date and time", step: "details" },
-  "content.endsAt": { label: "End time", step: "details" },
-  "content.timezone": { label: "Time zone", step: "details" },
-  "content.venue.mapsUrl": { label: "Directions link", step: "details" },
-  "content.gifts.url": { label: "Registry link", step: "details" },
-  "settings.rsvp.deadline": { label: "RSVP deadline", step: "settings" },
+const FIELD_LABELS: Record<string, string> = {
+  "content.headline": "Headline",
+  "content.partnerOne": "Partner one",
+  "content.partnerTwo": "Partner two",
+  "content.celebrantName": "Who's celebrating",
+  "content.parentNames": "Parents-to-be",
+  "content.hostNames": "Hosts",
+  "content.organisation": "Organisation",
+  "content.startsAt": "Start date and time",
+  "content.endsAt": "End time",
+  "content.timezone": "Time zone",
+  "content.venue.mapsUrl": "Directions link",
+  "content.gifts.url": "Registry link",
+  "settings.rsvp.deadline": "RSVP deadline",
 };
 
 /** Plain-language reason for a validation issue (Zod's defaults are written for developers). */
@@ -49,11 +50,11 @@ function friendlyMessage(issue: { code?: string; message: string; minimum?: unkn
 }
 
 function labelFor(path: string): { label: string; step: EditorTarget } {
-  if (FIELD_LABELS[path]) return FIELD_LABELS[path];
-  if (path.startsWith("content.contacts")) return { label: "Contacts", step: "details" };
-  if (path.startsWith("functions")) return { label: "Schedule", step: "schedule" };
-  if (path.startsWith("content.")) return { label: path.replace("content.", ""), step: "details" };
-  return { label: path, step: "settings" };
+  const step = stepForPath(path) ?? "settings";
+  if (FIELD_LABELS[path]) return { label: FIELD_LABELS[path], step };
+  if (path.startsWith("content.contacts")) return { label: "Contacts", step };
+  if (path.startsWith("functions")) return { label: "Schedule", step };
+  return { label: path.replace("content.", ""), step };
 }
 
 export function PublishPanel({ isGuest = false }: { isGuest?: boolean }) {

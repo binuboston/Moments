@@ -421,6 +421,15 @@
   0%, 100% { transform: rotate(0deg); }
   50% { transform: rotate(0.6deg); }
 }
+/* Invitation editor: steps slide in from the direction of travel. */
+@keyframes step-in-next {
+  from { opacity: 0; transform: translateX(18px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes step-in-prev {
+  from { opacity: 0; transform: translateX(-18px); }
+  to { opacity: 1; transform: none; }
+}
 /* Background music button: equaliser bars. */
 @keyframes music-bar {
   0%, 100% { transform: scaleY(0.35); }

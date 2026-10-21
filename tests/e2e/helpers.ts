@@ -57,3 +57,9 @@ export async function waitForDraft<T>(page: Page, id: string, pick: (draft: Reco
     )
     .toEqual(expected);
 }
+
+/** Shows a step of the invitation editor (names, when, where, words, schedule, photos, design, music, extras). */
+export async function openStep(page: Page, step: string) {
+  await page.getByTestId(`step-${step}`).click();
+  await expect(page.getByTestId(`editor-step-${step}`)).toBeVisible();
+}

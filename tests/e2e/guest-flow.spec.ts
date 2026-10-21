@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { PASSWORD, uniqueEmail, waitForDraft } from "./helpers";
+import { openStep, PASSWORD, uniqueEmail, waitForDraft } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -31,6 +31,7 @@ test("a visitor designs without an account and signs up only to publish", async 
   const id = page.url().match(/invitations\/([0-9a-f-]{36})\/edit/)![1];
 
   await page.getByLabel("Who's celebrating?").fill("Maya");
+  await openStep(page, "words");
   await page.getByTestId("field-headline").fill("Maya turns five");
   await waitForDraft(page, id, (d) => (d.content as { headline: string }).headline, "Maya turns five");
 

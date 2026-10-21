@@ -42,10 +42,10 @@ export function GuestStart() {
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next"), ROUTES.app);
   const started = useRef(false);
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<null | "disabled" | "busy">(null);
 
   const run = useCallback(async (force: boolean) => {
-    setFailed(false);
+    setFailed(null);
     const supabase = createClient();
     const { data } = await supabase.auth.getUser();
     // Looping back here with a "valid" session means the server rejects it: start over.
@@ -62,7 +62,8 @@ export function GuestStart() {
       }
       const { error } = await supabase.auth.signInAnonymously();
       if (error) {
-        setFailed(true);
+        // Guest mode switched off for the project (Supabase: anonymous sign-ins), or rate-limited.
+        setFailed(error.code === "anonymous_provider_disabled" ? "disabled" : "busy");
         return;
       }
       await fetch("/api/guest/session", { method: "POST" }).catch(() => undefined);
@@ -81,10 +82,12 @@ export function GuestStart() {
       <Logo />
       {failed ? (
         <div role="alert" className="surface-card grid max-w-sm gap-4 p-6">
-          <p className="text-lg font-semibold tracking-tight">We couldn&apos;t start your studio</p>
-          <p className="text-sm text-muted-foreground text-pretty">Guest sessions are busy right now. Try again, or create a free account to keep going.</p>
+          <p className="text-lg font-semibold tracking-tight">{failed === "disabled" ? "Guest mode isn't available" : "We couldn't start your studio"}</p>
+          <p className="text-sm text-muted-foreground text-pretty">
+            {failed === "disabled" ? "Create a free account or log in to start designing. It only takes a moment." : "Guest sessions are busy right now. Try again, or create a free account to keep going."}
+          </p>
           <div className="grid gap-2">
-            <Button onClick={() => void run(true)}>Try again</Button>
+            {failed === "busy" ? <Button onClick={() => void run(true)}>Try again</Button> : null}
             <div className="grid grid-cols-2 gap-2">
               <Button asChild variant="soft">
                 <Link href={routes.login(next)}>Log in</Link>

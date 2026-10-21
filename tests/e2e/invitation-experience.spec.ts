@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { createInvitation, waitForDraft } from "./helpers";
+import { createInvitation, openStep, waitForDraft } from "./helpers";
 
 const DEMO = "/demo/eternal-grace";
 const hiddenCount = (page: import("@playwright/test").Page) =>
@@ -75,7 +75,7 @@ test.describe("background music", () => {
 
   test("the owner picks a track in the editor", async ({ page }) => {
     const id = await createInvitation(page, "wedding", "eternal-grace");
-    await page.getByTestId("editor-section-music").click();
+    await openStep(page, "music");
     const preview = page.getByTestId("music-preview-clair-de-lune");
     await preview.click();
     await expect(preview).toHaveAttribute("aria-pressed", "true");
@@ -84,7 +84,7 @@ test.describe("background music", () => {
     await page.locator("label", { hasText: "Clair de Lune" }).click();
     await expect(page.getByRole("radio", { name: /Clair de Lune/ })).toBeChecked();
     await waitForDraft(page, id, (d) => (d.settings as { musicTrack?: string }).musicTrack, "clair-de-lune");
-    await expect(page.getByTestId("editor-section-music")).toContainText("Clair de Lune");
+    await expect(page.getByTestId("step-music")).toContainText("(done)");
     await page.locator("label", { hasText: "No music" }).click();
     await waitForDraft(page, id, (d) => (d.settings as { musicTrack?: string }).musicTrack, "");
   });
@@ -147,7 +147,7 @@ test.describe("gallery carousel", () => {
 
   test("the owner can switch the gallery to a grid", async ({ page }) => {
     const id = await createInvitation(page, "wedding", "eternal-grace");
-    await page.getByTestId("editor-section-design").click();
+    await openStep(page, "design");
     await page.getByTestId("gallery-grid").click();
     await expect(page.getByTestId("gallery-grid")).toHaveAttribute("aria-checked", "true");
     await waitForDraft(page, id, (d) => (d.theme as { gallery?: string }).gallery, "grid");

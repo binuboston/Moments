@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { createInvitation, logIn, signUp, waitForDraft } from "./helpers";
+import { createInvitation, logIn, openStep, signUp, waitForDraft } from "./helpers";
 
 /**
  * Full product journey. Tests run serially in one worker and share module
@@ -18,15 +18,22 @@ test("owner creates a draft through the wizard and edits it", async ({ page }) =
   ownerEmail = (await signUp(page, "owner")).email;
   invitationId = await createInvitation(page, "birthday", "confetti-pop");
 
+  // A new invitation opens on its first step; Next walks through the rest.
+  await expect(page.getByTestId("editor-step-names")).toBeVisible();
   await page.getByLabel("Who's celebrating?").fill("Maya");
-  await page.getByTestId("field-headline").fill(headline);
+  await page.getByTestId("step-next").click();
+  await expect(page.getByTestId("editor-step-when")).toBeVisible();
+  await page.getByTestId("step-next").click();
   await page.getByTestId("field-venue-name").fill("The Orangery");
+  await openStep(page, "words");
+  await page.getByTestId("field-headline").fill(headline);
   await waitForDraft(page, invitationId, (d) => (d.content as { headline: string }).headline, headline);
 
   // Draft persistence: a hard reload shows the saved values.
   await page.reload();
-  await expect(page.getByTestId("field-headline")).toHaveValue(headline);
   await expect(page.getByLabel("Who's celebrating?")).toHaveValue("Maya");
+  await openStep(page, "words");
+  await expect(page.getByTestId("field-headline")).toHaveValue(headline);
   await expect(page.getByTestId("save-indicator")).toContainText(/saved/i);
 
   // The editor must never overflow horizontally (this broke mobile clicks once).
@@ -38,8 +45,8 @@ test("owner personalises the design and enables RSVP", async ({ page }) => {
   await logIn(page, ownerEmail);
   await page.goto(`/invitations/${invitationId}/edit`);
 
-  // Sections are collapsible cards; open "Look & feel".
-  await page.getByTestId("editor-section-design").click();
+  // One step at a time; jump straight to "Look & feel" from the step bar.
+  await openStep(page, "design");
   await page.getByTestId("palette-ocean").click();
   await waitForDraft(page, invitationId, (d) => (d.theme as { paletteId: string }).paletteId, "ocean");
 
@@ -47,7 +54,7 @@ test("owner personalises the design and enables RSVP", async ({ page }) => {
   await page.getByTestId("view-preview").click();
   await expect(page.getByTestId("preview")).toBeVisible();
   await page.getByTestId("view-edit").click();
-  await expect(page.getByTestId("editor-section-details")).toBeVisible();
+  await expect(page.getByTestId("editor-step-design")).toBeVisible();
 
   // The design switcher lists the designs for this occasion.
   await page.getByTestId("template-switcher").click();

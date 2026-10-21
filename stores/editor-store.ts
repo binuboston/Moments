@@ -6,11 +6,11 @@ import type { InvitationFunctionInput } from "@/lib/validation/functions";
 import type { InvitationSettings } from "@/lib/validation/settings";
 import type { ThemeInput } from "@/lib/validation/theme";
 import type { InvitationDraft, MediaRecord } from "@/features/invitations/types";
+import { firstIncompleteStep, type EditorStep } from "@/features/invitations/editor/steps";
 
-/** Collapsible sections of the Edit view. */
-export type EditorSection = "details" | "schedule" | "photos" | "design" | "music";
-/** Anything the editor can navigate to: a section, or the settings sheet. */
-export type EditorTarget = EditorSection | "settings";
+export type { EditorStep };
+/** Anything the editor can navigate to: a step, or the settings sheet. */
+export type EditorTarget = EditorStep | "settings";
 export type EditorView = "edit" | "preview";
 export type SaveState = "idle" | "saving" | "saved" | "error";
 
@@ -21,21 +21,19 @@ interface EditorState {
   saveState: SaveState;
   lastSavedAt: number | null;
   view: EditorView;
-  openSections: EditorSection[];
+  /** The step shown in the Edit view. */
+  step: EditorStep;
   settingsOpen: boolean;
   publishOpen: boolean;
-  /** Set by goTo(); the editor scrolls the section into view, then clears it. */
-  focusTarget: EditorSection | null;
 
   load: (draft: InvitationDraft) => void;
   reset: () => void;
   setView: (view: EditorView) => void;
-  toggleSection: (section: EditorSection, open?: boolean) => void;
+  setStep: (step: EditorStep) => void;
   setSettingsOpen: (open: boolean) => void;
   setPublishOpen: (open: boolean) => void;
-  /** Jump to where something is edited (e.g. from a publish check): opens it and closes the publish sheet. */
+  /** Jump to where something is edited (e.g. from a publish check): shows that step and closes the publish sheet. */
   goTo: (target: EditorTarget) => void;
-  clearFocusTarget: () => void;
 
   setContent: (content: InvitationContentInput) => void;
   setTitle: (title: string) => void;
@@ -57,10 +55,9 @@ interface EditorState {
 
 const UI_DEFAULTS = {
   view: "edit" as EditorView,
-  openSections: ["details"] as EditorSection[],
+  step: "names" as EditorStep,
   settingsOpen: false,
   publishOpen: false,
-  focusTarget: null as EditorSection | null,
 };
 
 const patchDraft = (set: (fn: (s: EditorState) => Partial<EditorState>) => void, patch: (d: InvitationDraft) => Partial<InvitationDraft>) =>
@@ -74,25 +71,14 @@ export const useEditorStore = create<EditorState>()((set) => ({
   ...UI_DEFAULTS,
 
   // Reloading the same invitation (router.refresh after sign-in or a URL change) keeps the UI as it is.
-  load: (draft) => set((s) => ({ draft, serverDraft: draft, saveState: "idle", ...(s.draft?.id === draft.id ? {} : UI_DEFAULTS) })),
+  // A newly opened invitation starts at its first unfinished required step.
+  load: (draft) => set((s) => ({ draft, serverDraft: draft, saveState: "idle", ...(s.draft?.id === draft.id ? {} : { ...UI_DEFAULTS, step: firstIncompleteStep(draft) }) })),
   reset: () => set({ draft: null, serverDraft: null, saveState: "idle", lastSavedAt: null, ...UI_DEFAULTS }),
   setView: (view) => set({ view }),
-  toggleSection: (section, open) =>
-    set((s) => {
-      const isOpen = s.openSections.includes(section);
-      const next = open ?? !isOpen;
-      if (next === isOpen) return {};
-      return { openSections: next ? [...s.openSections, section] : s.openSections.filter((k) => k !== section) };
-    }),
+  setStep: (step) => set({ step, view: "edit" }),
   setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
   setPublishOpen: (publishOpen) => set({ publishOpen }),
-  goTo: (target) =>
-    set((s) =>
-      target === "settings"
-        ? { publishOpen: false, settingsOpen: true }
-        : { publishOpen: false, view: "edit", openSections: s.openSections.includes(target) ? s.openSections : [...s.openSections, target], focusTarget: target },
-    ),
-  clearFocusTarget: () => set({ focusTarget: null }),
+  goTo: (target) => set(target === "settings" ? { publishOpen: false, settingsOpen: true } : { publishOpen: false, view: "edit", step: target }),
 
   setContent: (content) => patchDraft(set, () => ({ content })),
   setTitle: (title) => patchDraft(set, () => ({ title })),
