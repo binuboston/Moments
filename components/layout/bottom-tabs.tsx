@@ -6,16 +6,16 @@ import { AppLink } from "@/components/layout/app-link";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { NAV_ITEMS } from "@/components/layout/nav-items";
 import { useAccount } from "@/features/auth/account-context";
-import { isActivePath, isFocusedFlow } from "@/lib/routes";
+import { hidesTabBar, isActivePath } from "@/lib/routes";
 import { cn } from "@/lib/utils/cn";
 
 const tab = "flex flex-col items-center justify-center gap-1 text-[0.7rem] font-semibold outline-none focus-visible:bg-fill";
 
-/** Phone navigation: Home, Templates, Create, Invitations and a Menu sheet. Steps aside in the wizard and editor. */
+/** Phone navigation: Home, Templates, Create, Invitations and a Menu sheet. Steps aside only in the editor, which has its own bar. */
 export function BottomTabs({ className }: { className?: string }) {
   const pathname = usePathname();
   const account = useAccount();
-  if (isFocusedFlow(pathname)) return null;
+  if (hidesTabBar(pathname)) return null;
   const create = NAV_ITEMS.find((i) => i.key === "create")!;
 
   return (
@@ -51,6 +51,6 @@ export function BottomTabs({ className }: { className?: string }) {
 /** Space so page content never hides behind the tab bar. */
 export function BottomTabsSpacer() {
   const pathname = usePathname();
-  if (isFocusedFlow(pathname)) return null;
+  if (hidesTabBar(pathname)) return null;
   return <div aria-hidden className="h-[calc(5rem+env(safe-area-inset-bottom))] md:hidden" />;
 }

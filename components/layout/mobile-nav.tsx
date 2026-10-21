@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/layout/logo";
 import { AccountAvatar } from "@/components/layout/account-avatar";
 import { AppLink } from "@/components/layout/app-link";
+import { ThemeSwitcher } from "@/components/layout/theme-switcher";
 import { useSignOut } from "@/features/auth/use-sign-out";
 import { accountView, type AccountAction } from "@/lib/auth/account-actions";
 import type { Account } from "@/lib/auth/account";
 import { SUPPORT_NAV } from "@/lib/routes";
 
-/** Phone "Menu" tab: the account section plus Settings & support pages, in a sheet. */
+/** Phone "Menu" tab: the account (the top bar has no account menu on phones), appearance, and Settings & support pages, in a sheet. */
 export function MobileNav({ account, trigger }: { account: Account | null | undefined; trigger: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
@@ -33,6 +34,12 @@ export function MobileNav({ account, trigger }: { account: Account | null | unde
             </DialogPrimitive.Close>
           </div>
           <AccountSection account={account} onNavigate={close} />
+          <section aria-labelledby="menu-appearance" className="mt-4 grid gap-2 border-t border-border pt-4">
+            <h2 id="menu-appearance" className="px-1 text-xs font-medium text-muted-foreground">
+              Appearance
+            </h2>
+            <ThemeSwitcher />
+          </section>
           <nav aria-label="Settings and support" className="mt-4 grid gap-1 border-t border-border pt-3">
             {SUPPORT_NAV.map((item) => (
               <AppLink key={item.href} href={item.href} onClick={close} className="rounded-2xl px-4 py-3 text-base font-semibold hover:bg-fill">

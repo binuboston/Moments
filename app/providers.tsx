@@ -1,6 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeSync } from "@/components/layout/theme-switcher";
 import { Tooltip } from "radix-ui";
 import { useState } from "react";
 import { Toaster } from "sonner";
@@ -27,6 +28,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <NavigationProgress />
+      <ThemeSync />
       {/* Resolves the signed-in account lazily, only on pages that show account UI. */}
       <AccountProvider>
         <Tooltip.Provider delayDuration={200}>{children}</Tooltip.Provider>

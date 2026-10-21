@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { openStep, PASSWORD, uniqueEmail, waitForDraft } from "./helpers";
+import { openAccount, openStep, PASSWORD, uniqueEmail, waitForDraft } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -13,9 +13,8 @@ test("starting from the site navigation (client-side) lands in the wizard as a g
   }
   await expect(page).toHaveURL(/\/invitations\/new$/, { timeout: 30_000 });
   await expect(page.getByRole("heading", { name: /create an invitation/i })).toBeVisible();
-  // In the wizard the phone tab bar steps aside; the account is in the top bar on every size.
-  await page.getByRole("button", { name: "Account menu" }).click();
-  await expect(page.getByRole("menu").getByText("Guest", { exact: true })).toBeVisible();
+  // Signed in as a guest: the account area (top bar menu, or the Menu tab on phones) says so.
+  await expect((await openAccount(page, isMobile)).getByText("Guest", { exact: true })).toBeVisible();
 });
 
 test("a visitor designs without an account and signs up only to publish", async ({ page }) => {

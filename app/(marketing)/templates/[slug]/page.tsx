@@ -35,7 +35,7 @@ export default async function TemplateDetailPage({ params }: PageProps<"/templat
 
   return (
     <Container className="py-12 sm:py-16">
-      <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
+      <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground max-sm:hidden">
         <ol className="flex items-center gap-2">
           <li>
             <Link href={ROUTES.templates} className="hover:text-foreground">

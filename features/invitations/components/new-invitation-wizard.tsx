@@ -102,7 +102,7 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
       <SwapTransition swapKey={step}>
       {step === 1 ? (
         <section aria-labelledby="step-category">
-          <h2 id="step-category" className="text-lg font-semibold">
+          <h2 id="step-category" className="text-base font-semibold sm:text-lg">
             What are you celebrating?
           </h2>
           <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
@@ -123,18 +123,19 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
                     }}
                     aria-pressed={active}
                     className={cn(
-                      "group surface-card surface-hover flex h-full w-full flex-col gap-2 p-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-5",
+                      // Phones: a compact tile (icon and name); the description and arrow join on wider screens.
+                      "group surface-card surface-hover flex h-full w-full items-center gap-3 p-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-col sm:items-stretch sm:gap-2 sm:p-5",
                       active && "ring-2 ring-primary",
                     )}
                   >
-                    <span className="mb-2 flex items-start justify-between">
-                      <IconTile icon={style.icon} tone={style.tone} className="transition-[rotate,scale] duration-(--duration-slow) ease-(--ease-out-quart) group-hover:-rotate-6 group-hover:scale-110" />
-                      <span aria-hidden className="flex size-8 items-center justify-center rounded-full bg-fill transition-[background-color,rotate] duration-(--duration-slow) ease-(--ease-out-quart) group-hover:rotate-45 group-hover:bg-fill-hover">
+                    <span className="flex shrink-0 items-start justify-between sm:mb-2">
+                      <IconTile icon={style.icon} tone={style.tone} className="transition-[rotate,scale] duration-(--duration-slow) ease-(--ease-out-quart) group-hover:-rotate-6 group-hover:scale-110 max-sm:size-9 max-sm:[&>svg]:size-4" />
+                      <span aria-hidden className="flex size-8 items-center justify-center rounded-full bg-fill max-sm:hidden transition-[background-color,rotate] duration-(--duration-slow) ease-(--ease-out-quart) group-hover:rotate-45 group-hover:bg-fill-hover">
                         <ArrowUpRightIcon className="size-4" />
                       </span>
                     </span>
-                    <span className="text-lg leading-snug font-semibold tracking-tight">{c.name}</span>
-                    {c.description ? <span className="line-clamp-2 text-xs text-muted-foreground">{c.description}</span> : null}
+                    <span className="min-w-0 truncate text-sm leading-snug font-semibold tracking-tight sm:text-lg">{c.name}</span>
+                    {c.description ? <span className="line-clamp-2 text-xs text-muted-foreground max-sm:hidden">{c.description}</span> : null}
                   </button>
                 </li>
               );
@@ -145,15 +146,17 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
         <section aria-labelledby="step-template" className="grid min-w-0 grid-cols-1 gap-5 sm:gap-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 id="step-template" className="text-lg font-semibold">
+              <h2 id="step-template" className="text-base font-semibold sm:text-lg">
                 Choose a template
               </h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground max-sm:hidden">
                 Showing designs for <span className="font-medium text-foreground">{categories.find((c) => c.slug === category)?.name}</span>. You can switch later.
               </p>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => setStep(1)}>
-              <ArrowLeftIcon aria-hidden /> Change event type
+            <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="max-sm:bg-fill">
+              <ArrowLeftIcon aria-hidden />
+              <span className="sm:hidden">{categories.find((c) => c.slug === category)?.name} · Change</span>
+              <span className="max-sm:hidden">Change event type</span>
             </Button>
           </div>
 
@@ -214,7 +217,8 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
 
       {/* Outside the animated region: a transformed ancestor would break position: fixed mid-transition. */}
       {step === 2 ? (
-          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:sticky sm:bottom-4 sm:flex sm:justify-end sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none [&>button]:w-full sm:[&>button]:w-auto">
+          // Phones: docked just above the tab bar (4rem + safe area); it stays visible here because this is the Create tab.
+          <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur-md sm:sticky sm:bottom-[calc(5rem+env(safe-area-inset-bottom))] sm:flex sm:justify-end sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none md:bottom-4 [&>button]:w-full sm:[&>button]:w-auto">
           <Button
             size="lg"
             disabled={!selected}

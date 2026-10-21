@@ -19,8 +19,9 @@ export default async function NewInvitationPage({ searchParams }: PageProps<"/in
 
   return (
     <div className="grid min-w-0 grid-cols-1 gap-5 sm:gap-8">
-      <div>
-        <Button asChild variant="ghost" size="sm" className="-ml-2 mb-1">
+      {/* Phones: the Create tab already says where you are; the heading stays for screen readers. */}
+      <div className="max-sm:sr-only">
+        <Button asChild variant="ghost" size="sm" className="-ml-2 mb-1 max-sm:hidden">
           <Link href={ROUTES.invitations}>
             <ArrowLeftIcon aria-hidden /> Invitations
           </Link>

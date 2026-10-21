@@ -312,10 +312,10 @@ export function GlobalSearch({ variant, className }: { variant: "inline" | "shee
       <DialogPrimitive.Root open={sheetOpen} onOpenChange={setSheetOpen}>
         <DialogPrimitive.Trigger
           ref={triggerRef}
-          className="flex h-12 w-full items-center gap-3 rounded-full bg-fill px-4 text-left text-base text-muted-foreground transition-colors hover:bg-fill-hover focus-visible:ring-4 focus-visible:ring-ring/30 focus-visible:outline-none"
+          className="flex h-10 w-full min-w-0 items-center gap-2 rounded-full bg-fill px-3.5 text-left text-sm text-muted-foreground transition-colors hover:bg-fill-hover focus-visible:ring-4 focus-visible:ring-ring/30 focus-visible:outline-none"
           data-testid="search-trigger"
         >
-          <SearchIcon className="size-5" aria-hidden />
+          <SearchIcon className="size-4 shrink-0" aria-hidden />
           Search
         </DialogPrimitive.Trigger>
         <DialogPrimitive.Portal>

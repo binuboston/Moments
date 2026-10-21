@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { accountView } from "@/lib/auth/account-actions";
-import { isAppPath, isFocusedFlow, ROUTES, routes } from "@/lib/routes";
+import { hidesTabBar, isAppPath, isFocusedFlow, ROUTES, routes } from "@/lib/routes";
 
 const keys = (v: ReturnType<typeof accountView>) => [v.primary?.key, ...v.actions.map((a) => a.key)].filter(Boolean);
 
@@ -47,5 +47,9 @@ describe("routes", () => {
     expect(isAppPath(ROUTES.templates)).toBe(false);
     expect(isFocusedFlow(routes.editInvitation("abc"))).toBe(true);
     expect(isFocusedFlow(ROUTES.invitations)).toBe(false);
+    // Only the editor replaces the phone tab bar; the wizard is the Create tab and keeps it.
+    expect(hidesTabBar(routes.editInvitation("abc"))).toBe(true);
+    expect(hidesTabBar(ROUTES.newInvitation)).toBe(false);
+    expect(hidesTabBar(ROUTES.invitations)).toBe(false);
   });
 });

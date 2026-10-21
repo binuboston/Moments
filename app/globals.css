@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Dark mode follows the `dark` class on <html> (set before paint from the saved choice or the system; see lib/theme.ts). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ------------------------------------------------------------------
    Design tokens
    Brand: "Invite". Visual language inspired by Pinterest: white canvas,
@@ -65,6 +68,53 @@
   --tone-lime: #ecf6d6;    --tone-lime-ink: #4d7c0f;
   --tone-blue: #e3edfd;    --tone-blue-ink: #2556b8;
   --tone-slate: #e9ecf1;   --tone-slate-ink: #3f4a5a;
+}
+
+/* Dark theme: the same roles, re-tuned for a near-black canvas. Invitations keep their own palettes. */
+.dark {
+  --background: #0f0f10;
+  --foreground: #f2f2f3;
+  --surface: #18181a;
+  --surface-foreground: #f2f2f3;
+  --muted: #232326;
+  --muted-foreground: #a1a1aa;
+  --subtle: #1c1c1f;
+  --border: #2b2b30;
+  --input: #3d3d43;
+  --stage: #0a0a0b;
+  --stage-foreground: #f5f5f5;
+  --stage-muted: #9a9a9a;
+  --stage-border: #2a2a2a;
+  --ring: #7c93ff;
+  --primary: #f43f5e;
+  --primary-hover: #e11d48;
+  --primary-foreground: #ffffff;
+  --accent: #d4b483;
+  --accent-foreground: #23190f;
+  --destructive: #f87171;
+  --destructive-foreground: #1f0a0a;
+  --success: #3ccf7e;
+  --success-foreground: #052e16;
+  --warning: #f2b84b;
+  --warning-foreground: #2b1d05;
+  --info: #7aa7d9;
+  --status-off: #71717a;
+  --canvas: #0f0f10;
+  --canvas-edge: #0f0f10;
+  --fill: #232326;
+  --fill-hover: #2e2e33;
+  --elevation-card: 0 0 0 1px rgb(255 255 255 / 0.08);
+  --elevation-card-hover: 0 0 0 1px rgb(255 255 255 / 0.1), 0 8px 24px rgb(0 0 0 / 0.5);
+  --elevation-float: 0 0 0 1px rgb(255 255 255 / 0.08), 0 10px 30px rgb(0 0 0 / 0.6);
+  --tone-rose: #3a1720;    --tone-rose-ink: #fda4b8;
+  --tone-violet: #251f45;  --tone-violet-ink: #c0b2ff;
+  --tone-amber: #3a2a0c;   --tone-amber-ink: #f6c86a;
+  --tone-peach: #3b2215;   --tone-peach-ink: #f8b48b;
+  --tone-teal: #0e2f2c;    --tone-teal-ink: #6fd8cb;
+  --tone-green: #13301f;   --tone-green-ink: #7fd9a3;
+  --tone-lime: #23300c;    --tone-lime-ink: #b8e06a;
+  --tone-blue: #13254a;    --tone-blue-ink: #93b6f5;
+  --tone-slate: #222833;   --tone-slate-ink: #b6c0cf;
 }
 
 @theme inline {

@@ -115,9 +115,10 @@ export function InvitationEditor({ initialDraft, templates, isGuest = false }: {
       <SwapTransition swapKey={view}>
         {view === "edit" ? (
           <div className="mx-auto grid w-full max-w-3xl grid-cols-[minmax(0,1fr)] gap-4 pb-44 sm:pb-28">
-            <header className="mb-1 px-1">
-              <h1 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">{title}</h1>
-              <div className="mt-2 flex flex-wrap items-center gap-3">
+            {/* Phones: one line (title, then status and save state); stacked from tablet size. */}
+            <header className="mb-1 flex items-center gap-3 px-1 sm:block">
+              <h1 className="min-w-0 flex-1 truncate text-lg font-semibold tracking-tight sm:text-3xl sm:text-balance sm:whitespace-normal">{title}</h1>
+              <div className="flex shrink-0 flex-wrap items-center gap-3 sm:mt-2">
                 <StatusBadge status={draft.status} />
                 <SaveIndicator />
               </div>

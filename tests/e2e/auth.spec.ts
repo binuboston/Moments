@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { logIn, logOut, signUp } from "./helpers";
+import { logIn, logOut, openAccount, signUp } from "./helpers";
 
 test.describe("authentication", () => {
   test("signed-out visitors open the app as guests; admin and the API still need a session", async ({ page, playwright, baseURL }) => {
@@ -19,13 +19,18 @@ test.describe("authentication", () => {
     await expect(page).toHaveURL(/\/login\?next=%2Fadmin/);
   });
 
-  test("sign up, log out and log back in", async ({ page }) => {
+  test("sign up, log out and log back in", async ({ page, isMobile }) => {
+    const signedIn = async () => {
+      const account = await openAccount(page, isMobile);
+      await expect(isMobile ? account.getByTestId("mobile-account") : account.getByRole("menuitem", { name: /log out/i })).toBeVisible();
+      await page.keyboard.press("Escape");
+    };
     const { email } = await signUp(page, "auth");
-    await expect(page.getByRole("button", { name: "Account menu" })).toBeVisible();
+    await signedIn();
     await logOut(page);
     await expect(page).toHaveURL(/\/$/);
     await logIn(page, email);
-    await expect(page.getByRole("button", { name: "Account menu" })).toBeVisible();
+    await signedIn();
     // Logged-in users are bounced away from auth pages.
     await page.goto("/login");
     await expect(page).toHaveURL((url) => url.pathname === "/");
@@ -41,16 +46,21 @@ test.describe("authentication", () => {
 });
 
 test.describe("account menu", () => {
-  test("logs out from the account dropdown", async ({ page }) => {
+  test("logs out from the account menu", async ({ page, isMobile }) => {
     await signUp(page, "menu-logout");
-    await page.getByRole("button", { name: "Account menu" }).click();
-    await page.getByRole("menuitem", { name: /log out/i }).click();
+    const account = await openAccount(page, isMobile);
+    if (isMobile) await account.getByTestId("mobile-account-signOut").click();
+    else await account.getByRole("menuitem", { name: /log out/i }).click();
     await page.waitForURL((url) => url.pathname === "/", { timeout: 15_000 });
-    // The account session is really gone: home shows Log in, and creating starts a fresh guest.
-    await expect(page.getByRole("link", { name: "Log in" })).toBeVisible();
+    // The account session is really gone: Log in is offered, and creating starts a fresh guest.
+    if (isMobile) {
+      await expect((await openAccount(page, true)).getByTestId("mobile-account-login")).toBeVisible();
+      await page.keyboard.press("Escape");
+    } else {
+      await expect(page.getByRole("link", { name: "Log in" })).toBeVisible();
+    }
     await page.goto("/invitations");
     await expect(page).toHaveURL(/\/invitations$/, { timeout: 30_000 });
-    await page.getByRole("button", { name: "Account menu" }).click();
-    await expect(page.getByRole("menu").getByText("Guest", { exact: true })).toBeVisible();
+    await expect((await openAccount(page, isMobile)).getByText("Guest", { exact: true })).toBeVisible();
   });
 });

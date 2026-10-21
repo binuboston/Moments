@@ -101,7 +101,17 @@ export function isAppPath(path: string): boolean {
   return SESSION_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
-/** Full-screen task flows (wizard, editor) with their own fixed action bars. */
+const isEditor = (pathname: string) => pathname.startsWith(`${ROUTES.invitations}/`) && pathname.endsWith("/edit");
+
+/** Task flows with their own fixed action bars (wizard, editor): page-entrance motion skips them. */
 export function isFocusedFlow(pathname: string): boolean {
-  return pathname.startsWith(ROUTES.newInvitation) || (pathname.startsWith(`${ROUTES.invitations}/`) && pathname.endsWith("/edit"));
+  return pathname.startsWith(ROUTES.newInvitation) || isEditor(pathname);
+}
+
+/**
+ * Screens whose own bottom bar replaces the phone tab bar: only the editor.
+ * The wizard keeps the tabs (it is the Create tab) and stacks its action bar above them.
+ */
+export function hidesTabBar(pathname: string): boolean {
+  return isEditor(pathname);
 }

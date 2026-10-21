@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { ThemeSwitcher } from "@/components/layout/theme-switcher";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,15 @@ export default async function SettingsPage() {
             </Button>
           </CardContent>
         </Card>
+        <Card className="max-w-xl">
+          <CardHeader>
+            <CardTitle>Appearance</CardTitle>
+            <CardDescription>Follow your device, or always use light or dark.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ThemeSwitcher className="max-w-sm" />
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -46,6 +56,15 @@ export default async function SettingsPage() {
       <PageHeader title="Settings" description="Your profile, plan and account security." />
       <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="grid gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Appearance</CardTitle>
+              <CardDescription>Follow your device, or always use light or dark.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ThemeSwitcher className="max-w-sm" />
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader>
               <CardTitle>Profile</CardTitle>

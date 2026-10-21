@@ -48,12 +48,13 @@ export default async function TemplatesPage({ searchParams }: PageProps<"/templa
 
   return (
     <div className="px-4 pt-2 pb-10 sm:px-6">
-      <header className="max-w-2xl">
+      {/* Phones: the filters come first (the heading stays for screen readers). */}
+      <header className="max-w-2xl max-sm:sr-only">
         <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">Find the design for your occasion</h1>
         <p className="mt-2 text-muted-foreground">Live previews with sample content. Every design adapts to your names, dates, photos and colours.</p>
       </header>
 
-      <nav aria-label="Filter templates" className="mt-6 flex flex-col gap-3">
+      <nav aria-label="Filter templates" className="flex flex-col gap-3 sm:mt-6">
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 no-scrollbar sm:-mx-6 sm:px-6">
           <Link href={buildHref({ category: "" })} className={chip(!category)} aria-current={!category ? "page" : undefined}>
             All occasions

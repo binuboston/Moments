@@ -9,17 +9,23 @@ import { useAccount } from "@/features/auth/account-context";
 import { GlobalSearch } from "@/features/search/components/global-search";
 import { ROUTES } from "@/lib/routes";
 
-/** Top of every page: the global search and the account (or Log in / Sign up). */
+/**
+ * Top of every page: the global search and the account (or Log in / Sign up).
+ * Phones: one compact row (wordmark and a search pill that opens
+ * full-screen search); the account lives in the tab bar's Menu there.
+ */
 export function TopBar() {
   const account = useAccount();
   return (
     <header className="sticky top-0 z-30 bg-surface/95 backdrop-blur-md">
-      <div className="flex h-16 items-center gap-3 px-4 sm:h-20 sm:gap-4 sm:px-6">
-        <Logo className="md:hidden" />
-        <Suspense fallback={<div className="h-12 flex-1 rounded-full bg-fill" />}>
+      <div className="flex h-14 items-center gap-2.5 px-4 sm:h-20 sm:gap-4 sm:px-6">
+        <Logo className="shrink-0 md:hidden" />
+        <Suspense fallback={<div className="h-10 min-w-0 flex-1 rounded-full bg-fill sm:h-12" />}>
           <GlobalSearch variant="inline" className="hidden min-w-0 flex-1 sm:block" />
+          <GlobalSearch variant="sheet" className="min-w-0 flex-1 sm:hidden" />
         </Suspense>
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        {/* Below md the tab bar's Menu holds the account (and Log in / Sign up). */}
+        <div className="hidden shrink-0 items-center gap-2 md:flex">
           {account === undefined ? (
             <span aria-hidden className="size-10 rounded-full bg-fill" />
           ) : account ? (
@@ -35,11 +41,6 @@ export function TopBar() {
             </>
           )}
         </div>
-      </div>
-      <div className="px-4 pb-3 sm:hidden">
-        <Suspense fallback={<div className="h-12 rounded-full bg-fill" />}>
-          <GlobalSearch variant="sheet" />
-        </Suspense>
       </div>
     </header>
   );

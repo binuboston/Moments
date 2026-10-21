@@ -13,7 +13,8 @@ interface SectionHeadingProps {
 export function SectionHeading({ eyebrow, title, description, align = "center", className, as: Heading = "h2" }: SectionHeadingProps) {
   return (
     <div className={cn(Heading === "h1" ? "max-w-4xl" : "max-w-2xl", align === "center" && "mx-auto text-center", className)}>
-      {eyebrow ? <p className="eyebrow mb-4">{eyebrow}</p> : null}
+      {/* Page titles drop their eyebrow on phones (the title says enough there). */}
+      {eyebrow ? <p className={cn("eyebrow mb-4", Heading === "h1" && "max-sm:hidden")}>{eyebrow}</p> : null}
       <Heading data-reveal="split" className={cn("text-balance", Heading === "h1" ? "display-2" : "display-3")}>
         {title}
       </Heading>

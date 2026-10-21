@@ -38,11 +38,11 @@ export default async function HomePage() {
         <section aria-labelledby="home-title" className="grid gap-4">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div className="min-w-0">
-              <h1 id="home-title" className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              <h1 id="home-title" className="text-2xl font-semibold tracking-tight max-sm:sr-only sm:text-3xl">
                 {firstName ? `Welcome back, ${firstName}` : "Your invitations"}
               </h1>
               {summary?.next ? (
-                <div className="mt-3">
+                <div className="sm:mt-3">
                   <NextUp next={summary.next} />
                 </div>
               ) : null}
@@ -54,7 +54,8 @@ export default async function HomePage() {
           <InvitationGrid items={list.items} />
         </section>
       ) : (
-        <header className="max-w-2xl">
+        // Phones: straight to the occasions and designs (the heading stays for screen readers).
+        <header className="max-w-2xl max-sm:sr-only">
           <h1 id="home-title" className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
             Invitations, <span className="text-primary">beautifully yours</span>
           </h1>

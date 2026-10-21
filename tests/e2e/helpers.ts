@@ -63,3 +63,16 @@ export async function openStep(page: Page, step: string) {
   await page.getByTestId(`step-${step}`).click();
   await expect(page.getByTestId(`editor-step-${step}`)).toBeVisible();
 }
+
+/**
+ * Opens the account area and returns it: the top-bar menu on wider screens,
+ * the tab bar's Menu sheet on phones (the top bar has no account menu there).
+ */
+export async function openAccount(page: Page, isMobile: boolean) {
+  if (isMobile) {
+    await page.getByRole("button", { name: "Open menu" }).click();
+    return page.getByRole("dialog", { name: "Menu" });
+  }
+  await page.getByRole("button", { name: "Account menu" }).click();
+  return page.getByRole("menu");
+}

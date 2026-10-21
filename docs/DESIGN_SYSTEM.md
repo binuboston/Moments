@@ -83,3 +83,11 @@ Everything respects reduced motion. See ARCHITECTURE.md §10c.
 - Icons that identify something go in an `IconTile` with a tone; actions use `Button`.
 - Inside cards, `soft` is the secondary style; `primary` is only for the one main action on a screen.
 - No raw colours, shadows or radii: add a token first if something is missing.
+
+## Light and dark
+
+- The app chrome has light and dark themes. The default is **System** (follows the device, live). People can choose System, Light or Dark from the phone Menu sheet, the desktop "Settings & support" menu, or Settings. The choice is kept in this browser (`localStorage`, `invite:theme`).
+- Dark values are the same tokens re-tuned under `.dark` in `app/globals.css`, so components never need `dark:` overrides when they use tokens. Use the `dark:` variant only for one-off cases.
+- The pre-paint script (`lib/motion/pre-paint.ts`) sets the `dark` class and `color-scheme` before first paint, so there is no flash of the wrong theme. `lib/theme.ts` keeps it in sync after that, including the browser's theme colour.
+- Invitations (templates, previews, card images) are not themed: they always show the owner's chosen palette.
+

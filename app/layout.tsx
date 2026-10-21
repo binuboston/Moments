@@ -50,7 +50,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#faf7f2",
+  // Updated to the resolved light / dark background at runtime (lib/theme.ts).
+  themeColor: "#ffffff",
   width: "device-width",
   initialScale: 1,
   // Lets layouts pad for the iPhone home indicator via env(safe-area-inset-*).
