@@ -63,3 +63,14 @@ test.describe("marketing site", () => {
     expect(await sitemap.text()).toContain("/templates/eternal-grace");
   });
 });
+
+test("a template card previews the live demo for the chosen occasion", async ({ page, isMobile }) => {
+  await page.goto("/templates?category=wedding");
+  const card = page.getByRole("article").filter({ has: page.getByRole("link", { name: "Kalyanam", exact: true }) });
+  if (!isMobile) await card.hover();
+  const preview = card.getByRole("link", { name: "Preview Kalyanam" });
+  await expect(preview).toBeVisible();
+  await preview.click();
+  await expect(page).toHaveURL(/\/demo\/kalyanam\?occasion=wedding$/);
+  await expect(page.getByRole("button", { name: "Open", exact: true })).toBeVisible();
+});
