@@ -25,6 +25,7 @@ export const summit = defineTemplate({
   previewGradient: "linear-gradient(150deg, #f6f7fa 0%, #dbe3f4 60%, #1e3a8a 100%)",
   particles: "sparkles",
   motion: "editorial",
+  card: { align: "left", titleWeight: 600, titleTracking: -0.025, eyebrow: "spaced", frame: "inset" },
   recipe: {
     Hero: TicketHero,
     Cover: BannerCover,

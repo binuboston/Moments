@@ -26,6 +26,7 @@ export const confettiPop = defineTemplate({
   previewGradient: "linear-gradient(135deg, #fff8f0 0%, #ffe3ec 60%, #fff1c6 100%)",
   particles: "confetti",
   motion: "playful",
+  card: { align: "center", titleWeight: 700, titleTracking: -0.02, eyebrow: "pill", frame: "none" },
   recipe: {
     Hero: StickerHero,
     Cover: StickerCover,

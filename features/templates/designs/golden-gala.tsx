@@ -26,6 +26,7 @@ export const goldenGala = defineTemplate({
   previewGradient: "linear-gradient(160deg, #0f0f12 0%, #2a2318 100%)",
   particles: "sparkles",
   motion: "editorial",
+  card: { align: "center", titleWeight: 500, titleUppercase: true, titleTracking: 0.04, eyebrow: "spaced", frame: "double" },
   recipe: {
     Hero: DecoHero,
     Cover: DecoCover,

@@ -26,6 +26,7 @@ export const monochrome = defineTemplate({
   previewGradient: "linear-gradient(135deg, #f4f1ea 0%, #f4f1ea 60%, #111111 60%, #111111 100%)",
   particles: "sparkles",
   motion: "editorial",
+  card: { align: "left", titleWeight: 900, titleUppercase: true, titleTracking: -0.04, eyebrow: "spaced", frame: "none" },
   recipe: {
     Hero: PosterHero,
     Cover: MonoCover,

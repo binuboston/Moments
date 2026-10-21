@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { getPublishedInvitationView } from "@/features/invitations/queries";
-import { InvitationCardImage } from "@/features/invitations/card-image";
+import { renderInvitationCard } from "@/features/invitations/card-image";
 
 export const alt = "Event invitation";
 export const size = { width: 1200, height: 630 };
@@ -22,5 +22,5 @@ export default async function OpenGraphImage({ params }: { params: Promise<{ slu
     );
   }
 
-  return new ImageResponse(<InvitationCardImage view={view} />, size);
+  return renderInvitationCard(view);
 }

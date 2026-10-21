@@ -24,6 +24,7 @@ export const balloonBash = defineTemplate({
   previewGradient: "linear-gradient(160deg, #ffe3f1 0%, #fff5fb 45%, #dbeafe 100%)",
   particles: "confetti",
   motion: "playful",
+  card: { align: "center", titleWeight: 700, titleTracking: -0.01, eyebrow: "pill", frame: "none" },
   recipe: {
     Hero: PartyHero,
     Cover: PolaroidCover,

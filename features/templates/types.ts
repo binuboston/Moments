@@ -73,6 +73,24 @@ export type RenderMode = "public" | "demo" | "preview";
 /** Side effects that persist data, e.g. RSVP submission. */
 export const canSubmit = (mode: RenderMode) => mode === "public";
 
+/**
+ * How a template's card image is set (features/invitations/card-image.tsx).
+ * The fonts are the invitation's own display and body fonts; this decides the
+ * composition around them. Defaults: centred, weight 500, a hairline frame.
+ */
+export interface CardStyle {
+  align?: "center" | "left";
+  titleWeight?: 400 | 500 | 600 | 700 | 900;
+  titleItalic?: boolean;
+  titleUppercase?: boolean;
+  /** Title letter spacing, in em (negative tightens). */
+  titleTracking?: number;
+  /** The occasion line above the title: spaced capitals, or a filled pill. */
+  eyebrow?: "spaced" | "pill";
+  /** "inset": hairline inner border. "double": two rules (deco). "none": full bleed. */
+  frame?: "inset" | "double" | "none";
+}
+
 export interface TemplateProps {
   view: InvitationView;
   theme: ResolvedTheme;
@@ -97,5 +115,7 @@ export interface TemplateDefinition {
   particles?: "petals" | "confetti" | "sparkles";
   /** Motion character on the guest page (see features/templates/motion/engine/presets.ts). Defaults to "gentle". */
   motion?: MotionPresetKey;
+  /** Typography of the card image (dashboard thumbnails and link previews), echoing the hero. */
+  card?: CardStyle;
   component: ComponentType<TemplateProps>;
 }

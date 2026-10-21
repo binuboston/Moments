@@ -1,6 +1,5 @@
-import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
-import { InvitationCardImage } from "@/features/invitations/card-image";
+import { renderInvitationCard } from "@/features/invitations/card-image";
 import { draftToView } from "@/features/invitations/mappers";
 import { getOwnedInvitationDraft } from "@/features/invitations/queries";
 import { getProfilePlan } from "@/features/invitations/server-actions-helpers";
@@ -42,9 +41,5 @@ export async function GET(request: NextRequest, ctx: RouteContext<"/api/invitati
   });
 
   const versioned = new URL(request.url).searchParams.has("v");
-  return new ImageResponse(<InvitationCardImage view={view} />, {
-    width: 1200,
-    height: 630,
-    headers: { "Cache-Control": versioned ? "private, max-age=31536000, immutable" : "private, no-store" },
-  });
+  return renderInvitationCard(view, { headers: { "Cache-Control": versioned ? "private, max-age=31536000, immutable" : "private, no-store" } });
 }

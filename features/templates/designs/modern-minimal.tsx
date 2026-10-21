@@ -29,6 +29,7 @@ export const modernMinimal = defineTemplate({
   previewGradient: "linear-gradient(135deg, #ffffff 0%, #f0f0ec 100%)",
   particles: "sparkles",
   motion: "editorial",
+  card: { align: "left", titleWeight: 700, titleTracking: -0.03, eyebrow: "spaced", frame: "none" },
   recipe: {
     Hero: EditorialHero,
     Cover: WideCover,

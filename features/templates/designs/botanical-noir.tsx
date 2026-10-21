@@ -27,6 +27,7 @@ export const botanicalNoir = defineTemplate({
   previewGradient: "linear-gradient(160deg, #13231c 0%, #1f3a2e 100%)",
   particles: "sparkles",
   motion: "editorial",
+  card: { align: "center", titleWeight: 500, titleItalic: true, eyebrow: "spaced", frame: "inset" },
   recipe: {
     article: "relative overflow-hidden",
     Backdrop: LeavesBackdrop,

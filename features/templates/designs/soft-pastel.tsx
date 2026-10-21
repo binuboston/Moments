@@ -26,6 +26,7 @@ export const softPastel = defineTemplate({
   previewGradient: "linear-gradient(135deg, #fff6f0 0%, #fde2cf 50%, #e5d7f5 100%)",
   particles: "petals",
   motion: "gentle",
+  card: { align: "center", titleWeight: 500, eyebrow: "pill", frame: "none" },
   recipe: {
     article: "relative overflow-hidden",
     Backdrop: BlobsBackdrop,

@@ -28,6 +28,7 @@ export const eternalGrace = defineTemplate({
   previewGradient: "linear-gradient(135deg, #fbf8f1 0%, #efe4cf 100%)",
   particles: "petals",
   motion: "gentle",
+  card: { align: "center", titleWeight: 500, eyebrow: "spaced", frame: "inset" },
   recipe: {
     Hero: ArchHero,
     Cover: ArchCover,

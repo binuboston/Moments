@@ -28,6 +28,7 @@ export const kalyanam = defineTemplate({
   previewGradient: "linear-gradient(160deg, #fdf6ec 0%, #f9d9a8 55%, #f59e0b 100%)",
   particles: "petals",
   motion: "gentle",
+  card: { align: "center", titleWeight: 400, titleTracking: 0.02, eyebrow: "spaced", frame: "double" },
   recipe: {
     Hero: TempleHero,
     Cover: TempleCover,
