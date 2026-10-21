@@ -6,7 +6,7 @@ import type { InvitationFunctionInput } from "@/lib/validation/functions";
 import type { InvitationSettings } from "@/lib/validation/settings";
 import type { ThemeInput } from "@/lib/validation/theme";
 import type { InvitationDraft, MediaRecord } from "@/features/invitations/types";
-import { firstIncompleteStep, type EditorStep } from "@/features/invitations/editor/steps";
+import { EDITOR_STEPS, firstIncompleteStep, type EditorStep } from "@/features/invitations/editor/steps";
 
 export type { EditorStep };
 /** Anything the editor can navigate to: a step, or the settings sheet. */
@@ -21,8 +21,9 @@ interface EditorState {
   saveState: SaveState;
   lastSavedAt: number | null;
   view: EditorView;
-  /** The step shown in the Edit view. */
+  /** The step shown in the Edit view, and which way the last move went (for the transition). */
   step: EditorStep;
+  stepDirection: "next" | "prev";
   settingsOpen: boolean;
   publishOpen: boolean;
 
@@ -56,6 +57,7 @@ interface EditorState {
 const UI_DEFAULTS = {
   view: "edit" as EditorView,
   step: "names" as EditorStep,
+  stepDirection: "next" as "next" | "prev",
   settingsOpen: false,
   publishOpen: false,
 };
@@ -75,10 +77,15 @@ export const useEditorStore = create<EditorState>()((set) => ({
   load: (draft) => set((s) => ({ draft, serverDraft: draft, saveState: "idle", ...(s.draft?.id === draft.id ? {} : { ...UI_DEFAULTS, step: firstIncompleteStep(draft) }) })),
   reset: () => set({ draft: null, serverDraft: null, saveState: "idle", lastSavedAt: null, ...UI_DEFAULTS }),
   setView: (view) => set({ view }),
-  setStep: (step) => set({ step, view: "edit" }),
+  setStep: (step) => set((s) => ({ step, view: "edit", stepDirection: EDITOR_STEPS.indexOf(step) >= EDITOR_STEPS.indexOf(s.step) ? "next" : "prev" })),
   setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
   setPublishOpen: (publishOpen) => set({ publishOpen }),
-  goTo: (target) => set(target === "settings" ? { publishOpen: false, settingsOpen: true } : { publishOpen: false, view: "edit", step: target }),
+  goTo: (target) =>
+    set((s) =>
+      target === "settings"
+        ? { publishOpen: false, settingsOpen: true }
+        : { publishOpen: false, view: "edit", step: target, stepDirection: EDITOR_STEPS.indexOf(target) >= EDITOR_STEPS.indexOf(s.step) ? "next" : "prev" },
+    ),
 
   setContent: (content) => patchDraft(set, () => ({ content })),
   setTitle: (title) => patchDraft(set, () => ({ title })),

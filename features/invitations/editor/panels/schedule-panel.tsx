@@ -100,10 +100,6 @@ export function SchedulePanel() {
 
   return (
     <div className="grid gap-6">
-      <div>
-        <h2 className="text-base font-semibold">Schedule</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Optional. Add separate functions such as a mehendi, ceremony and reception. They appear as a timeline on the invitation.</p>
-      </div>
 
       {sorted.length === 0 ? (
         <EmptyState

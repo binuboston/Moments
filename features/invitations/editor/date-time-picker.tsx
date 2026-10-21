@@ -2,7 +2,8 @@
 
 import { CalendarDaysIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { Dialog as DialogPrimitive, Popover as PopoverPrimitive } from "radix-ui";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useMediaQuery, WIDE_SCREEN } from "@/hooks/use-media-query";
 import { Field, fieldAria } from "@/components/forms/field";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
@@ -27,20 +28,6 @@ const WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "
 const DEFAULT_TIME = "18:00";
 const SLOTS = timeSlots(15);
 
-/** Wide enough for a floating panel; below this the picker opens as a bottom sheet. */
-const WIDE = "(min-width: 640px)";
-function useWide() {
-  return useSyncExternalStore(
-    (onChange) => {
-      const mq = window.matchMedia(WIDE);
-      mq.addEventListener("change", onChange);
-      return () => mq.removeEventListener("change", onChange);
-    },
-    () => window.matchMedia(WIDE).matches,
-    () => true,
-  );
-}
-
 interface DateTimePickerProps {
   id: string;
   label: string;
@@ -62,7 +49,8 @@ interface DateTimePickerProps {
  */
 export function DateTimePicker({ id, label, hint, error, optional, value, timezone, onChange, min }: DateTimePickerProps) {
   const [open, setOpen] = useState(false);
-  const wide = useWide();
+  // Wide screens get a floating panel; phones a bottom sheet.
+  const wide = useMediaQuery(WIDE_SCREEN);
   const local = value ? toLocalInputValue(value, timezone) : "";
   const { date, time } = splitLocal(local);
   const minLocal = min ? toLocalInputValue(min, timezone) : "";

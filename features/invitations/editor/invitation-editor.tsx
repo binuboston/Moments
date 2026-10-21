@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeftIcon, CheckIcon, CloudOffIcon, Loader2Icon, SendIcon, Settings2Icon } from "lucide-react";
+import { ArrowLeftIcon, CheckIcon, CloudOffIcon, Loader2Icon, SendIcon, Settings2Icon, XIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { StatusBadge } from "@/features/invitations/components/status-badge";
 import { ContentFormProvider } from "@/features/invitations/editor/content-form";
 import { EditorStepper } from "@/features/invitations/editor/editor-stepper";
+import { StepNav } from "@/features/invitations/editor/step-nav";
+import { useMediaQuery, WIDE_SCREEN } from "@/hooks/use-media-query";
 import type { TemplateOption } from "@/features/invitations/editor/panels/design-panel";
 import { PublishPanel } from "@/features/invitations/editor/panels/publish-panel";
 import { SettingsPanel } from "@/features/invitations/editor/panels/settings-panel";
@@ -50,6 +52,7 @@ export function InvitationEditor({ initialDraft, templates, isGuest = false }: {
   const reset = useEditorStore((s) => s.reset);
   const draft = useEditorStore((s) => s.draft);
   const view = useEditorStore((s) => s.view);
+  const wide = useMediaQuery(WIDE_SCREEN);
   const settingsOpen = useEditorStore((s) => s.settingsOpen);
   const setSettingsOpen = useEditorStore((s) => s.setSettingsOpen);
   const publishOpen = useEditorStore((s) => s.publishOpen);
@@ -85,30 +88,33 @@ export function InvitationEditor({ initialDraft, templates, isGuest = false }: {
     <div className="editor-scope">
       {/* Editor controls as a floating bottom bar (thumb-reachable on phones, out of the way of the content). */}
       <div className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 mx-auto max-w-3xl md:left-[calc(4.5rem+0.75rem)]" data-testid="editor-bar">
-        <div className="surface-float grid grid-cols-[1fr_auto] items-center gap-2 rounded-3xl p-2 sm:grid-cols-[1fr_auto_1fr]">
-          <ViewToggle className="col-span-2 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:w-56" />
-          <div className="flex min-w-0 items-center gap-1.5 sm:col-start-1 sm:row-start-1 sm:gap-2">
-            <Button asChild variant="ghost" size="icon-sm" aria-label="Back to invitations">
-              <Link href={ROUTES.invitations}>
-                <ArrowLeftIcon />
-              </Link>
-            </Button>
-            <TemplateSwitcher templates={templates} />
-            <Button variant="soft" size="icon-sm" onClick={() => setSettingsOpen(true)} aria-label="RSVP and settings" data-testid="open-settings">
-              <Settings2Icon />
-            </Button>
-          </div>
-          <div className="flex items-center justify-end sm:col-start-3 sm:row-start-1">
-            <Button size="sm" onClick={() => setPublishOpen(true)} data-testid="go-to-publish">
-              <SendIcon aria-hidden /> {draft.status === "published" ? "Share" : "Publish"}
-            </Button>
+        <div className="surface-float rounded-3xl p-2">
+          {/* Phones: Back / Next live here, always within thumb reach. */}
+          {view === "edit" && !wide ? <StepNav variant="bar" className="mb-2 border-b border-border pb-2" /> : null}
+          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 sm:grid-cols-[1fr_auto_1fr] sm:gap-2">
+            <div className="flex min-w-0 items-center gap-1 sm:gap-2">
+              {/* On phones the step bar above has its own back arrow; leaving the editor is a close button there. */}
+              <Button asChild variant="ghost" size="icon-sm" aria-label={wide ? "Back to invitations" : "Close editor"}>
+                <Link href={ROUTES.invitations}>{wide ? <ArrowLeftIcon /> : <XIcon />}</Link>
+              </Button>
+              <TemplateSwitcher templates={templates} />
+              <Button variant="soft" size="icon-sm" onClick={() => setSettingsOpen(true)} aria-label="RSVP and settings" data-testid="open-settings">
+                <Settings2Icon />
+              </Button>
+            </div>
+            <ViewToggle compact={!wide} className="w-full sm:w-56" />
+            <div className="flex items-center justify-end">
+              <Button size="sm" onClick={() => setPublishOpen(true)} data-testid="go-to-publish">
+                <SendIcon aria-hidden /> {draft.status === "published" ? "Share" : "Publish"}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
       <SwapTransition swapKey={view}>
         {view === "edit" ? (
-          <div className="mx-auto grid w-full max-w-3xl grid-cols-[minmax(0,1fr)] gap-4 pb-40 sm:pb-28">
+          <div className="mx-auto grid w-full max-w-3xl grid-cols-[minmax(0,1fr)] gap-4 pb-44 sm:pb-28">
             <header className="mb-1 px-1">
               <h1 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">{title}</h1>
               <div className="mt-2 flex flex-wrap items-center gap-3">

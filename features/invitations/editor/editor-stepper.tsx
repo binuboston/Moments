@@ -1,15 +1,16 @@
 "use client";
 
-import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, SendIcon } from "lucide-react";
-import { useEffect, useRef, useState, type ComponentType } from "react";
+import { CheckIcon } from "lucide-react";
+import { useEffect, useRef, type ComponentType } from "react";
 import { useFormContext } from "react-hook-form";
-import { Button } from "@/components/ui/button";
 import { IconTile } from "@/components/ui/icon-tile";
 import { DesignPanel } from "@/features/invitations/editor/panels/design-panel";
 import { MusicPanel } from "@/features/invitations/editor/panels/music-panel";
 import { PhotosPanel } from "@/features/invitations/editor/panels/photos-panel";
 import { SchedulePanel } from "@/features/invitations/editor/panels/schedule-panel";
+import { StepNav } from "@/features/invitations/editor/step-nav";
 import { EDITOR_STEPS, STEP_DEFINITIONS, type EditorStep } from "@/features/invitations/editor/steps";
+import { useMediaQuery, WIDE_SCREEN } from "@/hooks/use-media-query";
 import { ExtrasStep } from "@/features/invitations/editor/steps/extras-step";
 import { NamesStep } from "@/features/invitations/editor/steps/names-step";
 import { WhenStep } from "@/features/invitations/editor/steps/when-step";
@@ -43,24 +44,20 @@ export function EditorStepper() {
   const draft = useEditorStore((s) => s.draft)!;
   const step = useEditorStore((s) => s.step);
   const setStep = useEditorStore((s) => s.setStep);
-  const setPublishOpen = useEditorStore((s) => s.setPublishOpen);
+  const direction = useEditorStore((s) => s.stepDirection);
   const { formState } = useFormContext();
-  const [direction, setDirection] = useState<"next" | "prev">("next");
+  // Phones get Back / Next in the fixed bottom bar instead (InvitationEditor).
+  const wide = useMediaQuery(WIDE_SCREEN);
   const heading = useRef<HTMLHeadingElement>(null);
   const shown = useRef(step);
 
   const index = EDITOR_STEPS.indexOf(step);
   const def = STEP_DEFINITIONS[step];
-  const prev = EDITOR_STEPS[index - 1];
   const next = EDITOR_STEPS[index + 1];
   const View = VIEWS[step];
   const icon = step === "names" ? categoryStyle(draft.categorySlug) : { icon: def.icon, tone: def.tone };
   const hasErrors = (key: EditorStep) => Boolean(STEP_DEFINITIONS[key].fields?.some((f) => (formState.errors as Record<string, unknown>)[f]));
 
-  const go = (target: EditorStep) => {
-    setDirection(EDITOR_STEPS.indexOf(target) >= index ? "next" : "prev");
-    setStep(target);
-  };
 
   // A new step (from Next, the bar, or a publish check): bring it into view and announce its title.
   useEffect(() => {
@@ -76,7 +73,6 @@ export function EditorStepper() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Enter" || !(e.metaKey || e.ctrlKey) || !next) return;
       e.preventDefault();
-      setDirection("next");
       setStep(next);
     };
     window.addEventListener("keydown", onKey);
@@ -89,7 +85,7 @@ export function EditorStepper() {
     // minmax(0, 1fr): the step bar scrolls inside its row instead of widening the page.
     <div className="grid grid-cols-[minmax(0,1fr)] gap-4">
       <nav id="editor-steps" aria-label="Invitation steps" className="scroll-mt-24">
-        <div className="mb-3 flex items-center justify-between gap-3 px-1 text-xs text-muted-foreground">
+        <div className="mb-3 hidden items-center justify-between gap-3 px-1 text-xs text-muted-foreground sm:flex">
           <span>
             Step {index + 1} of {EDITOR_STEPS.length}
           </span>
@@ -109,7 +105,7 @@ export function EditorStepper() {
               <li key={key} className="shrink-0">
                 <button
                   type="button"
-                  onClick={() => go(key)}
+                  onClick={() => setStep(key)}
                   aria-current={current ? "step" : undefined}
                   data-step-chip={key}
                   data-testid={`step-${key}`}
@@ -136,14 +132,18 @@ export function EditorStepper() {
         </ol>
       </nav>
 
-      <section aria-labelledby="editor-step-title" className="surface-card overflow-hidden" data-testid={`editor-step-${step}`}>
-        <div key={step} className={cn("p-5 sm:p-8", direction === "next" ? "motion-safe:animate-[step-in-next_0.35s_var(--ease-out-quart)]" : "motion-safe:animate-[step-in-prev_0.35s_var(--ease-out-quart)]")}>
-          <header className="mb-7 flex items-start gap-4">
-            <IconTile icon={icon.icon} tone={icon.tone} size="lg" />
+      <section aria-labelledby="editor-step-title" className="overflow-hidden sm:surface-card" data-testid={`editor-step-${step}`}>
+        <div key={step} className={cn("px-1 pt-2 pb-4 sm:p-8", direction === "next" ? "motion-safe:animate-[step-in-next_0.35s_var(--ease-out-quart)]" : "motion-safe:animate-[step-in-prev_0.35s_var(--ease-out-quart)]")}>
+          <header className="mb-6 flex items-start gap-3 sm:mb-7 sm:gap-4">
+            <IconTile icon={icon.icon} tone={icon.tone} size={wide ? "lg" : "md"} />
             <div className="min-w-0">
-              <p className="text-xs font-medium text-muted-foreground">
-                Step {index + 1}
-                {def.optional ? " · Optional" : ""}
+              {/* Phones already show "4/9" in the bottom bar: only "Optional" here. */}
+              <p className={cn("text-xs font-medium text-muted-foreground", !def.optional && "hidden sm:block")}>
+                <span className="hidden sm:inline">
+                  Step {index + 1}
+                  {def.optional ? " · " : ""}
+                </span>
+                {def.optional ? "Optional" : ""}
               </p>
               <h2 id="editor-step-title" ref={heading} tabIndex={-1} className="text-xl font-semibold tracking-tight text-balance outline-none sm:text-2xl">
                 {def.title}
@@ -153,31 +153,11 @@ export function EditorStepper() {
           </header>
           <View />
         </div>
-        <footer className="flex items-center justify-between gap-3 border-t border-border bg-fill/40 px-5 py-4 sm:px-8">
-          {prev ? (
-            <Button type="button" variant="ghost" onClick={() => go(prev)} data-testid="step-back">
-              <ArrowLeftIcon aria-hidden /> Back
-            </Button>
-          ) : (
-            <span />
-          )}
-          <div className="flex items-center gap-2">
-            {next && def.optional && !def.complete(draft) ? (
-              <Button type="button" variant="ghost" onClick={() => go(next)}>
-                Skip
-              </Button>
-            ) : null}
-            {next ? (
-              <Button type="button" onClick={() => go(next)} data-testid="step-next">
-                Next: {STEP_DEFINITIONS[next].short} <ArrowRightIcon aria-hidden />
-              </Button>
-            ) : (
-              <Button type="button" onClick={() => setPublishOpen(true)} data-testid="step-review">
-                <SendIcon aria-hidden /> {draft.status === "published" ? "Review & share" : "Review & publish"}
-              </Button>
-            )}
-          </div>
-        </footer>
+        {wide ? (
+          <footer className="border-t border-border bg-fill/40 px-8 py-4">
+            <StepNav variant="card" />
+          </footer>
+        ) : null}
       </section>
     </div>
   );

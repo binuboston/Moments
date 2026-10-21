@@ -79,7 +79,7 @@ export const STEP_DEFINITIONS: Record<EditorStep, StepDefinition> = {
   schedule: {
     title: "The schedule",
     short: "Schedule",
-    description: "Ceremonies, receptions or a running order. Skip it for a single event.",
+    description: "Separate functions such as a mehendi, ceremony and reception, shown as a timeline. Skip it for a single event.",
     icon: CalendarClockIcon,
     tone: "amber",
     optional: true,

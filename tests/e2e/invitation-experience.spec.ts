@@ -117,7 +117,8 @@ test.describe("gallery carousel", () => {
     await expect(carousel.getByLabel(/Use the arrow keys/)).not.toHaveAttribute("data-moving", /.*/);
 
     // A side photo comes to the front first; the front photo opens.
-    await carousel.getByRole("button", { name: /Bring to the front/ }).first().click();
+    // dispatchEvent: a real tap; .click() would first scroll the photo into view (moving the carousel) and race the check.
+    await carousel.getByRole("button", { name: /Bring to the front/ }).first().dispatchEvent("click");
     await expect(counter(carousel)).toContainText("02");
     await expect(page.getByRole("dialog")).toHaveCount(0);
     await carousel.getByRole("button", { name: /Open full screen/ }).click();
