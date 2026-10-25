@@ -5,7 +5,12 @@ import { isAppPath, ROUTES } from "@/lib/routes";
 
 /** App pages that need a session open to everyone (guests get one first); admin needs a real login. */
 const ADMIN_PREFIX = ROUTES.admin;
-const AUTH_PAGES: readonly string[] = [ROUTES.login, ROUTES.signup, ROUTES.forgotPassword];
+/**
+ * Pages a signed-in account holder is sent away from. Forgot-password is not
+ * one of them: it explains expired reset links, and asking for a reset while
+ * signed in is legitimate.
+ */
+const AUTH_PAGES: readonly string[] = [ROUTES.login, ROUTES.signup];
 
 /**
  * Refreshes the Supabase session cookie on every matched request and applies

@@ -71,7 +71,9 @@ export async function readJson<T = unknown>(request: Request): Promise<T> {
 }
 
 /** Translates common Postgres error codes to API errors. */
-export function mapDbError(error: { code?: string; message: string }, context: string): never {
+export function mapDbError(error: { code?: string; message: string; hint?: string | null }, context: string): never {
+  // Plan limits enforced by the database (supabase/migrations/*_plan_entitlements.sql): the message is user-facing.
+  if (error.code === "42501" && (error.hint === "plan_limit" || error.hint === "premium_required")) throw new ApiError(403, error.message, error.hint);
   if (error.code === "23505") throw new ApiError(409, "That value is already taken.", "conflict");
   if (error.code === "23514") throw new ApiError(400, "A value failed validation.", "constraint_violation");
   if (error.code === "42501") throw new ApiError(403, "You don't have permission to do that.", "forbidden");

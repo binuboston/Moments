@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Blossom } from "@/components/brand/blossom";
 import { Logo } from "@/components/layout/logo";
 import { Button } from "@/components/ui/button";
+import { CAPTCHA_MESSAGES, useCaptcha } from "@/features/auth/captcha";
 import { safeNextPath } from "@/features/auth/safe-next";
 import { ROUTES, routes } from "@/lib/routes";
 import { createClient } from "@/lib/supabase/client";
@@ -37,14 +38,18 @@ function recentAttempts(): number {
  *   server's "no session" redirect).
  * - If this keeps happening (a redirect loop), or a guest session cannot be
  *   created, it stops and offers clear choices instead of bouncing to sign-up.
+ * - When Turnstile is configured, it waits for the browser check and sends its
+ *   token with the anonymous sign-in (verified by Supabase Auth).
  */
 export function GuestStart() {
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next"), ROUTES.app);
   const started = useRef(false);
-  const [failed, setFailed] = useState<null | "disabled" | "busy">(null);
+  const [failed, setFailed] = useState<null | "disabled" | "busy" | "verify">(null);
+  const captcha = useCaptcha("guest", { className: "mt-2" });
+  const { token: captchaToken, ready: captchaReady, failed: captchaFailed, reset: resetCaptcha } = captcha;
 
-  const run = useCallback(async (force: boolean) => {
+  const run = useCallback(async (force: boolean, token: string | undefined) => {
     setFailed(null);
     const supabase = createClient();
     const { data } = await supabase.auth.getUser();
@@ -60,34 +65,46 @@ export function GuestStart() {
         window.location.replace(`${routes.login(next)}&error=expired`);
         return;
       }
-      const { error } = await supabase.auth.signInAnonymously();
+      const { error } = await supabase.auth.signInAnonymously({ options: { captchaToken: token } });
+      resetCaptcha();
       if (error) {
-        // Guest mode switched off for the project (Supabase: anonymous sign-ins), or rate-limited.
-        setFailed(error.code === "anonymous_provider_disabled" ? "disabled" : "busy");
+        // Guest mode switched off for the project (Supabase: anonymous sign-ins), the browser check failed, or rate-limited.
+        setFailed(error.code === "anonymous_provider_disabled" ? "disabled" : error.code === "captcha_failed" ? "verify" : "busy");
         return;
       }
       await fetch("/api/guest/session", { method: "POST" }).catch(() => undefined);
     }
     window.location.replace(next);
-  }, [next]);
+  }, [next, resetCaptcha]);
 
   useEffect(() => {
-    if (started.current) return;
+    if (started.current || !captchaReady) return;
     started.current = true;
-    void run(false);
-  }, [run]);
+    void run(false, captchaToken);
+  }, [run, captchaReady, captchaToken]);
+
+  // The browser check could not run (blocked script, widget error): a guest session would be refused.
+  const problem = failed ?? (captchaFailed ? "verify" : null);
 
   return (
     <main className="app-canvas flex min-h-dvh flex-col items-center justify-center gap-8 px-6 text-center">
       <Logo />
-      {failed ? (
+      {problem ? (
         <div role="alert" className="surface-card grid max-w-sm gap-4 p-6">
-          <p className="text-lg font-semibold tracking-tight">{failed === "disabled" ? "Guest mode isn't available" : "We couldn't start your studio"}</p>
+          <p className="text-lg font-semibold tracking-tight">{problem === "disabled" ? "Guest mode isn't available" : "We couldn't start your studio"}</p>
           <p className="text-sm text-muted-foreground text-pretty">
-            {failed === "disabled" ? "Create a free account or log in to start designing. It only takes a moment." : "Guest sessions are busy right now. Try again, or create a free account to keep going."}
+            {problem === "disabled"
+              ? "Create a free account or log in to start designing. It only takes a moment."
+              : problem === "verify"
+                ? `${captchaFailed ? CAPTCHA_MESSAGES.failed : CAPTCHA_MESSAGES.rejected} Or create a free account to keep going.`
+                : "Guest sessions are busy right now. Try again, or create a free account to keep going."}
           </p>
           <div className="grid gap-2">
-            {failed === "busy" ? <Button onClick={() => void run(true)}>Try again</Button> : null}
+            {problem === "busy" || problem === "verify" ? (
+              <Button onClick={() => void run(true, captchaToken)} disabled={!captchaReady}>
+                Try again
+              </Button>
+            ) : null}
             <div className="grid grid-cols-2 gap-2">
               <Button asChild variant="soft">
                 <Link href={routes.login(next)}>Log in</Link>
@@ -117,6 +134,8 @@ export function GuestStart() {
           </div>
         </>
       )}
+      {/* Mounted in both states: the check runs while "Setting up", and again before "Try again". */}
+      {captcha.widget}
     </main>
   );
 }

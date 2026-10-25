@@ -32,6 +32,7 @@ export const ROUTES = {
   /** Starts a guest session in the browser, then continues to `next`. */
   start: "/start",
   authCallback: "/auth/callback",
+  authConfirm: "/auth/confirm",
   signOut: "/auth/signout",
 
   admin: "/admin",
@@ -67,6 +68,8 @@ export const routes = {
   /** Guest-session entry that returns to `next`. */
   start: (next: string = ROUTES.app) => withNext(ROUTES.start, next),
   authCallback: (next: string) => withNext(ROUTES.authCallback, next),
+  /** Email links (confirmation, recovery): token-hash or code, any device. */
+  authConfirm: (next: string) => withNext(ROUTES.authConfirm, next),
   search: (q: string) => (q.trim() ? `${ROUTES.search}?q=${encodeURIComponent(q.trim())}` : ROUTES.search),
   helpSection: (id: string) => `${ROUTES.help}#${id}`,
 };

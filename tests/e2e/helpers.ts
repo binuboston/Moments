@@ -29,7 +29,7 @@ export async function logIn(page: Page, email: string, password = PASSWORD) {
 
 export async function logOut(page: Page) {
   await page.goto("/settings");
-  await page.getByRole("button", { name: "Log out" }).click();
+  await page.getByRole("button", { name: "Log out", exact: true }).click();
   await page.waitForURL((url) => url.pathname === "/", { timeout: 30_000 });
 }
 
@@ -75,4 +75,30 @@ export async function openAccount(page: Page, isMobile: boolean) {
   }
   await page.getByRole("button", { name: "Account menu" }).click();
   return page.getByRole("menu");
+}
+
+const MAILPIT = process.env.MAILPIT_URL ?? "http://127.0.0.1:54324";
+
+/**
+ * The newest link in the newest local email (Supabase's Mailpit) to `to`
+ * whose href matches `match`. Polls, because email delivery is asynchronous.
+ */
+export async function emailLink(to: string, match: RegExp, { after = 0 }: { after?: number } = {}): Promise<string> {
+  for (let i = 0; i < 40; i++) {
+    const search = await fetch(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:"${to}"`)}`).then((r) => r.json() as Promise<{ messages: { ID: string; Created: string }[] }>);
+    const latest = search.messages?.filter((m) => new Date(m.Created).getTime() >= after).sort((a, b) => b.Created.localeCompare(a.Created))[0];
+    if (latest) {
+      const message = await fetch(`${MAILPIT}/api/v1/message/${latest.ID}`).then((r) => r.json() as Promise<{ HTML: string }>);
+      const href = [...message.HTML.matchAll(/href="([^"]+)"/g)].map((m) => m[1].replace(/&amp;/g, "&")).find((h) => match.test(h));
+      if (href) return href;
+    }
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  throw new Error(`No email to ${to} with a link matching ${match}`);
+}
+
+/** Number of emails Mailpit has received for `to` since `after` (ms epoch). */
+export async function emailCount(to: string, after = 0): Promise<number> {
+  const search = await fetch(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:"${to}"`)}`).then((r) => r.json() as Promise<{ messages: { Created: string }[] }>);
+  return (search.messages ?? []).filter((m) => new Date(m.Created).getTime() >= after).length;
 }

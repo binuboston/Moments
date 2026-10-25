@@ -12,6 +12,7 @@ import { Field, fieldAria } from "@/components/forms/field";
 import { apiFetch } from "@/lib/api/client";
 import { createClient } from "@/lib/supabase/client";
 import { errorMessage } from "@/features/invitations/hooks";
+import { useCaptcha } from "@/features/auth/captcha";
 import { useSignOut } from "@/features/auth/use-sign-out";
 import { ROUTES, routes } from "@/lib/routes";
 
@@ -50,10 +51,17 @@ export function ProfileForm({ fullName, email }: { fullName: string; email: stri
 
 export function SecurityPanel({ email }: { email: string }) {
   const { signOut, pending: signingOut } = useSignOut();
+  const { signOut: signOutEverywhere, pending: signingOutEverywhere } = useSignOut({ everywhere: true });
+  const captcha = useCaptcha("password_reset");
   const reset = useMutation({
     mutationFn: async () => {
+      if (!captcha.ready) throw new Error(captcha.blockedMessage ?? "");
       const supabase = createClient();
-      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}${routes.authCallback(ROUTES.resetPassword)}` });
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}${routes.authConfirm(ROUTES.resetPassword)}`,
+        captchaToken: captcha.token,
+      });
+      captcha.reset();
       if (error) throw new Error(error.message);
     },
     onSuccess: () => toast.success("Password reset link sent. Check your inbox."),
@@ -62,12 +70,17 @@ export function SecurityPanel({ email }: { email: string }) {
 
   return (
     <div className="flex flex-wrap items-center gap-3">
+      {captcha.widget}
       <Button variant="outline" onClick={() => reset.mutate()} loading={reset.isPending}>
         Send password reset email
       </Button>
-      <Button variant="ghost" onClick={signOut} loading={signingOut}>
+      <Button variant="ghost" onClick={signOut} loading={signingOut} disabled={signingOutEverywhere}>
         Log out
       </Button>
+      <Button variant="ghost" onClick={signOutEverywhere} loading={signingOutEverywhere} disabled={signingOut} data-testid="logout-everywhere">
+        Log out everywhere
+      </Button>
+      <p className="w-full text-xs text-muted-foreground">Log out ends this session only. Use Log out everywhere if you think someone else has access to your account.</p>
     </div>
   );
 }

@@ -97,6 +97,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"plan_entitlements": {
+                  Row: {
+                    "branding": boolean,"max_active_invitations": number,"max_gallery_images": number,"plan": Database["public"]['Enums']["plan_tier"],"premium_templates": boolean
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "branding": boolean,"max_active_invitations": number,"max_gallery_images": number,"plan": Database["public"]['Enums']["plan_tier"],"premium_templates": boolean
+                  }
+                  Update: {
+                    "branding"?: boolean,"max_active_invitations"?: number,"max_gallery_images"?: number,"plan"?: Database["public"]['Enums']["plan_tier"],"premium_templates"?: boolean
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"profiles": {
                   Row: {
                     "avatar_url": string | null,"created_at": string,"full_name": string,"id": string,"plan": Database["public"]['Enums']["plan_tier"],"role": Database["public"]['Enums']["user_role"],"updated_at": string
@@ -158,6 +172,9 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
 "is_guest":
+{ Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"is_maintenance":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
 "owns_invitation":

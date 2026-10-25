@@ -11,6 +11,8 @@ const publicSchema = z.object({
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(20),
   /** "true" once Google is configured in Supabase (see docs/SETUP.md). */
   NEXT_PUBLIC_AUTH_GOOGLE: z.enum(["true", "false"]).default("false"),
+  /** Cloudflare Turnstile site key; empty = widget off (features/auth/captcha.tsx, docs/AUTH.md). */
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().default(""),
 });
 
 const serverSchema = publicSchema.extend({
@@ -32,6 +34,7 @@ export function publicEnv(): PublicEnv {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_AUTH_GOOGLE: process.env.NEXT_PUBLIC_AUTH_GOOGLE,
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
   });
   if (!parsed.success) {
     throw new Error(
@@ -51,6 +54,7 @@ export function serverEnv(): ServerEnv {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_AUTH_GOOGLE: process.env.NEXT_PUBLIC_AUTH_GOOGLE,
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     CRON_SECRET: process.env.CRON_SECRET,
     RSVP_IP_SALT: process.env.RSVP_IP_SALT,
