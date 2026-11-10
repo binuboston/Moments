@@ -10,7 +10,7 @@ describe("safeNextPath", () => {
     expect(safeNextPath("/invitations")).toBe("/invitations");
     expect(safeNextPath("/invitations/abc/edit?publish=1")).toBe("/invitations/abc/edit?publish=1");
     expect(safeNextPath("/help#privacy")).toBe("/help#privacy");
-    expect(safeNextPath("/templates?category=wedding&tier=free")).toBe("/templates?category=wedding&tier=free");
+    expect(safeNextPath("/?category=wedding&tier=free")).toBe("/?category=wedding&tier=free");
     expect(safeNextPath("/")).toBe("/");
   });
 

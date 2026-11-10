@@ -31,7 +31,7 @@ export function SupportMenu() {
           <>
             <DropdownMenuLabel className="px-2 text-xs font-medium text-muted-foreground">Settings</DropdownMenuLabel>
             <DropdownMenuItem asChild className="rounded-xl font-semibold">
-              <AppLink href={ROUTES.settings}>{account.isGuest ? "Account" : "Account settings"}</AppLink>
+              <AppLink href={ROUTES.settings}>Account settings</AppLink>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
           </>

@@ -1,9 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/database";
-import { isAppPath, ROUTES } from "@/lib/routes";
+import { needsAccount, ROUTES } from "@/lib/routes";
 
-/** App pages that need a session open to everyone (guests get one first); admin needs a real login. */
+/** Admin pages need an account too (and the admin role, checked by the pages). */
 const ADMIN_PREFIX = ROUTES.admin;
 /**
  * Pages a signed-in account holder is sent away from. Forgot-password is not
@@ -41,23 +41,25 @@ export async function updateSession(request: NextRequest) {
   // and triggers a refresh when needed. Do not add logic between client
   // creation and this call.
   const { data } = await supabase.auth.getClaims();
-  const isAuthenticated = Boolean(data?.claims?.sub);
-  // Guests (anonymous sessions) may design drafts but are not "logged in" for auth pages.
-  const isGuest = data?.claims?.is_anonymous === true;
+  // An anonymous session (left over from the retired guest mode) counts as signed out.
+  const isAuthenticated = Boolean(data?.claims?.sub) && data?.claims?.is_anonymous !== true;
 
   const { pathname, search } = request.nextUrl;
 
   const under = (prefix: string) => pathname === prefix || pathname.startsWith(`${prefix}/`);
-  const needsSession = isAppPath(pathname);
-  if (!isAuthenticated && (needsSession || under(ADMIN_PREFIX))) {
+  if (!isAuthenticated && (needsAccount(pathname) || under(ADMIN_PREFIX))) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = needsSession ? ROUTES.start : ROUTES.login;
+    redirectUrl.pathname = ROUTES.login;
     redirectUrl.search = "";
     redirectUrl.searchParams.set("next", `${pathname}${search}`);
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (isAuthenticated && !isGuest && AUTH_PAGES.includes(pathname)) {
+  if (isAuthenticated && AUTH_PAGES.includes(pathname)) {
+    // Confirm with the auth server first: a deleted or revoked account still
+    // carries a valid-looking token, and must be able to log in again here.
+    const { data: confirmed } = await supabase.auth.getUser();
+    if (!confirmed.user || confirmed.user.is_anonymous) return response;
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = ROUTES.app;
     redirectUrl.search = "";

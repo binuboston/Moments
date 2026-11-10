@@ -25,16 +25,16 @@ test.describe("marketing site", () => {
     expect(overflow).toBeLessThanOrEqual(1);
   });
 
-  test("template catalogue filters and detail page work", async ({ page }) => {
+  test("the old /templates link opens Home at that occasion's designs; design pages still work", async ({ page }) => {
     await page.goto("/templates?category=wedding");
-    await expect(page.getByRole("heading", { name: /find the design/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Eternal Grace", exact: true })).toBeVisible();
-    await page.getByRole("link", { name: "Eternal Grace", exact: true }).click();
-    await expect(page).toHaveURL(/\/templates\/eternal-grace/);
+    await expect(page).toHaveURL(/\/\?category=wedding$/);
+    await expect(page.getByRole("heading", { name: "Choose a design" })).toBeVisible();
+    await expect(page.getByTestId("template-eternal-grace")).toBeVisible();
+    await page.goto("/templates/eternal-grace");
     await expect(page.getByRole("heading", { level: 1, name: "Eternal Grace" })).toBeVisible();
-    // No account needed: signed-out visitors go straight to guest setup, which continues to the wizard.
+    // Choosing a design needs no account (continuing to the editor does).
     const cta = await page.getByRole("link", { name: /use this template/i }).getAttribute("href");
-    expect(decodeURIComponent(cta ?? "")).toMatch(/\/invitations\/new\?template=eternal-grace/);
+    expect(decodeURIComponent(cta ?? "")).toMatch(/\/create\?category=[a-z-]+&template=eternal-grace$/);
   });
 
   test("pricing, how it works and help pages respond", async ({ page }) => {
@@ -60,15 +60,16 @@ test.describe("marketing site", () => {
     expect(body).not.toMatch(/Disallow: \/\s*$/m);
     expect(body).toContain("Disallow: /e/");
     const sitemap = await request.get("/sitemap.xml");
-    expect(await sitemap.text()).toContain("/templates/eternal-grace");
+    const map = await sitemap.text();
+    expect(map).toContain("/templates/eternal-grace");
+    expect(map).toContain("/?category=wedding");
+    expect(map).not.toMatch(/\/templates<\/loc>/);
   });
 });
 
-test("a template card previews the live demo for the chosen occasion", async ({ page, isMobile }) => {
-  await page.goto("/templates?category=wedding");
-  const card = page.getByRole("article").filter({ has: page.getByRole("link", { name: "Kalyanam", exact: true }) });
-  if (!isMobile) await card.hover();
-  const preview = card.getByRole("link", { name: "Preview Kalyanam" });
+test("a design in the Create flow previews the live demo for the chosen occasion", async ({ page }) => {
+  await page.goto("/?category=wedding");
+  const preview = page.getByTestId("preview-kalyanam");
   await expect(preview).toBeVisible();
   await preview.click();
   await expect(page).toHaveURL(/\/demo\/kalyanam\?occasion=wedding$/);

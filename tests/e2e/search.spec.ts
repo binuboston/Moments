@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { createInvitation, waitForDraft } from "./helpers";
+import { createInvitation, signUp, waitForDraft } from "./helpers";
 
 /** Opens the header search: the inline field on wider screens, the full-screen sheet on phones. */
 async function openSearch(page: Page, isMobile: boolean) {
@@ -43,14 +43,15 @@ test("Enter without choosing shows every result on the search page", async ({ pa
 });
 
 test("keyboard shortcut opens search from anywhere", async ({ page, isMobile }) => {
-  await page.goto("/templates");
+  await page.goto("/help");
   await page.locator("body").press("/");
   await expect(page.getByTestId(isMobile ? "search-sheet-input" : "search")).toBeFocused();
   await page.keyboard.press("Escape");
 });
 
-test("a guest finds their own draft by the name typed into it; inner pages have no search of their own", async ({ page, isMobile }) => {
+test("you find your own draft by the name typed into it; inner pages have no search of their own", async ({ page, isMobile }) => {
   const name = `Zara${Date.now().toString(36)}`;
+  await signUp(page, "search-draft");
   const id = await createInvitation(page, "birthday", "confetti-pop");
   await page.getByLabel("Who's celebrating?").fill(name);
   await waitForDraft(page, id, (d) => (d.content as { celebrantName?: string }).celebrantName, name);

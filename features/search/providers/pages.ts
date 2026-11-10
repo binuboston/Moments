@@ -7,8 +7,7 @@ import { PRIMARY_NAV, ROUTES, SUPPORT_NAV } from "@/lib/routes";
 
 /** Extra words for each page (the navigation labels are matched too). */
 const KEYWORDS: Partial<Record<string, string>> = {
-  [ROUTES.home]: "home start dashboard overview",
-  [ROUTES.templates]: "designs themes catalogue",
+  [ROUTES.home]: "home start dashboard overview designs templates themes catalogue browse",
   [ROUTES.invitations]: "my invitations drafts published events",
   [ROUTES.howItWorks]: "guide steps tutorial",
   [ROUTES.pricing]: "plans price cost premium free upgrade",
@@ -22,9 +21,10 @@ export const pagesProvider: SearchProvider = {
   label: "Pages",
   async search(query, ctx) {
     const pages: { title: string; href: string; icon: SearchIconKey }[] = [
-      ...PRIMARY_NAV.filter((n) => n.key !== "create").map((n) => ({ title: n.label, href: n.href, icon: "page" as const })),
+      // Home and Invitations are an account holder's pages.
+      ...(ctx.user ? PRIMARY_NAV.filter((n) => n.key !== "create").map((n) => ({ title: n.label, href: n.href, icon: "page" as const })) : []),
       ...SUPPORT_NAV.map((n) => ({ title: n.label, href: n.href, icon: "page" as const })),
-      ...(ctx.user && !ctx.user.isGuest ? [{ title: "Settings", href: ROUTES.settings, icon: "settings" as const }] : []),
+      ...(ctx.user ? [{ title: "Settings", href: ROUTES.settings, icon: "settings" as const }] : []),
     ];
     return pages.flatMap((p) => {
       const score = scoreFields(query, [

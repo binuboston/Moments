@@ -150,11 +150,6 @@ export function formatIsoWithOffset(date: Date, tz: string): string {
   return `${p.year}-${pad(p.month)}-${pad(p.day)}T${pad(p.hour)}:${pad(p.minute)}:00${sign}${pad(oh)}:${pad(om)}`;
 }
 
-export function isPast(iso: string, now = Date.now()): boolean {
-  const t = new Date(iso).getTime();
-  return !Number.isNaN(t) && t < now;
-}
-
 export function nextRoundHourIso(tz: string, daysAhead = 30): string {
   const d = new Date(Date.now() + daysAhead * 86_400_000);
   d.setUTCMinutes(0, 0, 0);

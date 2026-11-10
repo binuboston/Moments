@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { admin, anonClient, catalogue, sampleContent, uniqueSlug } from "./helpers";
 
-/** Guests (anonymous Supabase users) can draft but never publish. */
+/** Anonymous Supabase users (retired guest mode) can neither create nor publish invitations. */
 const guest = anonClient();
 let guestId: string;
 let templateId: string;
@@ -18,30 +18,26 @@ afterAll(async () => {
   if (guestId) await admin.auth.admin.deleteUser(guestId);
 });
 
-describe("guest sessions", () => {
-  it("a guest gets a profile and can create and edit a draft", async () => {
-    const { data: profile } = await guest.from("profiles").select("id").eq("id", guestId).maybeSingle();
-    expect(profile?.id).toBe(guestId);
-
-    const { data: draft, error } = await guest
+describe("anonymous sessions (retired guest mode)", () => {
+  it("cannot create an invitation", async () => {
+    const { error } = await guest
       .from("invitations")
       .insert({ owner_id: guestId, template_id: templateId, category_id: categoryId, slug: uniqueSlug("guest-draft"), content: sampleContent(), status: "draft" })
-      .select("id")
-      .single();
-    expect(error).toBeNull();
-    const { data: updated } = await guest.from("invitations").update({ title: "Our day" }).eq("id", draft!.id).select("id");
-    expect(updated).toHaveLength(1);
+      .select("id");
+    expect(error?.code).toBe("42501");
+    expect(error?.hint).toBe("account_required");
   });
 
-  it("a guest cannot publish, by insert or by update", async () => {
-    const inserted = await guest
+  it("an existing guest draft can be edited but never published", async () => {
+    // Drafts made before guest mode was retired (created here with the service role).
+    const { data: draft } = await admin
       .from("invitations")
-      .insert({ owner_id: guestId, template_id: templateId, category_id: categoryId, slug: uniqueSlug("guest-live"), content: sampleContent(), status: "published" })
-      .select("id");
-    expect(inserted.error?.code).toBe("42501");
-
-    const { data: draft } = await guest.from("invitations").select("id").eq("owner_id", guestId).limit(1).single();
-    const updated = await guest.from("invitations").update({ status: "published" }).eq("id", draft!.id).select("id");
-    expect(updated.error?.code).toBe("42501");
+      .insert({ owner_id: guestId, template_id: templateId, category_id: categoryId, slug: uniqueSlug("guest-old"), content: sampleContent(), status: "draft" })
+      .select("id")
+      .single();
+    const { data: updated } = await guest.from("invitations").update({ title: "Our day" }).eq("id", draft!.id).select("id");
+    expect(updated).toHaveLength(1);
+    const published = await guest.from("invitations").update({ status: "published" }).eq("id", draft!.id).select("id");
+    expect(published.error?.code).toBe("42501");
   });
 });

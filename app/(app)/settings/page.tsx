@@ -1,52 +1,19 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ThemeSwitcher } from "@/components/layout/theme-switcher";
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileForm, SecurityPanel } from "@/features/auth/settings-forms";
 import { PLAN_LIMITS } from "@/lib/entitlements";
-import { requireAppUser } from "@/lib/auth/session";
+import { requireAccount } from "@/lib/auth/session";
 import { getCurrentProfile } from "@/lib/supabase/server";
 import { BRAND } from "@/lib/brand";
-import { ROUTES, routes } from "@/lib/routes";
+import { ROUTES } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "Settings", robots: { index: false } };
 
 export default async function SettingsPage() {
-  const user = await requireAppUser(ROUTES.settings);
-  if (user.is_anonymous) {
-    // Guests have no profile or password yet.
-    return (
-      <div className="grid min-w-0 grid-cols-1 gap-5 sm:gap-8">
-        <PageHeader title="Settings" description="Your profile, plan and account security." />
-        <Card className="max-w-xl">
-          <CardHeader>
-            <CardTitle>Create your account</CardTitle>
-            <CardDescription>You&apos;re designing as a guest. Create a free account to publish, set up your profile and use your drafts on any device. Your work comes with you.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            <Button asChild>
-              <Link href={routes.signup(ROUTES.settings)}>Create free account</Link>
-            </Button>
-            <Button asChild variant="soft">
-              <Link href={routes.login(ROUTES.settings)}>Log in</Link>
-            </Button>
-          </CardContent>
-        </Card>
-        <Card className="max-w-xl">
-          <CardHeader>
-            <CardTitle>Appearance</CardTitle>
-            <CardDescription>Follow your device, or always use light or dark.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ThemeSwitcher className="max-w-sm" />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const user = await requireAccount(ROUTES.settings);
   const profile = await getCurrentProfile();
   const plan = profile?.plan ?? "free";
   const limits = PLAN_LIMITS[plan];

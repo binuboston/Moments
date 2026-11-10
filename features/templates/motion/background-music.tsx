@@ -43,8 +43,9 @@ export function useBackgroundMusic(music: MusicData | null) {
     const from = el.volume;
     const start = performance.now();
     const step = (now: number) => {
-      const t = Math.min(1, (now - start) / ms);
-      el.volume = from + (target - from) * t;
+      // The first frame's timestamp can precede `start`, so clamp progress (and volume: outside 0..1 throws).
+      const t = Math.min(1, Math.max(0, (now - start) / ms));
+      el.volume = Math.min(1, Math.max(0, from + (target - from) * t));
       if (t < 1) frame.current = requestAnimationFrame(step);
       else done?.();
     };

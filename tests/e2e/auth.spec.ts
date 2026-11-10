@@ -2,9 +2,11 @@ import { expect, test } from "@playwright/test";
 import { logIn, logOut, openAccount, signUp } from "./helpers";
 
 test.describe("authentication", () => {
-  test("signed-out visitors open the app as guests; admin and the API still need a session", async ({ page, playwright, baseURL }) => {
+  test("signed-out visitors can browse and pick a design; their invitations, admin and the API need an account", async ({ page, playwright, baseURL }) => {
+    await page.goto("/create");
+    await expect(page.getByTestId("template-eternal-grace")).toBeVisible({ timeout: 30_000 });
     await page.goto("/invitations");
-    await expect(page).toHaveURL(/\/invitations$/, { timeout: 30_000 });
+    await expect(page).toHaveURL(/\/login\?next=%2Finvitations$/, { timeout: 30_000 });
 
     // The logo always goes to the landing page.
     await page.getByRole("link", { name: "Invite home" }).first().click();
@@ -52,7 +54,7 @@ test.describe("account menu", () => {
     if (isMobile) await account.getByTestId("mobile-account-signOut").click();
     else await account.getByRole("menuitem", { name: /log out/i }).click();
     await page.waitForURL((url) => url.pathname === "/", { timeout: 15_000 });
-    // The account session is really gone: Log in is offered, and creating starts a fresh guest.
+    // The account session is really gone: Log in is offered, and your invitations ask you to log in.
     if (isMobile) {
       await expect((await openAccount(page, true)).getByTestId("mobile-account-login")).toBeVisible();
       await page.keyboard.press("Escape");
@@ -60,7 +62,6 @@ test.describe("account menu", () => {
       await expect(page.getByRole("link", { name: "Log in" })).toBeVisible();
     }
     await page.goto("/invitations");
-    await expect(page).toHaveURL(/\/invitations$/, { timeout: 30_000 });
-    await expect((await openAccount(page, isMobile)).getByText("Guest", { exact: true })).toBeVisible();
+    await expect(page).toHaveURL(/\/login\?next=%2Finvitations$/, { timeout: 30_000 });
   });
 });

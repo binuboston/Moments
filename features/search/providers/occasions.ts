@@ -18,7 +18,7 @@ export const occasionsProvider: SearchProvider = {
         { value: OCCASION_SYNONYMS[c.slug as CategorySlug], weight: 0.8 },
         { value: c.description, weight: 0.4 },
       ]);
-      return score ? [{ id: `occasion:${c.slug}`, group: "occasions" as const, title: c.name, subtitle: `Browse ${c.name.toLowerCase()} templates`, href: routes.templatesFor(c.slug), icon: `category:${c.slug}` as const, score }] : [];
+      return score ? [{ id: `occasion:${c.slug}`, group: "occasions" as const, title: c.name, subtitle: `Browse ${c.name.toLowerCase()} designs`, href: routes.browse({ category: c.slug }), icon: `category:${c.slug}` as const, score }] : [];
     });
   },
 };

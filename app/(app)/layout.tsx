@@ -4,8 +4,8 @@ import { AccountProvider } from "@/features/auth/account-context";
 import { getAccount } from "@/lib/auth/session";
 
 /**
- * The app: home (the index, open to everyone) plus pages that need a session
- * (invitations, settings: guarded by the proxy and requireAppUser). The server
+ * The app: home (the index, open to everyone) plus pages that need an account
+ * (invitations, settings: guarded by the proxy and requireAccount). The server
  * already knows the account, so it seeds the shell (no flash).
  */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {

@@ -120,7 +120,6 @@ export const contentSchema = z.discriminatedUnion("kind", [
 export type InvitationContent = z.infer<typeof contentSchema>;
 export type InvitationContentInput = z.input<typeof contentSchema>;
 export type ContentKind = InvitationContent["kind"];
-export type ContentOf<K extends ContentKind> = Extract<InvitationContent, { kind: K }>;
 
 export const contentSchemaByKind = {
   wedding: weddingContentSchema,

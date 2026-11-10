@@ -81,7 +81,7 @@ function AccountSection({ account, onNavigate }: { account: Account | null | und
     );
 
   return (
-    <div className="grid gap-2" data-testid={account ? (account.isGuest ? "mobile-guest" : "mobile-account") : "mobile-signed-out"}>
+    <div className="grid gap-2" data-testid={account ? "mobile-account" : "mobile-signed-out"}>
       {view.identity ? (
         <div className="flex items-center gap-3 rounded-2xl bg-fill px-3 py-2.5">
           <AccountAvatar identity={view.identity} />

@@ -172,7 +172,7 @@ export function OpeningCover({ names, date, invocation, icon, particles, onRevea
 
         <div data-badge className="relative mx-auto flex size-14 items-center justify-center rounded-full bg-(--inv-accent) text-(--inv-accent-contrast) shadow-[0_10px_24px_-8px_var(--inv-accent)]">
           <span data-ripple aria-hidden className="absolute inset-0 rounded-full border-2 border-(--inv-accent) opacity-0" />
-          <Icon className="size-6 fill-current" aria-hidden />
+          <Icon className="size-6 fill-current text-white" aria-hidden />
         </div>
 
         {invocation ? (

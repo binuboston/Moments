@@ -4,7 +4,7 @@ All invitation designs follow one pattern so they stay consistent and easy to ma
 
 ## How rendering works
 
-`InvitationRenderer` (`features/templates/renderer.tsx`) is the single rendering path used by the editor preview, catalogue cards, live demos (`/demo/[slug]`) and the public page (`/e/[slug]`). It looks up the template in `features/templates/registry.ts`, resolves the theme, and renders the template component.
+`InvitationRenderer` (`features/templates/renderer.tsx`) is the single rendering path used by the editor preview, the Create flow's design cards, live demos (`/demo/[slug]`) and the public page (`/e/[slug]`). It looks up the template in `features/templates/registry.ts`, resolves the theme, and renders the template component.
 
 | Piece | Location |
 | --- | --- |
@@ -26,7 +26,7 @@ On the public page (`/e/[slug]`) and the live demo (`/demo/[slug]`) the renderer
 - **Background music** (`background-music.tsx`): starts with the Open tap, with a mute button in the corner.
 - **Quick-action dock** (`action-dock.tsx`): Directions, Calendar, RSVP and Share, shown once the guest scrolls.
 
-Previews (the editor, catalogue cards and marketing mockups) render statically: no opening card, no motion, no dock.
+Previews (the editor, the Create flow's design cards and marketing mockups) render statically: no opening card, no motion, no dock.
 
 ### Motion engine
 

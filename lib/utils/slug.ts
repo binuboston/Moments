@@ -72,7 +72,3 @@ export function generateSlug(headline: string, fallback = "invitation", random?:
   const candidate = `${base}-${randomSuffix(4, random)}`;
   return candidate.slice(0, SLUG_MAX);
 }
-
-export function isValidSlug(slug: string): boolean {
-  return slugSchema.safeParse(slug).success;
-}

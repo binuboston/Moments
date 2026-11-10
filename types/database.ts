@@ -3,7 +3,25 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 export type Database = {
   
-  "public": {
+  "graphql_public": {
+          Tables: {
+            [_ in never]: never
+          }
+          Views: {
+            [_ in never]: never
+          }
+          Functions: {
+            "graphql":
+{ Args: { "extensions"?: Json,"operationName"?: string,"query"?: string,"variables"?: Json }; Returns: Json
+                           }
+          }
+          Enums: {
+            [_ in never]: never
+          }
+          CompositeTypes: {
+            [_ in never]: never
+          }
+        },"public": {
           Tables: {
             "event_categories": {
                   Row: {
@@ -67,14 +85,14 @@ isOneToOne: false
                   ]
                 },"invitations": {
                   Row: {
-                    "category_id": string,"content": NonNullable<Json>,"created_at": string,"expires_at": string | null,"id": string,"owner_id": string,"published_at": string | null,"search_text": string | null,"settings": NonNullable<Json>,"slug": string,"status": Database["public"]['Enums']["invitation_status"],"template_id": string,"theme": NonNullable<Json>,"title": string,"updated_at": string
+                    "category_id": string,"content": NonNullable<Json>,"created_at": string,"creation_key": string | null,"expires_at": string | null,"id": string,"owner_id": string,"published_at": string | null,"search_text": string | null,"settings": NonNullable<Json>,"slug": string,"status": Database["public"]['Enums']["invitation_status"],"template_id": string,"theme": NonNullable<Json>,"title": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "category_id": string,"content"?: NonNullable<Json>,"created_at"?: string,"expires_at"?: string | null,"id"?: string,"owner_id": string,"published_at"?: string | null,"search_text"?: never,"settings"?: NonNullable<Json>,"slug": string,"status"?: Database["public"]['Enums']["invitation_status"],"template_id": string,"theme"?: NonNullable<Json>,"title"?: string,"updated_at"?: string
+                    "category_id": string,"content"?: NonNullable<Json>,"created_at"?: string,"creation_key"?: string | null,"expires_at"?: string | null,"id"?: string,"owner_id": string,"published_at"?: string | null,"search_text"?: never,"settings"?: NonNullable<Json>,"slug": string,"status"?: Database["public"]['Enums']["invitation_status"],"template_id": string,"theme"?: NonNullable<Json>,"title"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "category_id"?: string,"content"?: NonNullable<Json>,"created_at"?: string,"expires_at"?: string | null,"id"?: string,"owner_id"?: string,"published_at"?: string | null,"search_text"?: never,"settings"?: NonNullable<Json>,"slug"?: string,"status"?: Database["public"]['Enums']["invitation_status"],"template_id"?: string,"theme"?: NonNullable<Json>,"title"?: string,"updated_at"?: string
+                    "category_id"?: string,"content"?: NonNullable<Json>,"created_at"?: string,"creation_key"?: string | null,"expires_at"?: string | null,"id"?: string,"owner_id"?: string,"published_at"?: string | null,"search_text"?: never,"settings"?: NonNullable<Json>,"slug"?: string,"status"?: Database["public"]['Enums']["invitation_status"],"template_id"?: string,"theme"?: NonNullable<Json>,"title"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -313,7 +331,11 @@ export type CompositeTypes<
   : never
 
 export const Constants = {
-  "public": {
+  "graphql_public": {
+          Enums: {
+            
+          }
+        },"public": {
           Enums: {
             "attendance": ["yes", "no", "maybe"],"invitation_status": ["draft", "published", "unpublished"],"media_kind": ["cover", "gallery"],"plan_tier": ["free", "pro"],"template_status": ["draft", "published", "archived"],"template_tier": ["free", "premium"],"user_role": ["user", "admin"]
           }

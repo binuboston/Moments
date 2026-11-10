@@ -4,11 +4,6 @@ import { useSyncExternalStore } from "react";
 
 const noop = () => () => {};
 
-/** False during server rendering and hydration, true afterwards (for values that depend on the browser). */
-export function useMounted(): boolean {
-  return useSyncExternalStore(noop, () => true, () => false);
-}
-
 let minute = 0;
 function minuteSnapshot() {
   const current = Math.floor(Date.now() / 60_000) * 60_000;

@@ -23,10 +23,6 @@ export function telegramShareUrl(url: string, text: string): string {
   return `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
 }
 
-export function facebookShareUrl(url: string): string {
-  return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-}
-
 /** Google Calendar "add event" link. Dates are UTC in basic ISO format. */
 export function googleCalendarUrl(opts: { title: string; startIso: string; endIso?: string; details?: string; location?: string }): string {
   const start = toGoogleUtc(opts.startIso);

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { signUp } from "./helpers";
 
 const isDark = (page: import("@playwright/test").Page) => page.evaluate(() => document.documentElement.classList.contains("dark"));
 
@@ -27,12 +28,14 @@ test("a chosen theme sticks across pages and reloads, with no flash", async ({ p
   expect(await isDark(page)).toBe(true);
 
   // Applied before first paint: the class is there in the initial HTML response's script, before React runs.
-  await page.goto("/templates", { waitUntil: "commit" });
+  await page.goto("/help", { waitUntil: "commit" });
   await page.waitForSelector("html.dark", { state: "attached", timeout: 5000 });
   await page.reload();
   expect(await isDark(page)).toBe(true);
 
-  // Back to the device setting.
+  // Back to the device setting, from Settings (needs an account; the theme survives signing up).
+  await signUp(page, "theme");
+  expect(await isDark(page)).toBe(true);
   await page.goto("/settings");
   await expect(page).toHaveURL(/\/settings/, { timeout: 30_000 });
   await page.getByTestId("theme-system").first().click();

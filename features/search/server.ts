@@ -25,8 +25,9 @@ export async function runSearch(raw: string, options: { limit?: number; groups?:
 
   const user = await getCurrentUser();
   const ctx: SearchContext = {
-    user: user ? { id: user.id, isGuest: Boolean(user.is_anonymous) } : null,
-    supabase: user ? await createClient() : null,
+    // A leftover anonymous session (retired guest mode) searches as signed out.
+    user: user && !user.is_anonymous ? { id: user.id } : null,
+    supabase: user && !user.is_anonymous ? await createClient() : null,
   };
   const providers = SEARCH_PROVIDERS.filter((p) => (!options.groups || options.groups.includes(p.group)) && (!p.requiresSession || ctx.user));
 

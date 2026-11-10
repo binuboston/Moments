@@ -2,7 +2,7 @@ import { ArrowRightIcon, CheckIcon, ImageIcon, LockIcon, MessageCircleIcon, Pale
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/layout/container";
-import { categoryIcon } from "@/components/marketing/category-grid";
+import { categoryIcon } from "@/lib/design/category-icon";
 import { Faq } from "@/components/marketing/faq";
 import { HorizontalScroller } from "@/components/marketing/horizontal-scroller";
 import { PinnedShowcase, type ShowcaseSlide } from "@/components/marketing/pinned-showcase";
@@ -107,7 +107,7 @@ export default async function HomePage() {
                     </AppLink>
                   </Button>
                   <Button asChild size="lg" variant="outline">
-                    <Link href={ROUTES.templates}>Browse designs</Link>
+                    <Link href={ROUTES.home}>Browse designs</Link>
                   </Button>
                 </div>
               </div>
@@ -180,7 +180,7 @@ export default async function HomePage() {
         </div>
         <Container className="mt-6 lg:-mt-8 lg:pb-8">
           <Button asChild variant="outline">
-            <Link href={ROUTES.templates}>
+            <Link href={ROUTES.home}>
               See all designs <ArrowRightIcon aria-hidden />
             </Link>
           </Button>
@@ -207,7 +207,7 @@ export default async function HomePage() {
                   <li key={c.id} data-reveal className="lg:absolute" style={{ left: pos.left, top: pos.top }}>
                     <div data-speed={pos.speed}>
                       <Link
-                        href={routes.templatesFor(c.slug)}
+                        href={routes.browse({ category: c.slug })}
                         className="interactive-lift flex items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3.5 outline-none focus-visible:ring-2 focus-visible:ring-ring lg:w-52"
                       >
                         <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">

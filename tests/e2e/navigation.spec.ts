@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { signUp } from "./helpers";
+import { chooseOccasion, signUp } from "./helpers";
 
 /**
  * The header and menus for every account state, on desktop and phone
@@ -11,51 +11,31 @@ async function openAccountUi(page: Page, isMobile: boolean) {
   else await page.getByRole("button", { name: "Account menu" }).click();
 }
 
-test("signed out: home works without an account; Invitations starts a guest session", async ({ page, isMobile }) => {
+test("signed out: Home is the Create flow, with no duplicate tabs (only Log in on phones)", async ({ page, isMobile }) => {
   await page.goto("/");
   if (isMobile) {
     await page.getByRole("button", { name: "Open menu" }).click();
     const menu = page.getByTestId("mobile-signed-out");
     await expect(menu.getByTestId("mobile-account-start")).toBeVisible();
     await expect(menu.getByTestId("mobile-account-login")).toBeVisible();
+    await expect(menu).not.toContainText(/guest/i);
     await page.getByRole("button", { name: "Close menu" }).click();
   } else {
     await expect(page.getByRole("link", { name: "Log in" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Account menu" })).toHaveCount(0);
   }
-  // Home (the index) needs no session; the rail / tab bar take you into the app.
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Invitations" }).click();
-  await expect(page).toHaveURL(/\/invitations$/, { timeout: 30_000 });
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-});
-
-test("guest: the same options in the account menu and the phone menu", async ({ page, isMobile }) => {
-  await page.goto("/");
-  await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Create" }).click();
-  await expect(page).toHaveURL(/\/invitations\/new$/, { timeout: 30_000 });
-
-  // Wider screens: the account menu in the top bar.
-  if (!isMobile) {
-    await page.getByRole("button", { name: "Account menu" }).click();
-    const menu = page.getByRole("menu");
-    await expect(menu.getByText("Guest", { exact: true })).toBeVisible();
-    await expect(menu.getByRole("menuitem", { name: /create free account/i })).toBeVisible();
-    await expect(menu.getByRole("menuitem", { name: /log in/i })).toBeVisible();
-    await expect(menu.getByRole("menuitem", { name: /log out/i })).toHaveCount(0);
-    await page.keyboard.press("Escape");
-  }
-
-  // Phones: the account lives in the tab bar's Menu (the top bar has none).
-  if (isMobile) {
-    await expect(page.getByRole("button", { name: "Account menu" })).toHaveCount(0);
-    await page.getByRole("button", { name: "Open menu" }).click();
-    const sheet = page.getByTestId("mobile-guest");
-    await expect(sheet.getByText("Guest", { exact: true })).toBeVisible();
-    await expect(sheet.getByTestId("mobile-account-signup")).toBeVisible();
-    await expect(sheet.getByTestId("mobile-account-login")).toBeVisible();
-    await expect(sheet.getByTestId("mobile-account-signOut")).toHaveCount(0);
-  }
+  // Home (the index) is the Create flow for visitors, so there is no Home or Create tab; phones get Log in.
+  const primary = page.getByRole("navigation", { name: "Primary" });
+  await expect(page.getByTestId("template-eternal-grace")).toBeVisible();
+  for (const name of ["Home", "Create", "Invitations"]) await expect(primary.getByRole("link", { name })).toHaveCount(0);
+  if (isMobile) await expect(primary.getByRole("link", { name: "Log in" })).toBeVisible();
+  // The flow has one address for visitors: /create brings them back to Home, keeping the choice.
+  await page.goto("/create?category=wedding");
+  await expect(page).toHaveURL(/\/\?category=wedding$/, { timeout: 30_000 });
+  await expect(page.getByTestId("template-eternal-grace")).toBeVisible();
+  // Your invitations still need an account: the address asks to log in, then comes back.
+  await page.goto("/invitations");
+  await expect(page).toHaveURL(/\/login\?next=%2Finvitations$/, { timeout: 30_000 });
 });
 
 test("account holder: settings and log out in both menus", async ({ page, isMobile }) => {
@@ -74,13 +54,14 @@ test("account holder: settings and log out in both menus", async ({ page, isMobi
 
 test("phones keep the tab bar on the Create screen, with the wizard's action docked above it", async ({ page, isMobile }) => {
   test.skip(!isMobile, "The tab bar is a phone pattern");
-  await page.goto("/invitations/new");
-  await expect(page).toHaveURL(/\/invitations\/new/, { timeout: 30_000 });
+  await signUp(page, "tabs");
+  await page.goto("/create");
+  await expect(page).toHaveURL(/\/create/, { timeout: 30_000 });
   const create = page.getByTestId("tab-create");
   await expect(create).toBeVisible();
   await expect(create).toHaveAttribute("aria-current", "page");
 
-  await page.getByTestId("category-birthday").click();
+  await chooseOccasion(page, "birthday");
   const cont = page.getByTestId("create-invitation");
   await expect(cont).toBeVisible();
   const [bar, tabs] = await Promise.all([cont.boundingBox(), page.getByRole("navigation", { name: "Primary" }).boundingBox()]);

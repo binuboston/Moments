@@ -17,14 +17,14 @@ async function fetchAccount(): Promise<Account | null> {
   const supabase = createClient();
   const { data } = await supabase.auth.getUser();
   const user = data.user;
-  if (!user) return null;
+  // A leftover anonymous session (retired guest mode) is not an account.
+  if (!user || user.is_anonymous) return null;
   const { data: profile } = await supabase.from("profiles").select("full_name, role, plan").eq("id", user.id).maybeSingle();
   return {
     name: profile?.full_name || (user.user_metadata?.full_name as string | undefined) || "",
     email: user.email ?? "",
     role: profile?.role ?? "user",
     plan: profile?.plan ?? "free",
-    isGuest: Boolean(user.is_anonymous),
   };
 }
 

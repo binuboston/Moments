@@ -29,17 +29,17 @@ Digital event invitation SaaS. Users pick a template, enter event details, perso
 
 ```
 app/                     routes only; thin, delegate to features
-  (marketing)/           /, /templates, /templates/[slug], /pricing, /how-it-works, /help
+  (marketing)/           /about, /templates/[slug] (design pages), /pricing, /how-it-works, /help
   (auth)/                /login, /signup, /forgot-password, /reset-password
   auth/callback/         code exchange route handler
-  (dashboard)/dashboard  overview, invitations, new, [id]/edit, settings
+  (app)/                 / (dashboard or, for visitors, the Create flow), /create, /invitations, [id]/edit, [id]/rsvps, /settings, /search
   (admin)/admin          overview, templates, events, categories (server-side role check in layout)
   e/[slug]/              public invitation + opengraph-image
   api/                   route handlers: invitations, media, rsvp, admin
   sitemap.ts, robots.ts
 components/ui            design system primitives (Button, Input, Dialog, ...)
 components/motion        SmoothScroll, RevealController, HeroEntrance, NavigationProgress, SwapTransition, useFlipList, LazyMount
-components/layout        Container, SiteHeader, SiteFooter, DashboardShell
+components/layout        AppShell (SideRail, TopBar, BottomTabs), nav-items (per-audience nav), AppLink, account and support menus, Container
 components/forms         Field, FormMessage, ImageUploader
 features/templates       registry, definitions, renderer, sections, themes
 features/invitations     editor store, wizard steps, API client, mappers, slug logic
@@ -77,7 +77,7 @@ Rules:
 
 ## 5. Security model
 
-- Supabase Auth with cookie sessions via `@supabase/ssr`. `proxy.ts` refreshes the session and redirects unauthenticated users away from `/dashboard` and `/admin`. Redirects in proxy are a convenience; every page and route handler re-checks the user on the server.
+- Supabase Auth with cookie sessions via `@supabase/ssr`. `proxy.ts` refreshes the session and sends visitors without an account away from account pages (`needsAccount`: `/invitations`, `/settings`) and `/admin` to `/login?next=`. Redirects in proxy are a convenience; every page and route handler re-checks the user on the server.
 - RLS is enabled on every table. Owners can read/write their own invitations, functions, media and read/delete their own RSVPs. Anonymous visitors can read only `status = 'published'` invitations and their functions/media. Admin access is granted through `public.is_admin()` (reads `profiles.role`). Category and template reads are public; writes require admin.
 - RSVP inserts never hit the table directly. A `SECURITY DEFINER` function `submit_rsvp` verifies the invitation is published with RSVP enabled, rate-limits by hashed IP, de-duplicates by a submission key and inserts. The route handler validates the payload with Zod before calling it.
 - The service-role key is only used in `lib/supabase/admin.ts`, which imports `server-only`, and is currently needed only for test seeding and cleanup jobs.
@@ -164,15 +164,15 @@ GSAP is the only animation library. Everything lives in two places:
 
 - `blossom.tsx`: the six-petal `Blossom`, the `CornerBloom` spray (any colours) and `blossomMarkup()` for imperatively created particles.
 - `burst.ts`: one particle burst (blossoms, blossoms and stars, or confetti) used by the invitation opening card and by the app.
-- `celebrate.tsx`: `CelebrationProvider` (in the dashboard shell) and `useCelebrate()`, which fires brand-coloured bursts from an element (choosing an occasion in the wizard, going live for the first time). It does nothing under reduced motion.
+- `celebrate.tsx`: `CelebrationProvider` (in the app layout) and `useCelebrate()`, which fires brand-coloured bursts from an element (choosing an occasion in the wizard, going live for the first time). It does nothing under reduced motion.
 - The `font-serif` token (Fraunces, shared with the templates) is for emphasis only: names and celebratory lines, never UI text.
 
-**Dashboard motion.** `app/(dashboard)/dashboard/template.tsx` wraps pages in `PageEnter`: top-level blocks rise in on in-app navigation, content that streams in after a skeleton animates when it arrives, and hard loads show content instantly (no flash). The wizard and editor are skipped because their fixed action bars must not sit inside a transformed parent. Other pieces:
+**App motion.** `app/(app)/template.tsx` wraps pages in `PageEnter`: top-level blocks rise in on in-app navigation, content that streams in after a skeleton animates when it arrives, and hard loads show content instantly (no flash). The wizard and editor are skipped because their fixed action bars must not sit inside a transformed parent. Other pieces:
 
 - The shared header's navigation highlight glides between links.
 - Invitation cards tilt toward the pointer through `useTilt`, on a wrapper so the CSS hover lift is untouched. They also get a light sweep and a "days to go" chip.
 - Overview stats count up.
-- The overview hero (`features/dashboard/overview-hero.tsx`) shows a live countdown to the next event from `getOverviewSummary`.
+- Home's "Next up" pill (`features/home/next-up.tsx`) shows a live countdown to the next event from `getOverviewSummary`.
 
 **Editor.** The editor (`features/invitations/editor/`) works like this:
 
@@ -186,20 +186,14 @@ GSAP is the only animation library. Everything lives in two places:
 
 **Build cache.** If a production build does not reflect a CSS change, delete `.next/cache` and build again. A stale Turbopack cache served old CSS once during development.
 
-## 10d. Guest drafts and sign-in (2026-10-21)
+## 10d. Accounts create invitations (2026-10-26; replaces guest mode from 2026-10-21)
 
-- **Guests.** Anyone can start creating without an account. When a signed-out visitor opens `/dashboard/invitations/new`, the proxy sends them to `/start`. That page starts an anonymous Supabase session **in the browser**: anonymous sign-ins are rate-limited per client IP, so they must not run on the server. A guest is a real `authenticated` user, so every owner policy, autosave and the photo storage work unchanged.
-- **Publishing needs an account.** It is enforced three times:
-  - the publish API uses `requireAccount()`
-  - the database trigger `prevent_guest_publish` (`20261021000005_guest_sessions.sql`) blocks it
-  - the publish sheet shows `AccountGate` (sign up or log in in place) instead of the Publish button
-- **Keeping the draft.** `/api/guest/session` sets an httpOnly, HMAC-signed cookie naming the guest (`lib/auth/guest.ts`). After any sign-in, the guest's invitations move to the account (using the service role) and the guest user is deleted:
-  - **Google:** `/auth/callback` does the move
-  - **Email and password:** `/api/guest/claim` does it
-
-  Storage folders are keyed by invitation id, so photos follow automatically.
+- **Browse freely, create with an account.** Home (the Create flow for visitors), design pages and demos are open to everyone. "Continue with {design}" asks a signed-out visitor to sign up or log in in a dialog, keeping the choice (`?category&template&key`), including across email confirmation on another device. See [AUTH.md](AUTH.md#creating-needs-an-account).
+- **Why not guests.** Anonymous "guest" users had to hand their drafts to the account at sign-in. That hand-over failed whenever sign-in finished somewhere else (email confirmation on another device or in-app browser, a missing cookie), and people re-created their invitation. With an account from the first draft, nothing ever moves.
+- **Idempotent creation.** `invitations.creation_key` (unique per owner) makes every repeat of "Continue" return the same draft.
+- **Enforcement.** Pages use `requireAccount()` (`lib/auth/session.ts`) and the proxy (`needsAccount`). Every API route uses `requireUser()`, which refuses anonymous sessions. The database trigger `prevent_guest_create` refuses anonymous inserts, and `prevent_guest_publish` still blocks publishing.
+- **Legacy.** `lib/auth/guest.ts` and `/api/guest/claim` move drafts and photos left by an earlier guest session when that person signs in. Remove after 2026-11-30. `public.purge_stale_guests()` can delete leftover anonymous users.
 - **Google** sign-in is behind `NEXT_PUBLIC_AUTH_GOOGLE` and configured in Supabase (SETUP.md).
-- **Cleanup.** `public.purge_stale_guests()` deletes guests inactive for 30 days (schedule it). Their uploaded files remain in storage until a storage sweep is added.
 
 ## 10e. App structure and single sources of truth (2026-10-21)
 
@@ -207,14 +201,15 @@ Each of these has exactly one home. A lint rule (`eslint.config.mjs`, `no-restri
 
 | Concern | Source | Used by |
 | --- | --- | --- |
-| Routes | `lib/routes.ts`: `ROUTES` (static), `routes.*()` (with parameters), `PRIMARY_NAV`, `isAppPath`, `isFocusedFlow` | Every link, redirect, robots, sitemap and the proxy |
+| Routes | `lib/routes.ts`: `ROUTES` (static), `routes.*()` (with parameters), `primaryNav(audience)` (account holder: Home, Create, Invitations; visitor: only Log in, on phones, since their Home is the Create flow; unknown while loading: none), `createFlowPath(audience)` (the flow is `/` for visitors and `/create` for account holders; each page redirects the other audience, keeping `?category&template&key`), `needsAccount`, `isFocusedFlow` | Every link, redirect, robots, sitemap and the proxy |
+| Browsing designs | One flow, `NewInvitationWizard`, in the Create tab (`/create`) and on signed-out Home (`/`). Signed-in Home is the dashboard (welcome, next event, latest invitations, Create new); flow links to Home (`?category`, `?template`, `?key`) continue at `/create`. The flow: designs for an occasion (weddings unless the URL names another), an occasion select to switch, Preview on each design (the full-screen demo, `routes.demo(slug, occasion)`), then Continue. `?category=&template=` hold the choice (replaced in place, refresh-safe); `getWizardProps` (`features/invitations/wizard-data.ts`) feeds both pages. `/templates` redirects to Home; `/templates/{slug}` design pages remain | Home, /create, demo pages, search, sitemap |
 | Product name and voice | `lib/brand.ts` (`BRAND.name` is "Invite") | Metadata, social images, footer, the "Made with" badge, plan copy, `.ics` PRODID |
 | Who is using the app (browser) | `features/auth/account-context.tsx`: `AccountProvider` and `useAccount()` | Header, menus, auth UI. The root provider resolves lazily; the app shell seeds it from the server |
-| What each account state can do | `lib/auth/account-actions.ts`: `accountView(account)` gives identity, primary action and actions for signed out, guest and account holder | Desktop account dropdown and phone menu (they cannot disagree) |
-| Entering the app | `components/layout/app-link.tsx`: `AppLink` | Every link into `/dashboard`. Signed-out visitors go straight to `/start` with a full page load, so the client router never caches the proxy's redirect |
-| Who may enter | Home (`/`) is open to everyone. Pages under `SESSION_PREFIXES` (`/invitations`, `/settings`) need a session: the proxy sends visitors without one to `/start`, and `requireAppUser()` is the page-level guarantee. `/admin` needs a real login | App layout and pages |
+| What each account state can do | `lib/auth/account-actions.ts`: `accountView(account)` gives identity, primary action and actions for signed out and account holder | Desktop account dropdown and phone menu (they cannot disagree) |
+| Entering the app | `components/layout/app-link.tsx`: `AppLink` | Every link into account pages. Signed-out visitors go straight to `/login?next=` with a full page load, so the client router never caches the proxy's redirect |
+| Who may enter | Home (`/`) is open to everyone. `/create` is the account holder's Create tab; it sends visitors to Home. Pages under `ACCOUNT_PREFIXES` (`/invitations`, `/settings`) need an account: the proxy sends visitors without one to `/login?next=`, and `requireAccount()` is the page-level guarantee. `/admin` needs an account and the admin role | App layout and pages |
 
-- **Structure.** The app is the index: `/` is home (your invitations, then designs to start from). The marketing landing page lives at `/about`, and it, How it works, Pricing, Help and the legal pages are reached from the Settings & support menu. `AppShell` (rail, top bar with search, phone tab bar) wraps both the `(app)` and `(marketing)` route groups. Old `/dashboard/*` URLs redirect permanently (`next.config.ts`).
+- **Structure.** The app is the index: `/` is Home: the dashboard (welcome, next event, latest invitations, Create new) for account holders, and the Create flow for visitors. The marketing landing page lives at `/about`, and it, How it works, Pricing, Help and the legal pages are reached from the Settings & support menu. `AppShell` (rail, top bar with search, phone tab bar) wraps both the `(app)` and `(marketing)` route groups. Old `/dashboard/*` URLs redirect permanently (`next.config.ts`).
 - **Static marketing.** Marketing pages are statically rendered: they never read cookies on the server.
 - **Tests.** `tests/e2e/navigation.spec.ts` checks every account state on desktop and phone, entering the app by clicking. `tests/unit/account-and-routes.test.ts` covers the account model and the route builders.
 

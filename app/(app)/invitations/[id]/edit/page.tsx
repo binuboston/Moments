@@ -4,7 +4,8 @@ import { InvitationEditor } from "@/features/invitations/editor/invitation-edito
 import { getOwnedInvitationDraft } from "@/features/invitations/queries";
 import { getPublishedTemplates } from "@/features/templates/queries";
 import { uuid } from "@/lib/validation/common";
-import { requireAppUser } from "@/lib/auth/session";
+import { requireAccount } from "@/lib/auth/session";
+import { routes } from "@/lib/routes";
 import { createClient, getCurrentProfile } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Edit invitation", robots: { index: false } };
@@ -12,7 +13,7 @@ export const metadata: Metadata = { title: "Edit invitation", robots: { index: f
 export default async function EditInvitationPage({ params }: PageProps<"/invitations/[id]/edit">) {
   const { id } = await params;
   if (!uuid.safeParse(id).success) notFound();
-  const user = await requireAppUser();
+  const user = await requireAccount(routes.editInvitation(id));
 
   const [supabase, profile, templates] = await Promise.all([createClient(), getCurrentProfile(), getPublishedTemplates()]);
   const draft = await getOwnedInvitationDraft(supabase, id, user.id, profile?.plan ?? "free");
@@ -22,5 +23,5 @@ export default async function EditInvitationPage({ params }: PageProps<"/invitat
     .filter((t) => t.def.categories.includes(draft.categorySlug))
     .map((t) => ({ slug: t.row.slug, key: t.def.key, name: t.def.name, description: t.row.description ?? t.def.description, tier: t.row.tier, gradient: t.def.previewGradient }));
 
-  return <InvitationEditor initialDraft={draft} templates={options} isGuest={Boolean(user.is_anonymous)} />;
+  return <InvitationEditor initialDraft={draft} templates={options} />;
 }

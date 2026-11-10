@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDotDate, formatEventDate, monthGrid, formatEventTime, formatShortDate, formatTimeRange, formatTimeZoneLabel, fromLocalInputValue, isPast, safeTimeZone, toLocalInputValue } from "@/lib/utils/dates";
+import { formatDotDate, formatEventDate, monthGrid, formatEventTime, formatShortDate, formatTimeRange, formatTimeZoneLabel, fromLocalInputValue, safeTimeZone, toLocalInputValue } from "@/lib/utils/dates";
 
 describe("time zone helpers", () => {
   it("falls back to UTC for unknown zones", () => {
@@ -26,11 +26,6 @@ describe("time zone helpers", () => {
   it("handles winter offsets", () => {
     expect(fromLocalInputValue("2026-01-15T09:00", "America/New_York")).toBe("2026-01-15T09:00:00-05:00");
     expect(fromLocalInputValue("2026-07-15T09:00", "America/New_York")).toBe("2026-07-15T09:00:00-04:00");
-  });
-
-  it("detects past dates", () => {
-    expect(isPast("2000-01-01T00:00:00Z")).toBe(true);
-    expect(isPast("2999-01-01T00:00:00Z")).toBe(false);
   });
 });
 

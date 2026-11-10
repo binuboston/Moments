@@ -37,8 +37,8 @@ Local auth has email confirmations disabled (`supabase/config.toml`) so sign-up 
 3. In Authentication → URL configuration set the site URL to your production domain and add `https://<domain>/auth/callback` to redirect URLs.
 4. The `invitation-media` bucket is created by the first migration (private, 8 MB, images only).
 
-5. In Authentication → Sign In / Providers, turn on **Allow anonymous sign-ins** (guests design before creating an account). Consider enabling CAPTCHA (Authentication → Attack Protection) to stop abuse.
-6. Schedule guest cleanup, for example daily with pg_cron: `select cron.schedule('purge-guests', '0 3 * * *', $$select public.purge_stale_guests()$$);`. It removes guest users inactive for 30 days, along with their drafts.
+5. Creating needs an account (guest mode is retired), so leave **Allow anonymous sign-ins** off in production (Authentication → Sign In / Providers). Local Supabase keeps it on only for the legacy-guest tests (`tests/rls/guest-sessions.test.ts`, the legacy claim test in `tests/e2e/create-flow.spec.ts`). Consider enabling CAPTCHA (Authentication → Attack Protection, see docs/AUTH.md).
+6. Optional: `select public.purge_stale_guests();` removes leftover anonymous users (and their drafts) inactive for 30 days.
 
 ### Google sign-in
 

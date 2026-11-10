@@ -39,19 +39,16 @@ export function handle<Args extends unknown[]>(fn: (...args: Args) => Promise<Re
   };
 }
 
-/** Returns the authenticated user and a session-bound client, or throws 401. */
+/**
+ * Returns the signed-in account holder and a session-bound client, or throws
+ * 401. A leftover anonymous session (retired guest mode) is not an account.
+ */
 export async function requireUser() {
   const user = await getCurrentUser();
   if (!user) throw new ApiError(401, "You need to be logged in.", "unauthenticated");
+  if (user.is_anonymous) throw new ApiError(403, "Log in or create a free account to continue.", "account_required");
   const supabase = await createClient();
   return { user, supabase };
-}
-
-/** Requires a real (non-guest) account, e.g. for publishing. */
-export async function requireAccount() {
-  const ctx = await requireUser();
-  if (ctx.user.is_anonymous) throw new ApiError(403, "Create a free account to publish your invitation.", "account_required");
-  return ctx;
 }
 
 /** Requires an admin profile. Relies on RLS as the second line of defence. */

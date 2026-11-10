@@ -4,6 +4,4 @@ export interface Account {
   email: string;
   role: "user" | "admin";
   plan: "free" | "pro";
-  /** Designing without an account yet (anonymous session). */
-  isGuest: boolean;
 }

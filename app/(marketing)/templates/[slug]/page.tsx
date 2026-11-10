@@ -30,16 +30,16 @@ export default async function TemplateDetailPage({ params }: PageProps<"/templat
   const { row, def } = template;
   const supported = categories.filter((c) => def.categories.includes(c.slug as CategorySlug));
   const related = all.filter((t) => t.row.id !== row.id && t.def.categories.some((c) => def.categories.includes(c))).slice(0, 3);
-  // No account needed to start: signed-out visitors get a guest session on the way in.
-  const startHref = routes.newInvitation({ template: row.slug });
+  // Into the Create flow with this design chosen (visitors pick it on Home; continuing asks them to sign up).
+  const startHref = routes.newInvitation({ category: def.categories[0], template: row.slug });
 
   return (
     <Container className="py-12 sm:py-16">
       <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground max-sm:hidden">
         <ol className="flex items-center gap-2">
           <li>
-            <Link href={ROUTES.templates} className="hover:text-foreground">
-              Templates
+            <Link href={ROUTES.home} className="hover:text-foreground">
+              Designs
             </Link>
           </li>
           <li aria-hidden>/</li>
@@ -68,7 +68,7 @@ export default async function TemplateDetailPage({ params }: PageProps<"/templat
               <dt className="text-xs font-semibold tracking-wide uppercase text-muted-foreground">Works for</dt>
               <dd className="mt-2 flex flex-wrap gap-2">
                 {supported.map((c) => (
-                  <Link key={c.id} href={routes.templatesFor(c.slug)} className="rounded-full border border-border px-3 py-1 text-sm hover:border-foreground/40">
+                  <Link key={c.id} href={routes.browse({ category: c.slug })} className="rounded-full border border-border px-3 py-1 text-sm hover:border-foreground/40">
                     {c.name}
                   </Link>
                 ))}

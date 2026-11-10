@@ -44,7 +44,7 @@ function SaveIndicator() {
  * cards; Preview shows the invitation as guests see it. Settings and publishing
  * open as sheets so the page never loses its place.
  */
-export function InvitationEditor({ initialDraft, templates, isGuest = false }: { initialDraft: InvitationDraft; templates: TemplateOption[]; isGuest?: boolean }) {
+export function InvitationEditor({ initialDraft, templates }: { initialDraft: InvitationDraft; templates: TemplateOption[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -67,7 +67,7 @@ export function InvitationEditor({ initialDraft, templates, isGuest = false }: {
 
   useAutosave();
 
-  // ?publish=1 (after signing in from the publish sheet, or returning from Google): reopen it.
+  // ?publish=1 (a link straight to publishing): open the publish sheet.
   const loaded = draft?.id === initialDraft.id;
   useEffect(() => {
     if (!loaded || searchParams.get("publish") !== "1") return;
@@ -151,7 +151,7 @@ export function InvitationEditor({ initialDraft, templates, isGuest = false }: {
             <DialogTitle>{draft.status === "published" ? "Your invitation is live" : "Publish"}</DialogTitle>
             <DialogDescription>Check everything is ready, choose your link and share it.</DialogDescription>
           </DialogHeader>
-          <PublishPanel isGuest={isGuest} />
+          <PublishPanel />
         </DialogContent>
       </Dialog>
     </div>

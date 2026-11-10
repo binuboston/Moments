@@ -1,25 +1,22 @@
 "use client";
 
-import { EyeIcon, EyeOffIcon, SparklesIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { publicEnv } from "@/lib/env";
 import { createClient } from "@/lib/supabase/client";
-import { useAccount } from "@/features/auth/account-context";
 import { cn } from "@/lib/utils/cn";
 import { ROUTES, routes } from "@/lib/routes";
 
 export const googleEnabled = () => publicEnv().NEXT_PUBLIC_AUTH_GOOGLE === "true";
 
-/** Whether this browser is designing as a guest (anonymous session). Null until known. */
-export function useIsGuest(): boolean | null {
-  const account = useAccount();
-  return account === undefined ? null : Boolean(account?.isGuest);
-}
-
-/** Moves this browser's guest drafts to the account that just signed in (no-op without a guest). */
+/**
+ * Legacy (retired guest mode, remove after 2026-11-30): moves drafts left by
+ * an earlier guest session in this browser to the account that just signed in.
+ * A no-op when there is none.
+ */
 export async function claimGuestDrafts(): Promise<number> {
   try {
     const res = await fetch("/api/guest/claim", { method: "POST" });
@@ -41,12 +38,8 @@ function GoogleMark() {
   );
 }
 
-/**
- * "Continue with Google". Works for new and existing accounts; a guest's drafts
- * are kept (the auth callback moves them). Hidden unless Google is configured.
- */
+/** "Continue with Google". Works for new and existing accounts. Hidden unless Google is configured. */
 export function GoogleButton({ next, label = "Continue with Google" }: { next: string; label?: string }) {
-  const isGuest = useIsGuest();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   if (!googleEnabled()) return null;
@@ -55,8 +48,6 @@ export function GoogleButton({ next, label = "Continue with Google" }: { next: s
     setLoading(true);
     setError(null);
     const supabase = createClient();
-    // Refresh this browser's guest marker so the callback can keep the drafts.
-    if (isGuest) await fetch("/api/guest/session", { method: "POST" }).catch(() => undefined);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: `${window.location.origin}${routes.authCallback(next)}`, queryParams: { prompt: "select_account" } },
@@ -158,17 +149,5 @@ export function StrengthMeter({ value }: { value: string }) {
       </div>
       <span className="w-12 text-right text-xs text-muted-foreground">{level.label}</span>
     </div>
-  );
-}
-
-/** Reassurance shown when a guest signs in: their draft comes with them. */
-export function GuestNotice({ className }: { className?: string }) {
-  const guest = useIsGuest();
-  if (!guest) return null;
-  return (
-    <p className={cn("flex items-start gap-2.5 rounded-2xl bg-tone-rose px-4 py-3 text-sm text-tone-rose-ink", className)} data-testid="guest-notice">
-      <SparklesIcon className="mt-0.5 size-4 shrink-0" aria-hidden />
-      Your draft is safe. It moves to your account as soon as you sign in.
-    </p>
   );
 }

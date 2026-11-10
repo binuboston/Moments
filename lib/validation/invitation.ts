@@ -9,6 +9,8 @@ import { slugSchema } from "@/lib/utils/slug";
 export const createInvitationSchema = z.object({
   categorySlug: z.enum(CATEGORY_SLUGS),
   templateSlug: z.string().trim().min(1).max(60),
+  /** One per "Continue with this design": repeats return the same draft. */
+  creationKey: z.uuid().optional(),
 });
 
 /** Partial updates from the editor. Content is loosely validated while drafting. */

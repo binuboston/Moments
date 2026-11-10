@@ -6,8 +6,8 @@ import { ROUTES } from "@/lib/routes";
 
 /**
  * Exchanges the PKCE code from OAuth (Google) and email links (confirmation,
- * recovery) for a session. If this browser was designing as a guest, the
- * guest's drafts move to the signed-in account before redirecting.
+ * recovery) for a session. Legacy: drafts from an earlier guest session in
+ * this browser move to the account before redirecting (lib/auth/guest.ts).
  */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);

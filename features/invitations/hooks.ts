@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ApiClientError } from "@/lib/api/client";
 import { invitationKeys, invitationsApi, type ListParams } from "@/features/invitations/api";
-import type { InvitationDraft, InvitationListItem, InvitationListResponse } from "@/features/invitations/types";
+import type { InvitationListItem, InvitationListResponse } from "@/features/invitations/types";
 
 export function useInvitationList(params: ListParams, initialData?: InvitationListResponse) {
   return useQuery({
@@ -13,15 +13,6 @@ export function useInvitationList(params: ListParams, initialData?: InvitationLi
     queryFn: () => invitationsApi.list(params),
     initialData,
     placeholderData: keepPreviousData,
-  });
-}
-
-export function useInvitation(id: string, initialData?: InvitationDraft) {
-  return useQuery({
-    queryKey: invitationKeys.detail(id),
-    queryFn: () => invitationsApi.get(id),
-    initialData,
-    staleTime: Infinity,
   });
 }
 

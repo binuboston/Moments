@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Field, fieldAria } from "@/components/forms/field";
-import { categoryIcon } from "@/components/marketing/category-grid";
+import { categoryIcon } from "@/lib/design/category-icon";
 import { apiFetch } from "@/lib/api/client";
 import { errorMessage } from "@/features/invitations/hooks";
 import { CATEGORY_SLUGS, type EventCategory } from "@/types/domain";

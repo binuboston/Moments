@@ -47,6 +47,10 @@ const nextConfig: NextConfig = {
     return [
       { source: "/dashboard", destination: "/", permanent: true },
       { source: "/dashboard/:path*", destination: "/:path*", permanent: true },
+      // The Create wizard moved out of /invitations (query strings, including the draft key, carry over).
+      { source: "/invitations/new", destination: "/create", permanent: true },
+      // Browsing designs merged into Home (filters carry over); /templates/{slug} design pages stay.
+      { source: "/templates", destination: "/", permanent: true },
     ];
   },
   async headers() {

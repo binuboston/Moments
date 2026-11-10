@@ -1,11 +1,12 @@
-import { expect, test, type Page } from "@playwright/test";
+import { randomUUID } from "node:crypto";
+import { expect, test } from "@playwright/test";
 import { unconfirmedAccount } from "./admin";
-import { createInvitation, emailLink, PASSWORD, uniqueEmail, waitForDraft } from "./helpers";
+import { emailLink, PASSWORD, uniqueEmail } from "./helpers";
 
 /**
  * Email confirmation via /auth/confirm (token hash): works on any device,
- * keeps the destination, rejects used links, and brings a guest's drafts
- * along when confirmed in the guest's browser.
+ * keeps the destination (the wizard, with the chosen design and its draft
+ * key), creates exactly one draft and rejects used links.
  */
 const confirmUrl = (hash: string, next?: string) => {
   const q = new URLSearchParams({ token_hash: hash, type: "signup" });
@@ -13,38 +14,27 @@ const confirmUrl = (hash: string, next?: string) => {
   return `/auth/confirm?${q}`;
 };
 
-async function guestDraft(page: Page) {
-  const id = await createInvitation(page, "birthday", "balloon-bash");
-  await page.getByLabel("Who's celebrating?").fill("Zoe");
-  await waitForDraft(page, id, (d) => (d.content as { celebrantName?: string }).celebrantName, "Zoe");
-  return id;
-}
-
-test("confirming in the guest's browser signs in, keeps the destination and brings the draft; the link is single-use", async ({ browser, page }) => {
-  const id = await guestDraft(page);
+test("confirming on another device continues with the chosen design, once; the link is single-use", async ({ browser }) => {
   const hash = await unconfirmedAccount(uniqueEmail("confirm"), PASSWORD);
+  const wizard = `/create?category=birthday&template=balloon-bash&key=${randomUUID()}`;
 
-  await page.goto(confirmUrl(hash, `/invitations/${id}/edit`));
-  await expect(page).toHaveURL(new RegExp(`/invitations/${id}/edit$`), { timeout: 30_000 });
-  expect((await page.request.get(`/api/invitations/${id}`)).status()).toBe(200);
-  const list = (await (await page.request.get("/api/invitations")).json()) as { total: number };
+  // A different browser from the one that signed up.
+  const other = await (await browser.newContext()).newPage();
+  await other.goto(confirmUrl(hash, wizard));
+  await other.waitForURL(/\/invitations\/[0-9a-f-]{36}\/edit/, { timeout: 30_000 });
+  const id = other.url().match(/invitations\/([0-9a-f-]{36})\/edit/)![1];
+  const draft = (await (await other.request.get(`/api/invitations/${id}`)).json()) as { templateKey: string };
+  expect(draft.templateKey).toBe("balloon-bash");
+
+  // Opening the wizard link again (refresh, Back, a second click) reopens the same draft.
+  await other.goto(wizard);
+  await other.waitForURL(new RegExp(`/invitations/${id}/edit`), { timeout: 30_000 });
+  const list = (await (await other.request.get("/api/invitations")).json()) as { total: number };
   expect(list.total).toBe(1);
 
   const again = await (await browser.newContext()).newPage();
-  await again.goto(confirmUrl(hash, "/invitations"));
+  await again.goto(confirmUrl(hash, wizard));
   await expect(again).toHaveURL(/\/login\?error=link/);
-});
-
-test("confirming on another device signs in there; the guest's drafts stay with the guest", async ({ browser, page }) => {
-  const id = await guestDraft(page);
-  const hash = await unconfirmedAccount(uniqueEmail("other-device"), PASSWORD);
-
-  const other = await (await browser.newContext()).newPage();
-  await other.goto(`${confirmUrl(hash, "/invitations")}&invitation=${id}`);
-  await expect(other).toHaveURL(/\/invitations$/, { timeout: 30_000 });
-  // Never moved because of a client-supplied id.
-  expect((await other.request.get(`/api/invitations/${id}`)).status()).toBe(404);
-  expect((await page.request.get(`/api/invitations/${id}`)).status()).toBe(200);
 });
 
 test("interrupted sign-up: an unconfirmed account cannot log in, can resend, and the new link works on any device", async ({ browser, page }) => {

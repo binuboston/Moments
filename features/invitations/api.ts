@@ -28,7 +28,7 @@ export const invitationsApi = {
     return apiFetch<InvitationListResponse>(`/api/invitations${qs ? `?${qs}` : ""}`);
   },
   get: (id: string) => apiFetch<InvitationDraft>(`/api/invitations/${id}`),
-  create: (body: { categorySlug: CategorySlug; templateSlug: string; timezone?: string }) =>
+  create: (body: { categorySlug: CategorySlug; templateSlug: string; timezone?: string; creationKey?: string }) =>
     apiFetch<{ id: string; slug: string }>("/api/invitations", { method: "POST", json: body }),
   update: (id: string, body: UpdateInvitationInput) => apiFetch<InvitationDraft>(`/api/invitations/${id}`, { method: "PATCH", json: body }),
   remove: (id: string) => apiFetch<{ ok: true }>(`/api/invitations/${id}`, { method: "DELETE" }),

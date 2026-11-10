@@ -29,9 +29,9 @@ test("log out ends this device only; log out everywhere ends them all", async ({
   await b.waitForURL((u) => u.pathname === "/");
   expect(await status(b)).toBe(401);
   await expect.poll(() => status(c), { timeout: 15_000 }).toBe(401);
-  // C no longer has the account: like any signed-out visitor, the app gives it a fresh guest studio.
+  // C no longer has the account: like any signed-out visitor, it is asked to log in.
   await c.goto("/settings");
-  await expect(c.getByRole("heading", { name: "Create your account" })).toBeVisible();
+  await expect(c).toHaveURL(/\/login\?next=%2Fsettings$/, { timeout: 30_000 });
   await expect(c.getByText(email)).toHaveCount(0);
 });
 

@@ -1,19 +1,22 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon, CheckIcon, LockIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { ArrowRightIcon, CheckIcon, EyeIcon, LockIcon } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { useCelebrate } from "@/components/brand/celebrate";
 import { SwapTransition } from "@/components/motion/swap-transition";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { IconTile } from "@/components/ui/icon-tile";
-import { categoryStyle } from "@/lib/design/tones";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { categoryStyle, TONES } from "@/lib/design/tones";
 import { DeviceFrame } from "@/features/templates/components/device-frame";
 import { InvitationRenderer } from "@/features/templates/renderer";
 import { sampleView } from "@/features/templates/sample-data";
+import { AccountGate } from "@/features/auth/account-gate";
+import { useAccount } from "@/features/auth/account-context";
 import { invitationsApi } from "@/features/invitations/api";
 import { errorMessage } from "@/features/invitations/hooks";
 import { canUseTemplate } from "@/lib/entitlements";
@@ -42,124 +45,193 @@ interface Props {
   categories: CategoryOption[];
   templates: TemplateOption[];
   plan: PlanTier;
-  preselectedTemplate?: string;
-  preselectedCategory?: CategorySlug;
+  /** Set when coming back from sign-up or log-in (?key=): create this draft straight away. */
+  resumeKey?: string;
 }
 
-export function NewInvitationWizard({ categories, templates, plan, preselectedTemplate, preselectedCategory }: Props) {
+/** The occasion shown first when the URL names none: most invitations are for weddings. */
+const DEFAULT_OCCASION: CategorySlug = "wedding";
+
+type OccasionPickerProps = { categories: CategoryOption[]; value?: CategorySlug; onChange: (slug: CategorySlug) => void };
+
+/**
+ * Switches the occasion whose designs are shown. Phones: a compact select
+ * (one line, native-feeling list). Wider screens: every occasion as a
+ * selectable chip with its icon and colour, so the choice is visible at once.
+ */
+function OccasionPicker(props: OccasionPickerProps) {
+  return (
+    <>
+      <div className="w-full sm:hidden">
+        <OccasionSelect {...props} />
+      </div>
+      <OccasionChips {...props} />
+    </>
+  );
+}
+
+function OccasionSelect({ categories, value, onChange }: OccasionPickerProps) {
+  return (
+    <Select value={value} onValueChange={(v) => onChange(v as CategorySlug)}>
+      <SelectTrigger aria-label="Occasion" className="h-11 w-full" data-testid="occasion-select">
+        <SelectValue placeholder="Choose an occasion" />
+      </SelectTrigger>
+      <SelectContent>
+        {categories.map((c) => {
+          const style = categoryStyle(c.slug);
+          return (
+            <SelectItem key={c.slug} value={c.slug} data-testid={`occasion-option-${c.slug}`}>
+              <span className="flex items-center gap-2">
+                <style.icon className="size-4" aria-hidden />
+                {c.name}
+              </span>
+            </SelectItem>
+          );
+        })}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function OccasionChips({ categories, value, onChange }: OccasionPickerProps) {
+  return (
+    <div role="radiogroup" aria-label="Occasion" className="hidden flex-wrap gap-2 sm:flex">
+      {categories.map((c) => {
+        const style = categoryStyle(c.slug);
+        const active = value === c.slug;
+        return (
+          <button
+            key={c.slug}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => onChange(c.slug)}
+            data-testid={`occasion-chip-${c.slug}`}
+            className={cn(
+              "inline-flex h-11 items-center gap-2 rounded-2xl pr-4 pl-3 text-sm font-semibold transition-[filter,box-shadow] outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              TONES[style.tone],
+              active ? "ring-2 ring-foreground" : "hover:brightness-95",
+            )}
+          >
+            <style.icon className="size-5" aria-hidden />
+            <span className="text-foreground">{c.name}</span>
+            {active ? <CheckIcon className="size-4 text-foreground" aria-hidden /> : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** One key per chosen design (crypto.randomUUID needs a secure context; LAN testing over http does not have one). */
+function newCreationKey(): string {
+  if (typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  const b = crypto.getRandomValues(new Uint8Array(16));
+  b[6] = (b[6] & 0x0f) | 0x40;
+  b[8] = (b[8] & 0x3f) | 0x80;
+  const h = Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+}
+
+/**
+ * Pick an occasion and a design (open to everyone), then continue to the
+ * editor. Continuing needs an account: signed-out visitors sign up or log in
+ * in a dialog, and the choice is kept through sign-up, email confirmation (on
+ * any device) and log-in via `?category&template&key`. Every attempt carries
+ * the same creation key, so retries, refreshes and returns never make a second
+ * draft.
+ */
+export function NewInvitationWizard({ categories, templates, plan, resumeKey }: Props) {
   const router = useRouter();
-  const celebrate = useCelebrate();
-  const presetTemplate = templates.find((t) => t.slug === preselectedTemplate);
-  const initialCategory = preselectedCategory && categories.some((c) => c.slug === preselectedCategory) ? preselectedCategory : presetTemplate?.categories[0];
-  const [category, setCategory] = useState<CategorySlug | undefined>(initialCategory);
-  const [templateSlug, setTemplateSlug] = useState<string | undefined>(presetTemplate?.slug);
-  const [step, setStep] = useState<1 | 2>(initialCategory ? 2 : 1);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const account = useAccount();
+
+  // The URL holds the choice (?category=, ?template=; shareable, refresh-safe). Without one, the designs
+  // for the primary occasion (weddings) show straight away; the occasion select switches them.
+  const fromUrl = templates.find((t) => t.slug === searchParams.get("template"));
+  const urlCategory = searchParams.get("category");
+  const fallback = categories.some((c) => c.slug === DEFAULT_OCCASION) ? DEFAULT_OCCASION : categories[0]?.slug;
+  const category = categories.some((c) => c.slug === urlCategory) ? (urlCategory as CategorySlug) : (fromUrl?.categories[0] ?? fallback);
+  const templateSlug = fromUrl && category && fromUrl.categories.includes(category) ? fromUrl.slug : undefined;
+  // The ref is the source of truth (a second click can arrive before a re-render); the state renders the dialog's link.
+  const keyRef = useRef(resumeKey ?? "");
+  const [creationKey, setCreationKey] = useState(() => resumeKey ?? "");
+  const [gateOpen, setGateOpen] = useState(false);
 
   const create = useMutation({
     mutationFn: invitationsApi.create,
-    onSuccess: (data) => router.push(routes.editInvitation(data.id)),
+    // Replace: Back must not return to a URL that would continue again.
+    onSuccess: (data) => router.replace(routes.editInvitation(data.id)),
     onError: (err) => toast.error(errorMessage(err)),
   });
 
   const available = category ? templates.filter((t) => t.categories.includes(category)) : [];
   const selected = available.find((t) => t.slug === templateSlug);
 
-  return (
-    <div className="grid min-w-0 grid-cols-1 gap-6 pb-24 sm:gap-8 sm:pb-0">
-      {/* Phones: one-line progress with a segmented bar. */}
-      <div className="sm:hidden" aria-hidden>
-        <p className="text-xs font-medium text-muted-foreground">
-          Step {step} of 3 · <span className="text-foreground">{step === 1 ? "Event type" : "Template"}</span>
-        </p>
-        <div className="mt-2 grid grid-cols-3 gap-1.5">
-          {[1, 2, 3].map((n) => (
-            <span key={n} className="relative h-1 overflow-hidden rounded-full bg-border">
-              <span className={cn("absolute inset-0 origin-left rounded-full bg-primary transition-[scale] duration-700 ease-(--ease-out-quart)", n <= step ? "scale-x-100" : "scale-x-0")} />
-            </span>
-          ))}
+  /** Writes the choice to the URL (replacing the entry, no server round trip). A new choice gets a new key. */
+  const choose = (next: { category?: CategorySlug; template?: string }) => {
+    const params = new URLSearchParams(window.location.search);
+    for (const [name, value] of [["category", next.category], ["template", next.template]] as const) {
+      if (value) params.set(name, value);
+      else params.delete(name);
+    }
+    params.delete("key");
+    const qs = params.toString();
+    window.history.replaceState(null, "", qs ? `${pathname}?${qs}` : pathname);
+    keyRef.current = "";
+  };
+  const keyForChoice = () => {
+    keyRef.current ||= newCreationKey();
+    setCreationKey(keyRef.current);
+    return keyRef.current;
+  };
+  const startDraft = (key: string) => {
+    if (!category || !selected) return;
+    create.mutate({ categorySlug: category, templateSlug: selected.slug, timezone: detectTimeZone(), creationKey: key });
+  };
+  const onContinue = () => {
+    if (!category || !selected || create.isPending) return;
+    const key = keyForChoice();
+    if (account) startDraft(key);
+    else setGateOpen(true);
+  };
+
+  // Back from sign-up, log-in or an email confirmation: continue once, without another click.
+  const resuming = Boolean(resumeKey && account && category && selected);
+  const resumed = useRef(false);
+  useEffect(() => {
+    if (!resuming || resumed.current || !resumeKey) return;
+    resumed.current = true;
+    startDraft(resumeKey);
+    // startDraft only reads values fixed while resuming.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resuming, resumeKey]);
+
+  if (resuming && !create.isError) {
+    return (
+      <div role="status" aria-live="polite" className="grid min-h-[50vh] place-items-center text-center" data-testid="resuming-draft">
+        <div>
+          <span className="mx-auto block size-10 animate-spin rounded-full border-2 border-primary/20 border-t-primary motion-reduce:animate-none" aria-hidden />
+          <p className="mt-5 text-lg font-semibold tracking-tight">Setting up your {selected?.name} invitation…</p>
+          <p className="mt-1 text-sm text-muted-foreground">Just a moment.</p>
         </div>
       </div>
-      <ol className="hidden items-center gap-3 text-sm sm:flex" aria-label="Progress">
-        {[
-          { n: 1, label: "Event type" },
-          { n: 2, label: "Template" },
-          { n: 3, label: "Details & design" },
-        ].map((s, i) => (
-          <li key={s.n} className="flex items-center gap-3">
-            <span className={cn("flex size-7 items-center justify-center rounded-full text-xs font-semibold transition-colors duration-(--duration-slow)", step >= s.n ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
-              {step > s.n ? <CheckIcon className="size-3.5" /> : s.n}
-            </span>
-            <span className={cn(step === s.n ? "font-medium" : "text-muted-foreground")}>{s.label}</span>
-            {i < 2 ? (
-              <span className="relative h-px w-10 overflow-hidden bg-border" aria-hidden>
-                <span className={cn("absolute inset-0 origin-left bg-primary transition-[scale] duration-700 ease-(--ease-out-quart)", step > s.n ? "scale-x-100" : "scale-x-0")} />
-              </span>
-            ) : null}
-          </li>
-        ))}
-      </ol>
+    );
+  }
 
-      <SwapTransition swapKey={step}>
-      {step === 1 ? (
-        <section aria-labelledby="step-category">
-          <h2 id="step-category" className="text-base font-semibold sm:text-lg">
-            What are you celebrating?
+  return (
+    <div className="grid min-w-0 grid-cols-1 gap-6 pb-24 sm:gap-8 sm:pb-0">
+      <section aria-labelledby="step-template" className="grid min-w-0 grid-cols-1 gap-5 sm:gap-6">
+          {/* No visible title or stepper: the designs are the screen. The heading stays for screen readers. */}
+          <h2 id="step-template" className="sr-only">
+            Choose a design
           </h2>
-          <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {categories.map((c) => {
-              const style = categoryStyle(c.slug);
-              const active = category === c.slug;
-              return (
-                <li key={c.slug}>
-                  <button
-                    type="button"
-                    data-testid={`category-${c.slug}`}
-                    onClick={(e) => {
-                      // A small blossom flourish from the chosen occasion as the step changes.
-                      celebrate(e.currentTarget, { count: 18, scale: 0.45 });
-                      setCategory(c.slug);
-                      setTemplateSlug(undefined);
-                      setStep(2);
-                    }}
-                    aria-pressed={active}
-                    className={cn(
-                      // Phones: a compact tile (icon and name); the description and arrow join on wider screens.
-                      "group surface-card surface-hover flex h-full w-full items-center gap-3 p-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring sm:flex-col sm:items-stretch sm:gap-2 sm:p-5",
-                      active && "ring-2 ring-primary",
-                    )}
-                  >
-                    <span className="flex shrink-0 items-start justify-between sm:mb-2">
-                      <IconTile icon={style.icon} tone={style.tone} className="transition-[rotate,scale] duration-(--duration-slow) ease-(--ease-out-quart) group-hover:-rotate-6 group-hover:scale-110 max-sm:size-9 max-sm:[&>svg]:size-4" />
-                      <span aria-hidden className="flex size-8 items-center justify-center rounded-full bg-fill max-sm:hidden transition-[background-color,rotate] duration-(--duration-slow) ease-(--ease-out-quart) group-hover:rotate-45 group-hover:bg-fill-hover">
-                        <ArrowUpRightIcon className="size-4" />
-                      </span>
-                    </span>
-                    <span className="min-w-0 truncate text-sm leading-snug font-semibold tracking-tight sm:text-lg">{c.name}</span>
-                    {c.description ? <span className="line-clamp-2 text-xs text-muted-foreground max-sm:hidden">{c.description}</span> : null}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ) : (
-        <section aria-labelledby="step-template" className="grid min-w-0 grid-cols-1 gap-5 sm:gap-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 id="step-template" className="text-base font-semibold sm:text-lg">
-                Choose a template
-              </h2>
-              <p className="text-sm text-muted-foreground max-sm:hidden">
-                Showing designs for <span className="font-medium text-foreground">{categories.find((c) => c.slug === category)?.name}</span>. You can switch later.
-              </p>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="max-sm:bg-fill">
-              <ArrowLeftIcon aria-hidden />
-              <span className="sm:hidden">{categories.find((c) => c.slug === category)?.name} · Change</span>
-              <span className="max-sm:hidden">Change event type</span>
-            </Button>
+          <div className="flex flex-wrap items-end gap-3">
+            <OccasionPicker categories={categories} value={category} onChange={(slug) => choose({ category: slug })} />
           </div>
 
+          <SwapTransition swapKey={category ?? ""}>
           <ul className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
             {available.map((t) => {
               const allowed = canUseTemplate(plan, t.tier);
@@ -182,6 +254,15 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
                           </Badge>
                         )}
                       </div>
+                      {/* Above the stretched select button: opens the full-screen demo with sample content. */}
+                      <Link
+                        href={routes.demo(t.slug, category)}
+                        className="absolute bottom-3 left-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-900 shadow-sm backdrop-blur transition-colors hover:bg-white focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:bottom-5 sm:left-5 sm:px-3.5 sm:py-2 sm:text-sm"
+                        aria-label={`Preview ${t.name}`}
+                        data-testid={`preview-${t.slug}`}
+                      >
+                        <EyeIcon className="size-3.5 sm:size-4" aria-hidden /> Preview
+                      </Link>
                       {active ? (
                         <span className="absolute top-3 right-3 flex size-6 sm:top-5 sm:right-5 sm:size-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
                           <CheckIcon className="size-4" />
@@ -194,7 +275,7 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
                         <button
                           type="button"
                           data-testid={`template-${t.slug}`}
-                          onClick={() => setTemplateSlug(t.slug)}
+                          onClick={() => choose({ category, template: t.slug })}
                           aria-pressed={active}
                           className="text-left outline-none after:absolute after:inset-0 after:rounded-3xl focus-visible:after:ring-2 focus-visible:after:ring-ring focus-visible:after:ring-offset-4 focus-visible:after:ring-offset-background"
                         >
@@ -209,14 +290,11 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
               );
             })}
           </ul>
-
-
-        </section>
-      )}
-      </SwapTransition>
+          </SwapTransition>
+      </section>
 
       {/* Outside the animated region: a transformed ancestor would break position: fixed mid-transition. */}
-      {step === 2 ? (
+      {category ? (
           // Phones: docked just above the tab bar (4rem + safe area); it stays visible here because this is the Create tab.
           <div className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur-md sm:sticky sm:bottom-[calc(5rem+env(safe-area-inset-bottom))] sm:flex sm:justify-end sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none md:bottom-4 [&>button]:w-full sm:[&>button]:w-auto">
           <Button
@@ -224,12 +302,32 @@ export function NewInvitationWizard({ categories, templates, plan, preselectedTe
             disabled={!selected}
             loading={create.isPending}
             data-testid="create-invitation"
-            onClick={() => category && selected && create.mutate({ categorySlug: category, templateSlug: selected.slug, timezone: detectTimeZone() })}
+            onClick={onContinue}
           >
             Continue with {selected?.name ?? "a template"} <ArrowRightIcon aria-hidden />
           </Button>
         </div>
       ) : null}
+
+      <Dialog open={gateOpen} onOpenChange={setGateOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Create your free account</DialogTitle>
+            <DialogDescription>Sign up or log in to continue with your design.</DialogDescription>
+          </DialogHeader>
+          {gateOpen && category && selected ? (
+            <AccountGate
+              title="Create your free account to continue"
+              description={`We'll set up your ${selected.name} invitation right after. It's free.`}
+              next={`${pathname}?${new URLSearchParams({ category, template: selected.slug, key: creationKey })}`}
+              onSuccess={() => {
+                setGateOpen(false);
+                startDraft(keyRef.current);
+              }}
+            />
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

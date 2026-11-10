@@ -1,4 +1,3 @@
-import type { CategorySlug } from "@/types/domain";
 import { botanicalNoir } from "@/features/templates/designs/botanical-noir";
 import { balloonBash } from "@/features/templates/designs/balloon-bash";
 import { confettiPop } from "@/features/templates/designs/confetti-pop";
@@ -41,8 +40,4 @@ export function getTemplateOrFallback(key: string): TemplateDefinition {
 
 export function listTemplates(): TemplateDefinition[] {
   return Object.values(TEMPLATE_REGISTRY);
-}
-
-export function templatesForCategory(category: CategorySlug): TemplateDefinition[] {
-  return listTemplates().filter((t) => t.categories.includes(category));
 }

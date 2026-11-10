@@ -24,10 +24,6 @@ const utc = (date: string) => {
   return Date.UTC(y, m - 1, d);
 };
 
-export function isLocalDate(value: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value);
-}
-
 /** "2026-12-12T18:30" → { date: "2026-12-12", time: "18:30" } (empty parts for ""). */
 export function splitLocal(value: string): { date: string; time: string } {
   const [date = "", time = ""] = value.split("T");

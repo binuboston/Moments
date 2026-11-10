@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils/cn";
 
 /*
  * Cloudflare Turnstile for public auth operations (sign-up, log-in, password
- * reset, resend confirmation, guest sessions).
+ * reset, resend confirmation).
  *
  * The browser only obtains a token; verification happens on the server, in
  * Supabase Auth (Dashboard → Authentication → Attack Protection → CAPTCHA,

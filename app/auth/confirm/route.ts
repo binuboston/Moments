@@ -13,8 +13,8 @@ const isType = (v: string | null): v is EmailOtpType => v !== null && (TYPES as 
  * Email links (confirmation, password recovery, invites, email changes). The
  * link carries a one-time token hash (supabase/templates/*.html), verified
  * server-side, so it works on any device, unlike PKCE codes (/auth/callback).
- * If this browser was designing as a guest, the guest's drafts move to the
- * account before redirecting.
+ * Legacy: drafts from an earlier guest session in this browser move to the
+ * account before redirecting (lib/auth/guest.ts).
  */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);

@@ -39,8 +39,8 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
           title={`Nothing matches “${term}”`}
           description="Try an occasion (wedding, birthday), a template name, a guest's name or a question."
           action={
-            <Link href={ROUTES.templates} className="text-sm font-medium text-primary underline-offset-4 hover:underline">
-              Browse all templates
+            <Link href={ROUTES.home} className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+              Browse all designs
             </Link>
           }
         />

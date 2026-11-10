@@ -10,17 +10,18 @@ const ESCAPES = ["%2F%09%2Fevil.example", "%2F%0A%2Fevil.example", "%2F%2Fevil.e
 
 const onSite = (page: import("@playwright/test").Page, baseURL?: string) => new URL(page.url()).origin === new URL(baseURL!).origin;
 
-test("/start never forwards off-site", async ({ page, baseURL }) => {
+test("the old /start link never forwards off-site", async ({ page, baseURL }) => {
   for (const next of ESCAPES) {
     await page.goto(`/start?next=${next}`);
     await page.waitForURL((u) => u.pathname !== "/start", { timeout: 30_000 });
     expect(onSite(page, baseURL), `${next} -> ${page.url()}`).toBe(true);
+    expect(new URL(page.url()).searchParams.get("next") ?? "/").toBe("/");
   }
 });
 
-test("/start still forwards to a valid internal page", async ({ page }) => {
-  await page.goto(`/start?next=${encodeURIComponent("/invitations/new?category=wedding")}`);
-  await expect(page).toHaveURL(/\/invitations\/new\?category=wedding$/, { timeout: 30_000 });
+test("the old /start link goes to sign-up, keeping a valid internal next", async ({ page }) => {
+  await page.goto(`/start?next=${encodeURIComponent("/create?category=wedding")}`);
+  await expect(page).toHaveURL(/\/signup\?next=%2Fcreate%3Fcategory%3Dwedding$/, { timeout: 30_000 });
 });
 
 test("logging in never forwards off-site, and still honours an internal next", async ({ page, baseURL }) => {

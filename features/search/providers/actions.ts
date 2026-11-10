@@ -20,7 +20,7 @@ export const actionsProvider: SearchProvider = {
   group: "actions",
   label: "Quick actions",
   async search(query, ctx) {
-    const account = ctx.user && !ctx.user.isGuest;
+    const account = Boolean(ctx.user);
     const actions: Action[] = [
       { id: "create", title: "Create an invitation", keywords: "new create make start design invite card", href: ROUTES.newInvitation, icon: "plus" },
       ...CATEGORY_SLUGS.map((slug) => ({
@@ -30,7 +30,7 @@ export const actionsProvider: SearchProvider = {
         href: routes.newInvitation({ category: slug }),
         icon: `category:${slug}` as const,
       })),
-      { id: "browse", title: "Browse templates", keywords: "templates designs themes catalogue browse explore", href: ROUTES.templates, icon: "layout" },
+      { id: "browse", title: "Browse designs", keywords: "templates designs themes catalogue browse explore", href: ROUTES.home, icon: "layout" },
       ...(account
         ? [
             { id: "settings", title: "Account settings", keywords: "settings profile account name email plan", href: ROUTES.settings, icon: "settings" as const },

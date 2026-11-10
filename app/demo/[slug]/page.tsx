@@ -37,11 +37,13 @@ export default async function TemplateDemoPage({ params, searchParams }: PagePro
   return (
     <main className="min-h-screen">
       <div className="fixed top-3 left-3 z-[75] flex items-center gap-2 rounded-full border border-black/10 bg-white/85 py-1.5 pr-1.5 pl-3 text-xs text-neutral-800 shadow-lg backdrop-blur">
-        <Link href={routes.template(row.slug)} className="inline-flex items-center gap-1 font-medium hover:underline">
-          <ArrowLeftIcon className="size-3.5" aria-hidden /> {def.name}
+        {/* Back into the Create flow: this occasion's designs, then this design selected. */}
+        <Link href={routes.newInvitation({ category })} className="inline-flex items-center gap-1 font-medium hover:underline">
+          <ArrowLeftIcon className="size-3.5" aria-hidden /> Designs
         </Link>
+        <span className="text-neutral-500">· {def.name}</span>
         <span className="text-neutral-500">· Sample</span>
-        <AppLink href={routes.newInvitation({ template: row.slug })} className="rounded-full bg-neutral-900 px-3 py-1 font-medium text-white hover:bg-neutral-700">
+        <AppLink href={routes.newInvitation({ category, template: row.slug })} data-testid="demo-use" className="rounded-full bg-neutral-900 px-3 py-1 font-medium text-white hover:bg-neutral-700">
           Use this design
         </AppLink>
       </div>

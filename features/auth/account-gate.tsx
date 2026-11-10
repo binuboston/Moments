@@ -8,11 +8,11 @@ import { LoginForm, SignupForm } from "@/features/auth/auth-forms";
 import { cn } from "@/lib/utils/cn";
 
 /**
- * Shown to guests at the moment it matters (publishing): create an account or
- * log in without leaving the page. Their draft moves to the account; `next`
- * is where Google sign-in returns to.
+ * Create an account or log in without leaving the page, at the moment it is
+ * needed. `onSuccess` runs when this browser is signed in; `next` is where
+ * email confirmation links and Google sign-in return to (any device).
  */
-export function AccountGate({ next, onSuccess, title = "Create your free account to publish" }: { next: string; onSuccess: () => void; title?: string }) {
+export function AccountGate({ next, onSuccess, title, description }: { next: string; onSuccess: () => void; title: string; description: string }) {
   const [mode, setMode] = useState<"signup" | "login">("signup");
 
   return (
@@ -21,7 +21,7 @@ export function AccountGate({ next, onSuccess, title = "Create your free account
         <IconTile icon={HeartIcon} tone="rose" size="sm" className="bg-surface" />
         <div>
           <p className="font-semibold text-tone-rose-ink">{title}</p>
-          <p className="mt-0.5 text-sm text-tone-rose-ink/80">Your design and details are saved and move to your account. It takes a few seconds.</p>
+          <p className="mt-0.5 text-sm text-tone-rose-ink/80">{description}</p>
         </div>
       </div>
 

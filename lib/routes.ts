@@ -4,10 +4,11 @@
  * literals elsewhere, so the structure can change in this file alone.
  */
 export const ROUTES = {
-  /** The app home: your invitations and designs to start from. Works without an account. */
+  /** Home: the dashboard for account holders; the Create flow for visitors (see `createFlowPath`). */
   home: "/",
   /** The marketing landing page (linked from the Settings & support menu). */
   about: "/about",
+  /** Prefix of the per-design pages (`routes.template`). Browsing designs happens on Home; `/templates` itself redirects there. */
   templates: "/templates",
   howItWorks: "/how-it-works",
   pricing: "/pricing",
@@ -19,9 +20,10 @@ export const ROUTES = {
 
   /** Alias of home (the app is the index). */
   app: "/",
-  /** Pages below here need a session: signed-out visitors get a guest session first. */
+  /** The Create flow for account holders (the Create tab). Visitors have it on Home; see `createFlowPath`. */
+  newInvitation: "/create",
+  /** Pages below here need an account. */
   invitations: "/invitations",
-  newInvitation: "/invitations/new",
   settings: "/settings",
   security: "/settings#security",
 
@@ -29,7 +31,7 @@ export const ROUTES = {
   signup: "/signup",
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password",
-  /** Starts a guest session in the browser, then continues to `next`. */
+  /** Old guest entry point: now redirects to sign-up, keeping `next`. */
   start: "/start",
   authCallback: "/auth/callback",
   authConfirm: "/auth/confirm",
@@ -51,12 +53,17 @@ const withNext = (path: string, next?: string) => (next ? `${path}?next=${encode
 /** Paths with parameters. */
 export const routes = {
   template: (slug: string) => `${ROUTES.templates}/${slug}`,
-  templatesFor: (category: string) => `${ROUTES.templates}?category=${encodeURIComponent(category)}`,
-  demo: (slug: string) => `${ROUTES.demos}${slug}`,
+  /** Home's Create flow, at an occasion's designs (and a selected design). */
+  browse: (opts: { category?: string; template?: string } = {}) => {
+    const q = new URLSearchParams(Object.entries(opts).filter(([, v]) => Boolean(v)) as [string, string][]).toString();
+    return q ? `${ROUTES.home}?${q}` : ROUTES.home;
+  },
+  /** Full-screen live demo with sample content, optionally for one occasion. */
+  demo: (slug: string, occasion?: string) => `${ROUTES.demos}${slug}${occasion ? `?occasion=${encodeURIComponent(occasion)}` : ""}`,
   /** The guest-facing invitation page. */
   invitation: (slug: string) => `${ROUTES.publicInvitations}${slug}`,
   invitationImage: (slug: string) => `${ROUTES.publicInvitations}${slug}/opengraph-image`,
-  newInvitation: (opts: { template?: string; category?: string } = {}) => {
+  newInvitation: (opts: { template?: string; category?: string; key?: string } = {}) => {
     const q = new URLSearchParams(Object.entries(opts).filter(([, v]) => Boolean(v)) as [string, string][]).toString();
     return q ? `${ROUTES.newInvitation}?${q}` : ROUTES.newInvitation;
   },
@@ -65,8 +72,6 @@ export const routes = {
   invitationsWithStatus: (status: "draft" | "published" | "unpublished") => `${ROUTES.invitations}?status=${status}`,
   login: (next?: string) => withNext(ROUTES.login, next),
   signup: (next?: string) => withNext(ROUTES.signup, next),
-  /** Guest-session entry that returns to `next`. */
-  start: (next: string = ROUTES.app) => withNext(ROUTES.start, next),
   authCallback: (next: string) => withNext(ROUTES.authCallback, next),
   /** Email links (confirmation, recovery): token-hash or code, any device. */
   authConfirm: (next: string) => withNext(ROUTES.authConfirm, next),
@@ -74,13 +79,60 @@ export const routes = {
   helpSection: (id: string) => `${ROUTES.help}#${id}`,
 };
 
-/** Main navigation (rail on desktop, tab bar on phones). */
-export const PRIMARY_NAV = [
-  { key: "home", href: ROUTES.home, label: "Home" },
-  { key: "templates", href: ROUTES.templates, label: "Templates" },
-  { key: "create", href: ROUTES.newInvitation, label: "Create" },
-  { key: "invitations", href: ROUTES.invitations, label: "Invitations" },
-] as const;
+/** Who navigation is for: an account holder, a visitor, or not known yet (the account still loading in the browser). */
+export type NavAudience = "account" | "visitor" | "unknown";
+
+export interface NavItem {
+  key: "home" | "create" | "invitations" | "login";
+  href: string;
+  label: string;
+  /** Paths (and their subpaths) where this item is the current one. */
+  activeOn: readonly string[];
+  /** Phones only: the desktop top bar already has its own "Log in". */
+  tabsOnly?: boolean;
+}
+
+/**
+ * Main navigation (rail on desktop, tab bar on phones), per audience. Only
+ * what that person can use, and never two entries for the same screen:
+ * - account holder: Home (dashboard), Create (the flow), Invitations;
+ * - visitor: nothing but Log in on phones. Their Home *is* the Create flow,
+ *   and the desktop top bar has its own Log in;
+ * - unknown (account still loading in the browser): nothing yet, so nobody
+ *   briefly sees the wrong tabs.
+ */
+export function primaryNav(audience: NavAudience): NavItem[] {
+  if (audience === "account") {
+    return [
+      { key: "home", href: ROUTES.home, label: "Home", activeOn: [ROUTES.home] },
+      { key: "create", href: ROUTES.newInvitation, label: "Create", activeOn: [ROUTES.newInvitation] },
+      { key: "invitations", href: ROUTES.invitations, label: "Invitations", activeOn: [ROUTES.invitations] },
+    ];
+  }
+  if (audience === "unknown") return [];
+  return [{ key: "login", href: ROUTES.login, label: "Log in", activeOn: [ROUTES.login, ROUTES.signup], tabsOnly: true }];
+}
+
+/**
+ * Where the Create flow lives for each audience: Home for visitors (it is
+ * their front door), /create for account holders (their Home is the
+ * dashboard). Each page sends the other audience to its address, keeping the
+ * choice (`?category`, `?template`, `?key`).
+ */
+export function createFlowPath(audience: Exclude<NavAudience, "unknown">, query = ""): string {
+  const base = audience === "account" ? ROUTES.newInvitation : ROUTES.home;
+  return query ? `${base}?${query}` : base;
+}
+
+/** The Create flow's choice in a URL query (what the flow pages pass along when redirecting). */
+export const CREATE_FLOW_PARAMS = ["category", "template", "key"] as const;
+
+export function isNavActive(pathname: string, item: NavItem): boolean {
+  return item.activeOn.some((href) => isActivePath(pathname, href));
+}
+
+/** The account holder's main navigation (for things that list the app's pages, e.g. search). */
+export const PRIMARY_NAV = primaryNav("account");
 
 /** The Settings & support menu: product, help and legal pages. */
 export const SUPPORT_NAV = [
@@ -96,12 +148,13 @@ export function isActivePath(pathname: string, href: string): boolean {
   return href === ROUTES.home ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** App pages that need a session (signed-out visitors get a guest session first). Home does not. */
-export const SESSION_PREFIXES = [ROUTES.invitations, ROUTES.settings] as const;
+/** App pages that need an account. Home and the Create wizard do not. */
+export const ACCOUNT_PREFIXES = [ROUTES.invitations, ROUTES.settings] as const;
 
-export function isAppPath(path: string): boolean {
+/** True when the path (with or without query) needs a signed-in account; signed-out visitors are sent to log in. */
+export function needsAccount(path: string): boolean {
   const pathname = path.split(/[?#]/)[0];
-  return SESSION_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  return ACCOUNT_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
 const isEditor = (pathname: string) => pathname.startsWith(`${ROUTES.invitations}/`) && pathname.endsWith("/edit");

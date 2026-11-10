@@ -11,7 +11,7 @@ export const guestsProvider: SearchProvider = {
   label: "Guests",
   requiresSession: true,
   async search(query, { user, supabase }) {
-    if (!user || !supabase || user.isGuest) return [];
+    if (!user || !supabase) return [];
     let request = supabase
       .from("rsvps")
       .select("id, guest_name, attendance, guest_count, invitation_id, invitations!inner(title, content, owner_id)")

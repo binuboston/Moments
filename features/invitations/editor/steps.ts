@@ -31,10 +31,6 @@ export interface StepDefinition {
 const content = (d: InvitationDraft) => d.content as Content;
 const filled = (v: unknown) => typeof v === "string" ? v.trim().length > 0 : v !== undefined && v !== null && v !== "";
 
-export function nameFields(kind: ContentKind): string[] {
-  return KIND_FIELDS[kind].map((f) => f.name as string);
-}
-
 export const STEP_DEFINITIONS: Record<EditorStep, StepDefinition> = {
   names: {
     title: "Who is it for?",

@@ -3,14 +3,14 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { InvitationList } from "@/features/invitations/components/invitation-list";
 import { listOwnedInvitations } from "@/features/invitations/queries";
 import { invitationListQuerySchema } from "@/lib/validation/invitation";
-import { requireAppUser } from "@/lib/auth/session";
+import { requireAccount } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { ROUTES } from "@/lib/routes";
 
 export const metadata: Metadata = { title: "Invitations", robots: { index: false } };
 
 export default async function InvitationsPage({ searchParams }: PageProps<"/invitations">) {
-  const user = await requireAppUser(ROUTES.invitations);
+  const user = await requireAccount(ROUTES.invitations);
   const sp = await searchParams;
   const params = invitationListQuerySchema.parse({
     status: typeof sp.status === "string" ? sp.status : undefined,

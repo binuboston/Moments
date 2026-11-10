@@ -9,7 +9,7 @@ import { useRecentSearches } from "@/features/search/client/recent";
 import { useSearch } from "@/features/search/client/use-search";
 import { ResultRow } from "@/features/search/components/result-row";
 import type { SearchIconKey } from "@/features/search/types";
-import { isAppPath, ROUTES, routes } from "@/lib/routes";
+import { needsAccount, ROUTES, routes } from "@/lib/routes";
 import { cn } from "@/lib/utils/cn";
 
 /** A row in the listbox: a result, a recent search, a suggestion or "See all results". */
@@ -26,7 +26,7 @@ interface Option {
 
 const SUGGESTIONS: Option[] = [
   { id: "s-create", group: "Suggestions", title: "Create an invitation", icon: "plus", href: ROUTES.newInvitation },
-  { id: "s-templates", group: "Suggestions", title: "Browse templates", icon: "layout", href: ROUTES.templates },
+  { id: "s-templates", group: "Suggestions", title: "Browse designs", icon: "layout", href: ROUTES.home },
   { id: "s-help", group: "Suggestions", title: "Help centre", icon: "help", href: ROUTES.help },
 ];
 
@@ -65,8 +65,8 @@ function SearchBox({ variant, onDone, inputRef }: { variant: "inline" | "sheet";
     setOpen(variant === "sheet");
     setActive(-1);
     onDone();
-    // Signed-out visitors heading to an app page start a guest session first (as AppLink does).
-    if (account === null && isAppPath(href)) window.location.assign(routes.start(href));
+    // Signed-out visitors heading to an account page log in first (as AppLink does).
+    if (account === null && needsAccount(href)) window.location.assign(routes.login(href));
     else router.push(href);
   };
 

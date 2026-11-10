@@ -3,8 +3,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertCircleIcon, CheckCircle2Icon, ExternalLinkIcon, Share2Icon } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { AccountGate } from "@/features/auth/account-gate";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -57,9 +55,7 @@ function labelFor(path: string): { label: string; step: EditorTarget } {
   return { label: path.replace("content.", ""), step };
 }
 
-export function PublishPanel({ isGuest = false }: { isGuest?: boolean }) {
-  const router = useRouter();
-  const pathname = usePathname();
+export function PublishPanel() {
   const qc = useQueryClient();
   const draft = useEditorStore((s) => s.draft)!;
   const setStep = useEditorStore((s) => s.goTo);
@@ -173,22 +169,11 @@ export function PublishPanel({ isGuest = false }: { isGuest?: boolean }) {
             </AlertDescription>
           </Alert>
         )}
-        {isGuest ? (
-          // Guests sign in right here; the page then reopens this sheet as the account owner.
-          <AccountGate
-            next={`${pathname}?publish=1`}
-            onSuccess={() => {
-              router.replace(`${pathname}?publish=1`);
-              router.refresh();
-            }}
-          />
-        ) : (
-          <div>
-            <Button size="lg" disabled={issues.length > 0 || premiumBlocked} loading={publish.isPending} onClick={() => publish.mutate()} data-testid="publish">
-              {isPublished ? "Publish changes now" : "Publish invitation"}
-            </Button>
-          </div>
-        )}
+        <div>
+          <Button size="lg" disabled={issues.length > 0 || premiumBlocked} loading={publish.isPending} onClick={() => publish.mutate()} data-testid="publish">
+            {isPublished ? "Publish changes now" : "Publish invitation"}
+          </Button>
+        </div>
       </section>
 
       <ShareDialog

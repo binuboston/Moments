@@ -8,8 +8,6 @@ const STATUS: Record<InvitationStatus, { label: string; variant: "warning" | "su
   unpublished: { label: "Unpublished", variant: "default", dot: "bg-status-off" },
 };
 
-export const statusLabel = (status: InvitationStatus) => STATUS[status].label;
-
 /** A status pill with text, for places with room to explain (editor, publish sheet, admin). */
 export function StatusBadge({ status, className }: { status: InvitationStatus; className?: string }) {
   const { label, variant } = STATUS[status];

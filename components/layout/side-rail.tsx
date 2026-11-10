@@ -3,24 +3,28 @@
 import { usePathname } from "next/navigation";
 import { AppLink } from "@/components/layout/app-link";
 import { LogoMark } from "@/components/layout/logo";
-import { NAV_ITEMS } from "@/components/layout/nav-items";
+import { navItems } from "@/components/layout/nav-items";
 import { SupportMenu } from "@/components/layout/support-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { isActivePath } from "@/lib/routes";
+import { useAccount } from "@/features/auth/account-context";
+import { isNavActive } from "@/lib/routes";
 import { cn } from "@/lib/utils/cn";
 
-/** Desktop navigation: a slim icon rail (logo, Home, Templates, Create, Invitations; Settings & support at the foot). */
+/**
+ * Desktop navigation: a slim icon rail (logo, then Home, Create, Invitations
+ * for account holders, or just Create for visitors; Settings & support at the
+ * foot). Visitors log in from the top bar.
+ */
 export function SideRail({ className }: { className?: string }) {
   const pathname = usePathname();
-  // "Create" is active only on the create page; Invitations covers the rest of /invitations.
-  const active = (key: string, href: string) => (key === "invitations" ? isActivePath(pathname, href) && !pathname.startsWith(NAV_ITEMS[2].href) : isActivePath(pathname, href));
+  const items = navItems(useAccount()).filter((item) => !item.tabsOnly);
 
   return (
     <aside className={cn("fixed inset-y-0 left-0 z-40 w-[4.5rem] flex-col items-center border-r border-border bg-surface py-4", className)}>
       <LogoMark />
       <nav aria-label="Primary" className="mt-4 flex flex-1 flex-col items-center gap-2">
-        {NAV_ITEMS.map((item) => {
-          const isActive = active(item.key, item.href);
+        {items.map((item) => {
+          const isActive = isNavActive(pathname, item);
           return (
             <Tooltip key={item.key}>
               <TooltipTrigger asChild>

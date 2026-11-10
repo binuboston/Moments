@@ -1,7 +1,7 @@
 import "server-only";
 
 import { unstable_cache } from "next/cache";
-import type { CategorySlug, EventCategory, TemplateRow } from "@/types/domain";
+import type { EventCategory, TemplateRow } from "@/types/domain";
 import { createAnonClient } from "@/lib/supabase/server";
 import { getTemplate, TEMPLATE_REGISTRY } from "@/features/templates/registry";
 import type { TemplateDefinition } from "@/features/templates/types";
@@ -55,13 +55,3 @@ export async function getPublishedTemplateBySlug(slug: string): Promise<Catalogu
   return all.find((t) => t.row.slug === slug) ?? null;
 }
 
-export async function getFeaturedTemplates(limit = 4): Promise<CatalogueTemplate[]> {
-  const all = await getPublishedTemplates();
-  const featured = all.filter((t) => t.row.is_featured);
-  return (featured.length >= limit ? featured : all).slice(0, limit);
-}
-
-export function primaryCategory(t: CatalogueTemplate): CategorySlug {
-  const first = t.row.category_slugs[0] ?? t.def.categories[0];
-  return first as CategorySlug;
-}

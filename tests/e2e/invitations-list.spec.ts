@@ -17,6 +17,6 @@ test("the invitations list: status dots, filter chips and a create tile", async 
 
   await page.getByTestId("filter-all").click();
   await page.getByTestId("create-tile").click();
-  await expect(page).toHaveURL(/\/invitations\/new/);
+  await expect(page).toHaveURL(/\/create/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
 });

@@ -9,7 +9,7 @@ import { SEARCH_GROUPS } from "@/features/search/types";
 import { ROUTES, routes } from "@/lib/routes";
 
 const signedOut: SearchContext = { user: null, supabase: null };
-const account: SearchContext = { user: { id: "u1", isGuest: false }, supabase: null };
+const account: SearchContext = { user: { id: "u1" }, supabase: null };
 
 describe("search scoring", () => {
   it("normalises case, accents and spacing", () => {

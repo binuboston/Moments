@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { generateSlug, isValidSlug, RESERVED_SLUGS, slugify, slugSchema } from "@/lib/utils/slug";
+import { generateSlug, RESERVED_SLUGS, slugify, slugSchema } from "@/lib/utils/slug";
 
 describe("slugify", () => {
   it("lowercases, strips diacritics and collapses separators", () => {
@@ -19,7 +19,7 @@ describe("generateSlug", () => {
   it("appends a 4 character suffix and stays within limits", () => {
     const slug = generateSlug("Aisha & Rohan", "invitation", () => 0.5);
     expect(slug).toMatch(/^aisha-and-rohan-[a-z0-9]{4}$/);
-    expect(isValidSlug(slug)).toBe(true);
+    expect(slugSchema.safeParse(slug).success).toBe(true);
   });
   it("uses the fallback when the headline is empty", () => {
     expect(generateSlug("", "wedding", () => 0.1)).toMatch(/^wedding-[a-z0-9]{4}$/);
@@ -27,7 +27,7 @@ describe("generateSlug", () => {
   it("never exceeds 60 characters", () => {
     const slug = generateSlug("x".repeat(200));
     expect(slug.length).toBeLessThanOrEqual(60);
-    expect(isValidSlug(slug)).toBe(true);
+    expect(slugSchema.safeParse(slug).success).toBe(true);
   });
 });
 

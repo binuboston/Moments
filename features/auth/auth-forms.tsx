@@ -13,7 +13,7 @@ import { Field, fieldAria } from "@/components/forms/field";
 import { createClient } from "@/lib/supabase/client";
 import { CAPTCHA_MESSAGES, useCaptcha } from "@/features/auth/captcha";
 import { safeNextPath } from "@/features/auth/safe-next";
-import { AuthSwitch, claimGuestDrafts, GoogleButton, googleEnabled, GuestNotice, OrDivider, PasswordInput, StrengthMeter } from "@/features/auth/auth-ui";
+import { AuthSwitch, claimGuestDrafts, GoogleButton, googleEnabled, OrDivider, PasswordInput, StrengthMeter } from "@/features/auth/auth-ui";
 import { ROUTES, routes } from "@/lib/routes";
 import { cn } from "@/lib/utils/cn";
 import {
@@ -96,18 +96,18 @@ function ResendConfirmation({ email, next }: { email: string; next: string }) {
 }
 
 interface AuthFormProps {
-  /** Inside another surface (the publish sheet): no page heading or switch. */
+  /** Inside another surface (the Create flow's account dialog): no page heading or switch. */
   embedded?: boolean;
-  /** Where to go after signing in (defaults to ?next= or the dashboard). */
+  /** Where to go after signing in (defaults to ?next= or Home). */
   next?: string;
-  /** Called after sign-in (and after guest drafts are kept) instead of navigating. */
+  /** Called after sign-in instead of navigating. */
   onSuccess?: () => void;
 }
 
 function useAfterAuth({ next, onSuccess }: { next: string; onSuccess?: () => void }) {
   const router = useRouter();
   return async () => {
-    // A guest's drafts move to the account before anything re-renders.
+    // Legacy: drafts from an earlier guest session in this browser move to the account first.
     await claimGuestDrafts();
     if (onSuccess) onSuccess();
     else {
@@ -164,7 +164,6 @@ export function LoginForm({ embedded = false, next: nextProp, onSuccess }: AuthF
           </div>
         </>
       )}
-      {embedded ? null : <GuestNotice />}
       <GoogleButton next={next} />
       {googleEnabled() ? <OrDivider /> : null}
       <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-5" noValidate>
@@ -248,7 +247,7 @@ export function SignupForm({ embedded = false, next: nextProp, onSuccess }: Auth
         </span>
         <h1 className="mt-6 text-2xl font-semibold tracking-tight">Check your inbox</h1>
         <p className="mt-3 text-sm text-muted-foreground text-pretty">
-          We sent a confirmation link to <span className="font-medium text-foreground">{sentTo}</span>. Open it on this device to finish, and your draft comes with you.
+          We sent a confirmation link to <span className="font-medium text-foreground">{sentTo}</span>. Open it on any device and you&apos;ll carry on right where you left off.
         </p>
         <div className="mt-6">
           <ResendConfirmation email={sentTo} next={next} />
@@ -275,7 +274,6 @@ export function SignupForm({ embedded = false, next: nextProp, onSuccess }: Auth
           </div>
         </>
       )}
-      {embedded ? null : <GuestNotice />}
       <GoogleButton next={next} label="Sign up with Google" />
       {googleEnabled() ? <OrDivider /> : null}
       <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-5" noValidate>

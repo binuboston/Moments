@@ -29,7 +29,21 @@ The confirmation and reset emails use Supabase's token-hash links (`supabase/tem
 
 Invalid, used or expired links go to `/login?error=link` (or `/forgot-password?error=link` for recovery). OAuth (Google) still returns through `/auth/callback` (PKCE code).
 
-**Guest drafts.** When a guest signs up or logs in, their drafts move to the account if the sign-in finishes in the same browser (signed claim cookie, `lib/auth/guest.ts`). Confirming on another device signs the person in there, and the drafts stay with the guest in the first browser. Drafts are never moved because a client supplied an invitation id.
+## Creating needs an account
+
+Anyone can browse occasions and designs in the wizard (`/create`). "Continue with {design}" needs an account:
+
+- **Signed in:** the draft is created and the editor opens.
+- **Signed out:** a dialog offers sign-up or log-in (`AccountGate`). The choice is kept in `next` = `/create?category=…&template=…&key=…`:
+  - **Log-in, or sign-up without email confirmation:** the draft is created straight away.
+  - **Sign-up with confirmation (production):** the email link (`/auth/confirm`, any device) returns to that wizard URL, which creates the draft and opens the editor without another click.
+- **One draft per choice.** Every attempt sends the same `creationKey`. `POST /api/invitations` returns the existing draft for `(owner, key)` (unique index), so double clicks, refreshes, Back and a second click on the email link never make a second draft.
+
+Account pages (`/invitations…`, `/settings`) send signed-out visitors to `/login?next=…`. The old `/start` link redirects to sign-up.
+
+An anonymous session counts as signed out everywhere: pages, API (`requireUser`), header and search. The database refuses invitations created by one (`prevent_guest_create`).
+
+**Retired guest mode (legacy, remove after 2026-11-30).** Before 2026-10-26 visitors could design as anonymous "guests". A guest who signs in in the same browser still gets their drafts and photos moved to the account (signed cookie, `lib/auth/guest.ts`, `/api/guest/claim`). Nothing creates guests any more. Drafts are never moved because a client supplied an invitation id.
 
 ## Password recovery
 
@@ -57,7 +71,7 @@ Shown after sign-up and when logging in to an unconfirmed account. It calls `aut
 
 ## Bot protection (Cloudflare Turnstile)
 
-These operations send a Turnstile token: sign-up, log-in, both password-reset forms, resend confirmation and guest sessions (`features/auth/captcha.tsx`). Without `NEXT_PUBLIC_TURNSTILE_SITE_KEY` the widget is not rendered.
+These operations send a Turnstile token: sign-up, log-in, both password-reset forms and resend confirmation (`features/auth/captcha.tsx`). Without `NEXT_PUBLIC_TURNSTILE_SITE_KEY` the widget is not rendered.
 
 Supabase Auth verifies the token server-side once CAPTCHA protection is on. A missing, invalid, expired or reused token gets `captcha_failed`, which the forms show as a clear message. The forms fail closed: if the widget errors or Cloudflare's script is blocked, they do not submit and say why. Tests: `tests/component/captcha.test.tsx`.
 
@@ -67,7 +81,7 @@ Supabase Auth verifies the token server-side once CAPTCHA protection is on. A mi
 2. Vercel → set `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and redeploy. Tokens are sent, but nothing is enforced yet.
 3. On the live domain, check that each form sends `captcha_token` in its Supabase auth request and that Cloudflare's analytics show solves.
 4. Supabase → Authentication → Attack Protection → enable CAPTCHA, provider Turnstile, paste the **secret** key.
-5. Re-test sign-up, log-in, reset, resend and guest start on the live domain.
+5. Re-test sign-up, log-in, reset and resend on the live domain.
 
 To roll back, turn CAPTCHA protection off in Supabase first. The secret key never goes in this app or in Vercel.
 
@@ -114,7 +128,10 @@ select owner_id, count(*) from invitations where status = 'published' group by o
   - Confirm email: on.
 - **Authentication → Attack Protection → Prevent use of leaked passwords:** available on Pro plans and above. On Free it is unavailable; the strength meter and 8-character minimum still apply.
 - **Authentication → SMTP:** configure a custom SMTP provider. The built-in sender allows only a few emails per hour and is not meant for production.
+- **Authentication → Sign In / Providers → Anonymous sign-ins:** turn off after deploying (the app no longer creates guests; existing guests can still sign in and keep their drafts).
 - **CAPTCHA:** see the rollout order above. Turn it on last.
+
+The redirect URL and email templates must be set before the confirm-then-continue flow works in production: without them, confirmation links fall back to the Site URL and lose the chosen design.
 
 ### Vercel
 

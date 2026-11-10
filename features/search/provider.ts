@@ -5,7 +5,7 @@ import type { Database } from "@/types/database";
 
 export interface SearchContext {
   /** null for signed-out visitors (search never creates a session). */
-  user: { id: string; isGuest: boolean } | null;
+  user: { id: string } | null;
   /** Session-bound client: row-level security limits rows to the user's own. */
   supabase: SupabaseClient<Database> | null;
 }
